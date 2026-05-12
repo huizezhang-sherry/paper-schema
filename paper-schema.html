@@ -59,6 +59,35 @@ div.csl-indent {
 <link href="paper-schema_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="paper-schema_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -77,9 +106,9 @@ div.csl-indent {
   <li><a href="#communication-of-data-analysis" id="toc-communication-of-data-analysis" class="nav-link" data-scroll-target="#communication-of-data-analysis"><span class="header-section-number">2.2</span> Communication of data analysis</a></li>
   <li><a href="#ai-for-reproducibility" id="toc-ai-for-reproducibility" class="nav-link" data-scroll-target="#ai-for-reproducibility"><span class="header-section-number">2.3</span> AI for reproducibility</a></li>
   </ul></li>
-  <li><a href="#method" id="toc-method" class="nav-link" data-scroll-target="#method"><span class="header-section-number">3</span> Method</a>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology"><span class="header-section-number">3</span> Methodology</a>
   <ul class="collapse">
-  <li><a href="#terminology" id="toc-terminology" class="nav-link" data-scroll-target="#terminology"><span class="header-section-number">3.1</span> Terminology</a></li>
+  <li><a href="#schema-for-describing-data-analysis" id="toc-schema-for-describing-data-analysis" class="nav-link" data-scroll-target="#schema-for-describing-data-analysis"><span class="header-section-number">3.1</span> Schema for describing data analysis</a></li>
   </ul></li>
   <li><a href="#application-many-analysts-football-study" id="toc-application-many-analysts-football-study" class="nav-link" data-scroll-target="#application-many-analysts-football-study"><span class="header-section-number">4</span> Application: many-analysts football study</a>
   <ul class="collapse">
@@ -168,48 +197,18 @@ div.csl-indent {
 <h2 data-number="2.3" class="anchored" data-anchor-id="ai-for-reproducibility"><span class="header-section-number">2.3</span> AI for reproducibility</h2>
 </section>
 </section>
-<section id="method" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Method</h1>
-<section id="terminology" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="terminology"><span class="header-section-number">3.1</span> Terminology</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 30%">
-<col style="width: 69%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>term</th>
-<th>definition</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>decision</td>
-<td>the unit of analysis for understanding a data analysis. It is a specific methodological choice made by the analyst that has potential theoretical alternatives. NO NEGATIVES: Do NOT create standalone decisions for negative actions (e.g., ‘we did not use X’).</td>
-</tr>
-<tr class="even">
-<td>fork (old action)</td>
-<td>an open methodological goal that invites multiple possible approaches. It must NOT describe the final choice.</td>
-</tr>
-<tr class="odd">
-<td>path (old decision)</td>
-<td>a POSITIVE methodological decision that has potential theoretical alternatives, chosen to resolve the ‘fork’.</td>
-</tr>
-<tr class="even">
-<td>justification</td>
-<td>WHY that decision was made, extracted from the text.</td>
-</tr>
-<tr class="odd">
-<td>tag</td>
-<td>a unique, lowercase string starting with ‘block-’.</td>
-</tr>
-<tr class="even">
-<td>status</td>
-<td>should default to ‘DRAFT’.</td>
-</tr>
-</tbody>
-</table>
+<section id="methodology" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Methodology</h1>
+<section id="schema-for-describing-data-analysis" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="schema-for-describing-data-analysis"><span class="header-section-number">3.1</span> Schema for describing data analysis</h2>
+<p>We represent a data analysis, <span class="math inline">\(\mathcal{S} = \{A_1, A_2, \cdots, A_n\}\)</span>, as a sequence of <span class="math inline">\(n\)</span> analytical step, <span class="math inline">\(A_i\)</span>, applied to a dataset <span class="math inline">\(\mathcal{D}\)</span>, where each step <span class="math inline">\(A_i\)</span> is defined as</p>
+<p><span class="math display">\[\begin{equation}
+A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
+\end{equation}\]</span></p>
+<p>The components of <span class="math inline">\(A_i\)</span> are partitioned into a required triplet <span class="math inline">\((f_{i}, \pi_{i}, r_{i})\)</span> and a set of optional parameters <span class="math inline">\((\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})\)</span>. <span class="math inline">\(f_{i} \in \mathcal{F}\)</span> denotes the methodological fork that defines the <strong>objective</strong> of the analytical step (e.g.&nbsp;<span class="math inline">\(f_{i}\)</span> could be “handle missing data” [TODO: more examples]). Each fork is an open question that invites multiple justifiable approaches, rather than a closed decision that has already been resolved. The second component of the tuple, <span class="math inline">\(\pi_{i} \in \Pi\)</span>, represents the analytical <strong>decision</strong> made to resolve the fork <span class="math inline">\(f_{i}\)</span>, where <span class="math inline">\(i\)</span> indexes the specific choice among a set of justifiable alternatives <span class="math inline">\(\Pi\)</span>. For example, if <span class="math inline">\(f_{i}\)</span> is “handle missing data”, then <span class="math inline">\(\pi_{i}\)</span> could be “listwise deletion”, “multiple imputation”, or “model-based approach”. The term <span class="math inline">\(r_{i}\)</span> is the epistemic or theoretical <strong>justification</strong> provided for selecting path <span class="math inline">\(\pi_{j}\)</span>. This field bridges the gap between raw code and scientific intent, ensuring that the justification of the analysis is preserved alongside the decision.</p>
+<p>The operational flow of the analysis is governed by the input and output spaces, <span class="math inline">\(\mathcal{I}_{i}\)</span> and <span class="math inline">\(\mathcal{O}_{i}\)</span>. To maintain computational integrity, the analysis must satisfy a sequential consistency constraint: the inputs for any given step must be grounded in the existing data state, comprising the original dataset and all prior transformations. Formally, we require:</p>
+<p><span class="math display">\[\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{k &lt; i} \mathcal{O}_{k} \right), \quad \forall i \in \{2, \dots, n\}\]</span></p>
+<p>When the schema is extracted by Large Language Models (LLMs), we introduce a confidence score, <span class="math inline">\(\omega_{i}\)</span> (low, medium, high), that can be used to trigger a clarification question when the confidence is low. The confidence score can be particularly useful in cases where the source text is ambiguous, guiding the LLM to seek additional information or clarification to improve the accuracy of the schema extraction.</p>
 </section>
 </section>
 <section id="application-many-analysts-football-study" class="level1" data-number="4">

@@ -46,18 +46,25 @@ library(broom.mixed)
 
 ## AI for reproducibility
 
-# Method
+# Methodology 
 
-## Terminology
+## Schema for describing data analysis
 
-| term | definition |
-|----------------------|--------------------------------------------------|
-| decision | the unit of analysis for understanding a data analysis. It is a specific methodological choice made by the analyst that has potential theoretical alternatives. NO NEGATIVES: Do NOT create standalone decisions for negative actions (e.g., 'we did not use X'). |
-| fork (old action) | an open methodological goal that invites multiple possible approaches. It must NOT describe the final choice. |
-| path (old decision) | a POSITIVE methodological decision that has potential theoretical alternatives, chosen to resolve the 'fork'. |
-| justification | WHY that decision was made, extracted from the text. |
-| tag | a unique, lowercase string starting with 'block-'. |
-| status | should default to 'DRAFT'. |
+We represent a data analysis, $\mathcal{S} = \{A_1, A_2, \cdots, A_n\}$, as a sequence of $n$ analytical step, $A_i$, applied to a dataset $\mathcal{D}$, where each step $A_i$ is defined as
+
+\begin{equation}
+A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
+\end{equation}
+
+The components of $A_i$ are partitioned into a required triplet $(f_{i}, \pi_{i}, r_{i})$ and a set of optional parameters $(\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})$. $f_{i} \in \mathcal{F}$ denotes the methodological fork that defines the **objective** of the analytical step (e.g. $f_{i}$ could be "handle missing data" [TODO: more examples]). Each fork is an open question that invites multiple justifiable approaches, rather than a closed decision that has already been resolved. The second component of the tuple, $\pi_{i} \in \Pi$, represents the analytical **decision** made to resolve the fork $f_{i}$, where $i$ indexes the specific choice among a set of justifiable alternatives $\Pi$. For example, if $f_{i}$ is "handle missing data", then $\pi_{i}$ could be "listwise deletion", "multiple imputation", or "model-based approach". The term $r_{i}$ is the epistemic or theoretical **justification** provided for selecting path $\pi_{j}$. This field bridges the gap between raw code and scientific intent, ensuring that the justification of the analysis is preserved alongside the decision. 
+
+The operational flow of the analysis is governed by the input and output spaces, $\mathcal{I}_{i}$ and $\mathcal{O}_{i}$. To maintain computational integrity, the analysis must satisfy a sequential consistency constraint: the inputs for any given step must be grounded in the existing data state, comprising the original dataset and all prior transformations. Formally, we require:
+
+$$\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{k < i} \mathcal{O}_{k} \right), \quad \forall i \in \{2, \dots, n\}$$
+
+When the schema is extracted by Large Language Models (LLMs), we introduce a confidence score, $\omega_{i}$ (low, medium, high), that can be used to trigger a clarification question when the confidence is low.  The confidence score can be particularly useful in cases where the source text is ambiguous, guiding the LLM to seek additional information or clarification to improve the accuracy of the schema extraction.
+
+
 
 
 
