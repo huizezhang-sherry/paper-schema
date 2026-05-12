@@ -3,3 +3,7 @@
 .RData
 .Ruserdata
 .DS_Store
+
+/.luarc.json
+/paper-schema_cache
+data/mod_comp_res.rds

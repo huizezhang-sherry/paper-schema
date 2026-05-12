@@ -2,31 +2,175 @@
 title: "Title"
 format:
   jasa-pdf:
-    keep-tex: true  
+    keep-tex: true
+    number-sections: true
     journal:
       blinded: false
-  #jasa-html: default
+  jasa-html:
+    number-sections: true
 date: last-modified
 author:
-  - name: Author 1
+  - name: H. Sherry Zhang
     affiliations:
-      - name: University of XXX
-        department: Department of YYY
-  - name: Author 2
+      - name: University of Texas at Austin
+        department: Department of Statistics and Data Sciences
+  - name: Roger D. Peng
     affiliations:
-      - name: University of WWW
-        department: Department of ZZZ
+      - name: University of Texas at Austin
+        department: Department of Statistics and Data Sciences
 abstract: |
-  The text of your abstract. 200 or fewer words.
+  This is the abstract. It should be no more than 250 words and should not contain any references or displayed equations. The abstract should be a single paragraph and should not be subdivided into sections. The abstract should provide a concise summary of the paper, including the motivation, methods, results, and conclusions.
 keywords:
   - 3 to 6 keywords
   - that do not appear in the title
 bibliography: bibliography.bib  
 ---
 
-## Introduction {#sec-intro}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
+
+library(tidyverse)
+library(glmmTMB)
+library(broom.mixed)
+```
 
 
+# Introduction {#sec-intro}
+
+
+# Literature review
+
+## Agentic data science
+
+## Communication of data analysis
+
+## AI for reproducibility
+
+# Method
+
+## Terminology
+
+| term | definition |
+|----------------------|--------------------------------------------------|
+| decision | the unit of analysis for understanding a data analysis. It is a specific methodological choice made by the analyst that has potential theoretical alternatives. NO NEGATIVES: Do NOT create standalone decisions for negative actions (e.g., 'we did not use X'). |
+| fork (old action) | an open methodological goal that invites multiple possible approaches. It must NOT describe the final choice. |
+| path (old decision) | a POSITIVE methodological decision that has potential theoretical alternatives, chosen to resolve the 'fork'. |
+| justification | WHY that decision was made, extracted from the text. |
+| tag | a unique, lowercase string starting with 'block-'. |
+| status | should default to 'DRAFT'. |
+
+
+
+
+
+
+# Application: many-analysts football study
+
+The many-analysts study posits fixed research questions on a fixed dataset and invites teams of researchers to analyze the problem with whatever software they're comfortable with. In @silberzahn2018, one question is to answer whether soccer referees are more likely to give red cards to dark-skin-toned player than to light-skin-toned players. The provided dataset contains two raters' rating to the picture of players, the number of redcard received for each player/referee dyade out of the number of games, and a collection of player, referee, and game characteristics: player birthday, height, weight, player position, league country, number of victories, ties, and defeats, and number of yellow and red cards received. Most groups take a modelling approach to estimate the effect of skin rating on the red card issued with varied distribution assumptions (linear, logistic, and poisson) and covariate choices as fixed and random effects. The study is comprised of an initial analysis conducted separately by each team, followed by a round-robin peer evaluation round, and then each group presents their final analysis after incorporating the feedback from the discussion and presents the results in a way they would in a published article with formal Method section. All the materials related to the study is publicly available on the Open Science Framework (OSF).
+
+From the report presented by each team, we can use LLM to convert the decisions into the schema designed and generate the corresponding coding script. From the write-up reports, we extract the sentences relevant to the decisions made in the final analysis by the team. This step is needed because the original skin rating is 1-5 but later changed to 0-1 and also many teams report their initial analysis and how their final analysis modify on top of the initial analysis. We do this to avoid confusion on reading comprehension with LLM. For general methodology write-up, this step is not necessarily needed [TODO: write it better].
+
+We send the text description of the extractetd decisions for LLM to generate the schema and the code script for each analysis. The code script is run by a separate LLM to validate for potential syntax errors. We manually in-place replace the `glm()` command with `fixest::feglm()` [@fixest] for generalized linear model and the `lme4::glmer()` [@lme4] function with `glmmTMB::glmmTMB()` [@glmmTMB-1] for generalized mix-effect model to speed up the evaluation of eaach script. These two functions are in-place replacements of the classic functions for estimating the relevant model with implementation with multi-threading in C++ [@fixest] and with Template Model Builder (TMB) [@glmmTMB-2] for better performance. This replacement should not affect the estimation of the effect size. All the LLM-related simulations are conducted with claude-opus-4.5.
+
+```{r}
+#| echo: false
+# df <- read_csv(here::here("data/res.csv"))
+# df |> count(validate_iter_n) |> knitr::kable()
+```
+
+In the validation phase, all team scripts were successfully executed. Notably, 10% of the scripts (n = 2) yielded successful results without requiring any automated syntax corrections by the validator, whereas the vast majority (90%) reached completion after two or three iterations. The most frequent correction involved resolving broken and overflow syntax in comments. 
+
+```{r}
+#| echo: false
+#| label: fig-res-updated
+#| fig.cap: "Comparison of the odd ratio of the effect skin color on receiving red cards in football games from our simulation with the schema (simulated) vs. the reported estimated effect size in @silberzahn2018 (published). Teams are arranged by the difference in odd ratio of our simulation and the reported value. For most teams, the simulation successfully recovers the odd ratio reported by each analyst team, larger variations are seen in the following teams: Team 1, 9, 15, 21, 23, and 27."
+knitr::include_graphics(here::here("figures/res-updated.png"))
+```
+
+@fig-res-updated shows the agreement of the estimated effect size, in odd ratio, from our experiments (simulated) and the published effect size in @silberzahn2018 (published). For most teams, the simulation successfully recovers the odd ratio reported by each analyst team, larger variations are seen in the following teams: Team 1, 9, 15, 21, 23, and 27. Here we listed the reasons for these discrepencies upon investigation: 
+
+  * **Team 27**: the diffference comes from the ambiguity of the method description, the final approach sections says *In addition to the independent variables specified in the initial approach (skin-tone rating, goals scored, games played, yellow cards, and mean explicit and implicit bias) a variable for player position was included, as well as a variable for the league of the player.* The author is intended to include the interaction effect of rating and position/ league country as other variables in the initial approach, but the LLM interprets it as only include the main effects. This error can be easily caught by comparing the reproducible script provided by the author. 
+  * **Team 9**: the authors mistake player country for referee country in the text description, but their parameter estimation table suggests they are using player country (countryCode - Germany: France) instead. 
+  * **Team 23 and 1**: the discrepency comes from the LLM fails to properly reshape the data from a player-referee dyad per observation to per game observation. The schema properly identifies this step but the generated code doesn't execute this step properly and create a silent error with the validator.
+  * **Team 15**: the discrpency comes from the default setting for estimating factor variable in R (our similuation) and SPSS (original script). In SPSS, the factor variables are estimated with effect coding, where the coefficients are compared to the grand mean, rather than to the reference group (dummy coding) in R. After changing the `contrast` options, we obtain the reported odd ratio. 
+
+<!-- options(contrasts = c("contr.sum", "contr.poly")) -->
+
+## Exploring alternatives
+
+@tbl-alternatives shows ...
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| label: tbl-alternatives
+#| tbl.cap: "this is the caption"
+load(here::here("data/mod_comp_res.rds"))
+# map_dfr(mod_comp_res$env, ~glance(.x$glmm_model), .id = "model") |> 
+#   left_join(tibble(model = as.character(1:4), model2 = c("original", "gm1", "gm2", "gm3"))) |> 
+#   select(-c(model:logLik, df.residual)) |> 
+#   pivot_longer(cols = c(AIC, BIC, deviance), names_to = "measure", values_to = "value") |> 
+#   pivot_wider(names_from = model2, values_from = value)
+
+
+# re_df <- map_dfr(mod_comp_res$env, ~tidy(.x$glmm_model, effect = "ran_pars", scales = "vcov"), .id = "model")
+# save(re_df, file = here::here("data/re_df.rds"))
+load(here::here("data/re_df.rds"))
+
+re_df |> 
+  filter(!str_detect(term, "cov")) |> 
+  left_join(tibble(model = as.character(1:4), model2 = c("original", "gm1", "gm2", "gm3"))) |> 
+  select(-(model:component)) |> 
+  pivot_wider(names_from = model2, values_from = estimate) |> 
+  mutate(group = factor(group, levels = c("playerShort", "refNum", "refCountry"))) |> 
+  arrange(group, term) |> 
+  knitr::kable(digits = 4)
+```
+
+
+# Appendix {.unnumbered}
+
+## Built-in prompts
+
+:::{.callout-note}
+
+# Prompt: Extracting the schema from the text
+
+```{r echo = FALSE}
+tines::prompt_extract_schema(text = "[inset text here]", data_dict = NA)
+```
+
+:::
+
+:::{.callout-note}
+
+# Prompt: generating code from the schema
+
+```{r echo = FALSE}
+tines::prompt_gen_code()
+```
+:::
+
+
+:::{.callout-note}
+
+# Prompt: validating the code generated 
+
+```{r echo = FALSE}
+cat(strwrap(tines:::build_sys_prompt(data = "[insert the path to the data]"), width = 70), sep = "\n")
+```
+:::
+
+:::{.callout-note}
+
+# Prompt: generating alternatives for a specific step
+
+```{r echo = FALSE}
+tines::prompt_alternatives(step = "[inset step number here]")
+```
+
+:::
 
 
 # References
