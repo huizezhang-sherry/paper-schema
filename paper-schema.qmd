@@ -48,7 +48,7 @@ library(broom.mixed)
 
 # Methodology 
 
-## Schema for describing data analysis
+## A schema for describing data analysis
 
 We represent a data analysis, $\mathcal{S} = \{A_1, A_2, \cdots, A_n\}$, as a sequence of $n$ analytical step, $A_i$, applied to a dataset $\mathcal{D}$, where each step $A_i$ is defined as
 
@@ -56,16 +56,33 @@ We represent a data analysis, $\mathcal{S} = \{A_1, A_2, \cdots, A_n\}$, as a se
 A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
 \end{equation}
 
-The components of $A_i$ are partitioned into a required triplet $(f_{i}, \pi_{i}, r_{i})$ and a set of optional parameters $(\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})$. $f_{i} \in \mathcal{F}$ denotes the methodological fork that defines the **objective** of the analytical step (e.g. $f_{i}$ could be "handle missing data" [TODO: more examples]). Each fork is an open question that invites multiple justifiable approaches, rather than a closed decision that has already been resolved. The second component of the tuple, $\pi_{i} \in \Pi$, represents the analytical **decision** made to resolve the fork $f_{i}$, where $i$ indexes the specific choice among a set of justifiable alternatives $\Pi$. For example, if $f_{i}$ is "handle missing data", then $\pi_{i}$ could be "listwise deletion", "multiple imputation", or "model-based approach". The term $r_{i}$ is the epistemic or theoretical **justification** provided for selecting path $\pi_{j}$. This field bridges the gap between raw code and scientific intent, ensuring that the justification of the analysis is preserved alongside the decision. 
+The components of $A_i$ are partitioned into a required triplet $(f_{i}, \pi_{i}, r_{i})$ and a set of optional parameters $(\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})$. $f_{i} \in \mathcal{F}$ denotes the methodological fork that defines the **objective** of the analytical step (e.g. $f_{i}$ could be "handle missing data" [TODO: more examples]). Each fork is an open question that invites multiple justifiable approaches, rather than a closed decision that has already been resolved. The second component of the tuple, $\pi_{i} \in \Pi$, represents the analytical **decision** made to resolve the fork $f_{i}$, where $i$ indexes the specific choice among a set of justifiable alternatives $\Pi$. For example, if $f_{i}$ is "handle missing data", then $\pi_{i}$ could be "listwise deletion", "multiple imputation", or "model-based approach". The term $r_{i}$ is the epistemic or theoretical **justification** provided for selecting path $\pi_{i}$. This field bridges the gap between raw code and scientific intent, ensuring that the justification of the analysis is preserved alongside the decision. 
 
 The operational flow of the analysis is governed by the input and output spaces, $\mathcal{I}_{i}$ and $\mathcal{O}_{i}$. To maintain computational integrity, the analysis must satisfy a sequential consistency constraint: the inputs for any given step must be grounded in the existing data state, comprising the original dataset and all prior transformations. Formally, we require:
 
-$$\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{k < i} \mathcal{O}_{k} \right), \quad \forall i \in \{2, \dots, n\}$$
+$$\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j < i} \mathcal{O}_{j} \right), \quad \forall i \in \{2, \dots, n\}$$
 
 When the schema is extracted by Large Language Models (LLMs), we introduce a confidence score, $\omega_{i}$ (low, medium, high), that can be used to trigger a clarification question when the confidence is low.  The confidence score can be particularly useful in cases where the source text is ambiguous, guiding the LLM to seek additional information or clarification to improve the accuracy of the schema extraction.
 
+## Describing alternatives
+
+A single analysis $\mathcal{S}$ represents one realized path in the decision space. In data analysis, there are often multiple plausible paths that can be taken to address the same research question, each with its own set of assumptions and implications. 
+
+For each step $i$ in the sequence, to fulfill each fork $f_i$, there could be $k_i$ decision choices to choose from: $\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}$
+
+To identify a specific path through the multiverse, we define a selection vector $r = (r_1, r_2, \dots, r_n)$, where $r_i \in \{1, \dots, k_i\}$. A single realized analysis sequence, $\mathcal{S}^{r}$, is then the ordered sequence:
+$$\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}$$
+
+A multiverse is defined as the Cartesian product of these sets:
+
+$$\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}$$
 
 
+
+The cardinality of this space, $|\mathcal{M}| = \prod_{i=1}^n k_i$, quantifies the total number of unique, fully-specified analysis.
+
+
+## Generating and validating code from the schema by LLM
 
 
 
