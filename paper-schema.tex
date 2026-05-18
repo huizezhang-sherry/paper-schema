@@ -111,6 +111,8 @@
 \addtolength{\textwidth}{1in}%
 \addtolength{\textheight}{1.7in}%
 \addtolength{\topmargin}{-1in}%
+\usepackage{amsmath}
+\usepackage{amssymb}
 \makeatletter
 \@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
 \@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
@@ -193,7 +195,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\date{May 14, 2026}
+\date{May 18, 2026}
 \title{\bf Title}
 \author{
 H. Sherry Zhang\\
@@ -430,25 +432,113 @@ investigation:
 
 \subsection{Exploring alternatives}\label{exploring-alternatives}
 
-Table~\ref{tbl-alternatives} shows \ldots{}
+To demonstrate the functionality for specifying alternatives in Section
+3.2, we use Group 5 from the football study above as an example. Group 5
+uses a binomial generalized linear mixed model (GLMM) to estimate the
+effect of skin tone rating on the number of red cards received using a
+logit link function:
 
-\begin{longtable}[]{@{}llrrrr@{}}
+\begin{align*}
+\textbf{Model 1 (gm1):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{k} \\
+u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}) \\[1.5em]
+\textbf{Model 2 (gm2):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{0k} + v_{1k} X_{ijk} \\
+u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad \mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right) \\[1.5em]
+\textbf{Model 3 (gm3):} \quad \text{logit}(p_{ijkm}) &= \beta_0 + \beta_1 X_{ijkm} + u_{j} + v_{k} + w_{0m} + w_{1m} X_{ijkm} \\
+u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}), \quad \mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)
+\end{align*}
 
-\caption{\label{tbl-alternatives}}
+where \(p\) denotes the probability of a player receiving a red card,
+and \(X\) represents the player's skin tone rating. The subscripts
+\(i, j, k,\) and \(m\) index the individual observation, player,
+referee, and the referee's home country, respectively. The parameter
+\(\beta_0\) represents the global baseline log-odds of receiving a red
+card, and \(\beta_1\) estimates the fixed effect of a player's skin
+tone. The random structures account for multi-level variation across
+groupings with varying intercepts and/or slopes: (1) scalar random
+intercepts (\(\sigma^2\)) capture baseline shifts for players across all
+specifications (\(u_j \sim N(0, \sigma^2_{\text{player}})\)) and for
+individual referees in Models 1 and 3
+(\(v_k \sim N(0, \sigma^2_{\text{ref}})\)); and (2) variance-covariance
+matrices (\(\mathbf{\Sigma}\)) accommodate random slopes, allowing the
+effect of skin tone to vary across individual referees in Model 2
+(\(\mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right)\))
+and across referee countries in Model 3
+(\(\mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)\)).
+
+The full workflow of experimenting with alternatives is summarized in
+Figure~\ref{fig-alt-workflow}. Alternatives to a specific step are
+specified in a YAML file in Listing~\ref{lst-yaml-alternative}, which is
+then processed to generate multiple copies of the full schema. The code
+for each schema are then generated separately, and validated to ensure
+its syntactic correctness and executability.
+Table~\ref{tbl-random-effects} summarizes the estimated random effect
+from the workflow. {[}TODO: expand more here{]}
+
+\begin{codelisting}
+
+\caption{\label{lst-yaml-alternative}Example of a YAML file specifying
+alternatives for the random effects structure in the many-analyst
+analysis of Group 5.}
+
+\centering{
+
+\begin{verbatim}
+meta:
+  type: alternatives
+  step: specify_random_effects_structure
+  fork: how to account for the non-nested cross-classified data structure
+alternatives:
+  - id: "gm1"
+    path: "a random effect of player and referee"
+    rationale: ""
+  - id: "gm2"
+    path: "a random effect of player and referee, and a random effect of skin-tone across referees"
+    rationale: ""
+  - id: "gm3"
+    path: "a random effect of player, referee, and referees' countries of origin, and a random effect of skin tone across referees' countries of origin"
+    rationale: ""
+\end{verbatim}
+
+}
+
+\end{codelisting}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.3\linewidth,height=0.3\textheight]{paper-schema_files/mediabag/900px-Image-Placehol.jpg}
+
+}
+
+\caption{\label{fig-alt-workflow}Workflow for generating and validating
+code for alternatives. The YAML file specifies the alternatives for a
+specific step, which is then processed to generate multiple copies of
+the full schema. The code for each schema are then generated separately,
+and validated to ensure its syntactic correctness and executability.}
+
+\end{figure}%
+
+\begin{longtable}[]{@{}llrrr@{}}
+
+\caption{\label{tbl-random-effects}Summary of random effect estimates
+for Group 5. The three models (gm1, gm2, and gm3) represent different
+specifications of the random effects structure to account for the
+non-nested cross-classified data structure.}
 
 \tabularnewline
 
 \toprule\noalign{}
-group & term & original & gm1 & gm2 & gm3 \\
+group & term & gm1 & gm2 & gm3 \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-playerShort & var\_\_(Intercept) & 0.3671 & 0.3737 & 0.3738 & 0.2899 \\
-refNum & var\_\_(Intercept) & 0.1471 & 0.1528 & 0.1932 & 0.0748 \\
-refNum & var\_\_avgrate01 & NA & NA & 0.0286 & NA \\
-refCountry & var\_\_(Intercept) & NA & NA & NA & 0.3990 \\
-refCountry & var\_\_avgrate01 & 0.0228 & NA & NA & 0.0870 \\
+playerShort & var\_\_(Intercept) & 0.3737 & 0.3738 & 0.2899 \\
+refNum & var\_\_(Intercept) & 0.1528 & 0.1932 & 0.0748 \\
+refNum & var\_\_avgrate01 & NA & 0.0286 & NA \\
+refCountry & var\_\_(Intercept) & NA & NA & 0.3990 \\
+refCountry & var\_\_avgrate01 & NA & NA & 0.0870 \\
 
 \end{longtable}
 
@@ -457,7 +547,7 @@ refCountry & var\_\_avgrate01 & 0.0228 & NA & NA & 0.0870 \\
 
 \subsection{Built-in prompts}\label{built-in-prompts}
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, arc=.35mm, left=2mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, bottomrule=.15mm, coltitle=black, toprule=.15mm, bottomtitle=1mm, toptitle=1mm, breakable, colback=white, opacityback=0, colframe=quarto-callout-note-color-frame, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, bottomrule=.15mm, toprule=.15mm, opacityback=0, toptitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, colframe=quarto-callout-note-color-frame, left=2mm, arc=.35mm, leftrule=.75mm]
 
 \begin{verbatim}
 You are an expert methodologist and data pipeline architect. I will
@@ -525,7 +615,7 @@ NA
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, arc=.35mm, left=2mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, bottomrule=.15mm, coltitle=black, toprule=.15mm, bottomtitle=1mm, toptitle=1mm, breakable, colback=white, opacityback=0, colframe=quarto-callout-note-color-frame, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, bottomrule=.15mm, toprule=.15mm, opacityback=0, toptitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, colframe=quarto-callout-note-color-frame, left=2mm, arc=.35mm, leftrule=.75mm]
 
 \begin{verbatim}
 You are an expert R programmer. Attached is a text document
@@ -542,7 +632,7 @@ start with markdown formatting blocks (like ```R) or backticks.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, arc=.35mm, left=2mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, bottomrule=.15mm, coltitle=black, toprule=.15mm, bottomtitle=1mm, toptitle=1mm, breakable, colback=white, opacityback=0, colframe=quarto-callout-note-color-frame, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, bottomrule=.15mm, toprule=.15mm, opacityback=0, toptitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, colframe=quarto-callout-note-color-frame, left=2mm, arc=.35mm, leftrule=.75mm]
 
 \begin{verbatim}
 You are an expert R developer and automated debugging agent. The user
@@ -567,7 +657,7 @@ character must be R code.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, arc=.35mm, left=2mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, bottomrule=.15mm, coltitle=black, toprule=.15mm, bottomtitle=1mm, toptitle=1mm, breakable, colback=white, opacityback=0, colframe=quarto-callout-note-color-frame, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, bottomrule=.15mm, toprule=.15mm, opacityback=0, toptitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, colframe=quarto-callout-note-color-frame, left=2mm, arc=.35mm, leftrule=.75mm]
 
 \begin{verbatim}
 You are an expert Data Analyst and Methodologist. You are reviewing

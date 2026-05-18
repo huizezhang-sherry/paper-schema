@@ -8,7 +8,7 @@
 
 <meta name="author" content="H. Sherry Zhang">
 <meta name="author" content="Roger D. Peng">
-<meta name="dcterms.date" content="2026-05-14">
+<meta name="dcterms.date" content="2026-05-18">
 <meta name="keywords" content="3 to 6 keywords, that do not appear in the title">
 
 <title>Title</title>
@@ -160,7 +160,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 14, 2026</p>
+      <p class="date">May 18, 2026</p>
     </div>
   </div>
   
@@ -255,21 +255,67 @@ Figure&nbsp;1: Comparison of the odd ratio of the effect skin color on receiving
 <!-- options(contrasts = c("contr.sum", "contr.poly")) -->
 <section id="exploring-alternatives" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="exploring-alternatives"><span class="header-section-number">4.1</span> Exploring alternatives</h2>
-<p><a href="#tbl-alternatives" class="quarto-xref">Table&nbsp;1</a> shows …</p>
-<div class="cell" data-tbl.cap="this is the caption">
-<div id="tbl-alternatives" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl.cap="this is the caption">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-alternatives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1
+<p>To demonstrate the functionality for specifying alternatives in Section 3.2, we use Group 5 from the football study above as an example. Group 5 uses a binomial generalized linear mixed model (GLMM) to estimate the effect of skin tone rating on the number of red cards received using a logit link function:</p>
+<p><span class="math display">\[\begin{align*}
+\textbf{Model 1 (gm1):} \quad \text{logit}(p_{ijk}) &amp;= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{k} \\
+u_{j} &amp;\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}) \\[1.5em]
+\textbf{Model 2 (gm2):} \quad \text{logit}(p_{ijk}) &amp;= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{0k} + v_{1k} X_{ijk} \\
+u_{j} &amp;\sim N(0, \sigma^2_{\text{player}}), \quad \mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right) \\[1.5em]
+\textbf{Model 3 (gm3):} \quad \text{logit}(p_{ijkm}) &amp;= \beta_0 + \beta_1 X_{ijkm} + u_{j} + v_{k} + w_{0m} + w_{1m} X_{ijkm} \\
+u_{j} &amp;\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}), \quad \mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)
+\end{align*}\]</span></p>
+<p>where <span class="math inline">\(p\)</span> denotes the probability of a player receiving a red card, and <span class="math inline">\(X\)</span> represents the player’s skin tone rating. The subscripts <span class="math inline">\(i, j, k,\)</span> and <span class="math inline">\(m\)</span> index the individual observation, player, referee, and the referee’s home country, respectively. The parameter <span class="math inline">\(\beta_0\)</span> represents the global baseline log-odds of receiving a red card, and <span class="math inline">\(\beta_1\)</span> estimates the fixed effect of a player’s skin tone. The random structures account for multi-level variation across groupings with varying intercepts and/or slopes: (1) scalar random intercepts (<span class="math inline">\(\sigma^2\)</span>) capture baseline shifts for players across all specifications (<span class="math inline">\(u_j \sim N(0, \sigma^2_{\text{player}})\)</span>) and for individual referees in Models 1 and 3 (<span class="math inline">\(v_k \sim N(0, \sigma^2_{\text{ref}})\)</span>); and (2) variance-covariance matrices (<span class="math inline">\(\mathbf{\Sigma}\)</span>) accommodate random slopes, allowing the effect of skin tone to vary across individual referees in Model 2 (<span class="math inline">\(\mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right)\)</span>) and across referee countries in Model 3 (<span class="math inline">\(\mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)\)</span>).</p>
+<p>The full workflow of experimenting with alternatives is summarized in <a href="#fig-alt-workflow" class="quarto-xref">Figure&nbsp;2</a>. Alternatives to a specific step are specified in a YAML file in <a href="#lst-yaml-alternative" class="quarto-xref">Listing&nbsp;1</a>, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability. <a href="#tbl-random-effects" class="quarto-xref">Table&nbsp;1</a> summarizes the estimated random effect from the workflow. [TODO: expand more here]</p>
+<div id="lst-yaml-alternative" class="listing quarto-float quarto-figure quarto-figure-left anchored">
+<figure class="quarto-float quarto-float-lst figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-yaml-alternative-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Listing&nbsp;1: Example of a YAML file specifying alternatives for the random effects structure in the many-analyst analysis of Group 5.
 </figcaption>
-<div aria-describedby="tbl-alternatives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="lst-yaml-alternative-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<pre><code>meta:
+  type: alternatives
+  step: specify_random_effects_structure
+  fork: how to account for the non-nested cross-classified data structure
+alternatives:
+  - id: "gm1"
+    path: "a random effect of player and referee"
+    rationale: ""
+  - id: "gm2"
+    path: "a random effect of player and referee, and a random effect of skin-tone across referees"
+    rationale: ""
+  - id: "gm3"
+    path: "a random effect of player, referee, and referees' countries of origin, and a random effect of skin tone across referees' countries of origin"
+    rationale: ""</code></pre>
+</div>
+</figure>
+</div>
+<div class="cell">
 <div class="cell-output-display">
-<table class="do-not-create-environment caption-top table table-sm table-striped small">
+<div id="fig-alt-workflow" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-alt-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://thevanillaroom.co.uk/wp-content/uploads/2023/12/900px-Image-Placeholder.jpg" style="width:30.0%;height:30.0%" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alt-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Workflow for generating and validating code for alternatives. The YAML file specifies the alternatives for a specific step, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-random-effects" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-random-effects-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Summary of random effect estimates for Group 5. The three models (gm1, gm2, and gm3) represent different specifications of the random effects structure to account for the non-nested cross-classified data structure.
+</figcaption>
+<div aria-describedby="tbl-random-effects-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;">group</th>
 <th style="text-align: left;">term</th>
-<th style="text-align: right;">original</th>
 <th style="text-align: right;">gm1</th>
 <th style="text-align: right;">gm2</th>
 <th style="text-align: right;">gm3</th>
@@ -279,7 +325,6 @@ Table&nbsp;1
 <tr class="odd">
 <td style="text-align: left;">playerShort</td>
 <td style="text-align: left;">var__(Intercept)</td>
-<td style="text-align: right;">0.3671</td>
 <td style="text-align: right;">0.3737</td>
 <td style="text-align: right;">0.3738</td>
 <td style="text-align: right;">0.2899</td>
@@ -287,7 +332,6 @@ Table&nbsp;1
 <tr class="even">
 <td style="text-align: left;">refNum</td>
 <td style="text-align: left;">var__(Intercept)</td>
-<td style="text-align: right;">0.1471</td>
 <td style="text-align: right;">0.1528</td>
 <td style="text-align: right;">0.1932</td>
 <td style="text-align: right;">0.0748</td>
@@ -295,7 +339,6 @@ Table&nbsp;1
 <tr class="odd">
 <td style="text-align: left;">refNum</td>
 <td style="text-align: left;">var__avgrate01</td>
-<td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">0.0286</td>
 <td style="text-align: right;">NA</td>
@@ -305,13 +348,11 @@ Table&nbsp;1
 <td style="text-align: left;">var__(Intercept)</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0.3990</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">refCountry</td>
 <td style="text-align: left;">var__avgrate01</td>
-<td style="text-align: right;">0.0228</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">0.0870</td>

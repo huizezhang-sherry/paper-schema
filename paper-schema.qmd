@@ -4,6 +4,10 @@ format:
   jasa-pdf:
     keep-tex: true
     number-sections: true
+    include-in-header:
+      - text: |
+          \usepackage{amsmath}
+          \usepackage{amssymb}
     journal:
       blinded: false
   jasa-html:
@@ -122,29 +126,60 @@ knitr::include_graphics(here::here("figures/res-updated.png"))
 
 ## Exploring alternatives
 
-@tbl-alternatives shows ...
+To demonstrate the functionality for specifying alternatives in Section 3.2, we use Group 5 from the football study above as an example. Group 5 uses a binomial generalized linear mixed model (GLMM) to estimate the effect of skin tone rating on the number of red cards received using a logit link function:
+
+\begin{align*}
+\textbf{Model 1 (gm1):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{k} \\
+u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}) \\[1.5em]
+\textbf{Model 2 (gm2):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{0k} + v_{1k} X_{ijk} \\
+u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad \mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right) \\[1.5em]
+\textbf{Model 3 (gm3):} \quad \text{logit}(p_{ijkm}) &= \beta_0 + \beta_1 X_{ijkm} + u_{j} + v_{k} + w_{0m} + w_{1m} X_{ijkm} \\
+u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}), \quad \mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)
+\end{align*}
+
+where $p$ denotes the probability of a player receiving a red card, and $X$ represents the player's skin tone rating. The subscripts $i, j, k,$ and $m$ index the individual observation, player, referee, and the referee's home country, respectively. The parameter $\beta_0$ represents the global baseline log-odds of receiving a red card, and $\beta_1$ estimates the fixed effect of a player's skin tone. The random structures account for multi-level variation across groupings with varying intercepts and/or slopes: (1) scalar random intercepts ($\sigma^2$) capture baseline shifts for players across all specifications ($u_j \sim N(0, \sigma^2_{\text{player}})$) and for individual referees in Models 1 and 3 ($v_k \sim N(0, \sigma^2_{\text{ref}})$); and (2) variance-covariance matrices ($\mathbf{\Sigma}$) accommodate random slopes, allowing the effect of skin tone to vary across individual referees in Model 2 ($\mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right)$) and across referee countries in Model 3 ($\mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)$).
+
+The full workflow of experimenting with alternatives is summarized in @fig-alt-workflow. Alternatives to a specific step are specified in a YAML file in @lst-yaml-alternative, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability. @tbl-random-effects summarizes the estimated random effect from the workflow. [TODO: expand more here]
+
+:::{#lst-yaml-alternative lst-cap="Example of a YAML file specifying alternatives for the random effects structure in the many-analyst analysis of Group 5."}
+````
+meta:
+  type: alternatives
+  step: specify_random_effects_structure
+  fork: how to account for the non-nested cross-classified data structure
+alternatives:
+  - id: "gm1"
+    path: "a random effect of player and referee"
+    rationale: ""
+  - id: "gm2"
+    path: "a random effect of player and referee, and a random effect of skin-tone across referees"
+    rationale: ""
+  - id: "gm3"
+    path: "a random effect of player, referee, and referees' countries of origin, and a random effect of skin tone across referees' countries of origin"
+    rationale: ""
+````
+:::
+
+```{r}
+#| label: fig-alt-workflow
+#| out.height: 30%
+#| out.width: 30%
+#| echo: false
+#| fig.cap: "Workflow for generating and validating code for alternatives. The YAML file specifies the alternatives for a specific step, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability."
+knitr::include_graphics("https://thevanillaroom.co.uk/wp-content/uploads/2023/12/900px-Image-Placeholder.jpg")
+```
 
 ```{r}
 #| echo: false
 #| message: false
 #| warning: false
-#| label: tbl-alternatives
-#| tbl.cap: "this is the caption"
-load(here::here("data/mod_comp_res.rds"))
-# map_dfr(mod_comp_res$env, ~glance(.x$glmm_model), .id = "model") |> 
-#   left_join(tibble(model = as.character(1:4), model2 = c("original", "gm1", "gm2", "gm3"))) |> 
-#   select(-c(model:logLik, df.residual)) |> 
-#   pivot_longer(cols = c(AIC, BIC, deviance), names_to = "measure", values_to = "value") |> 
-#   pivot_wider(names_from = model2, values_from = value)
-
-
-# re_df <- map_dfr(mod_comp_res$env, ~tidy(.x$glmm_model, effect = "ran_pars", scales = "vcov"), .id = "model")
-# save(re_df, file = here::here("data/re_df.rds"))
+#| label: tbl-random-effects
+#| tbl-cap: "Summary of random effect estimates for Group 5. The three models (gm1, gm2, and gm3) represent different specifications of the random effects structure to account for the non-nested cross-classified data structure."
 load(here::here("data/re_df.rds"))
 
 re_df |> 
-  filter(!str_detect(term, "cov")) |> 
-  left_join(tibble(model = as.character(1:4), model2 = c("original", "gm1", "gm2", "gm3"))) |> 
+  filter(!str_detect(term, "cov"), model != 1) |> 
+  left_join(tibble(model = as.character(2:4), model2 = c("gm1", "gm2", "gm3"))) |> 
   select(-(model:component)) |> 
   pivot_wider(names_from = model2, values_from = estimate) |> 
   mutate(group = factor(group, levels = c("playerShort", "refNum", "refCountry"))) |> 
