@@ -41,16 +41,33 @@ library(broom.mixed)
 
 # Introduction {#sec-intro}
 
+Reporting the sequence of steps and decisions taken in a data analysis is a crucial part of presenting evidence in publications for new scientific discoveries. Modern data analyses have grown in complexity, with data coming from multiple sources and are potential spatial, temporal, and multivariate nature. To ensure the reproducibility of reported results, good practices are advocated to make code scripts publicly available or adopt literate programming techniques. To this date, reproducibility checks by the journals have been a standard screening process in the publication pipeline in statistics. 
 
-# Literature review
+
+One implicit assumption the current practices operates under is that an analysis becomes reproducible, hence understandable, once all the reproducible materials are made available. Specifically, understandable implies that an independent researcher should be able to, without much difficulty, track the steps that have been done on the data and understand why each step was taken. In practice, however, reconstructing an analysis is rarely straightfoward. Instead, it is often a frustrating cycle of trial and error, hitting failure points with little feedback on when things go wrong. Part of the reason is that the two media (manuscripts and code scripts) serve different communication goals. A manuscript is a curated narrative designed to present new scientific discoveries, rather than an algorithmic log of the data analysis workfllow. Code scripts, on the other hand, show all the computational details but don't inherently carry the underlying scientific rationale behind each step. Additionally, code scripts reflect author's choice of pragramming language, personal coding style, and customized abstractions built to streamline repetitive analytical tasks. These all create obstables for readers attempting to parse the code and hinder their ability to confidently modify or extend the analysis. 
+
+<!-- comprehend why alternative analytical paths were discarded -->
+
+<!-- Under these reporting conventions, a division of labor is assumed: the manuscript text provides the high-level conceptual justifications, while the accompanying code serves as a detailed record of execution. 
+
+assuming they would make the same reporting choices and prose writing style as the original authors, and that they are as familiar with the script as the original authors. -->
+
+
+Hence, a gap still exists between an analysis being machine replicable and reader understandable, requiring researchers to spend a non-trivial amount of time piecing together information from the manuscript and code scripts. With recent advances in large language models (LLMs), we have the opportunity to rethink how we can present data analysis in a way that is more structured and to facilitate comprehension and exploration of alternatives. LLMs have shown remarkable capabilities in understanding human language and in generating code from natural language descriptions. This opens up new possibilities to bridge the gap from reproducibility to understandability.
+
+In this paper, we present a schema designed to describe data analysis in a structured way that captures the key decisions and their justifications, as well as the inputs and outputs of each step. We also demonstrate how this schema can be used to generate code scripts from textual descriptions of analyses, and to explore alternative analytical paths given the power of LLMs for code generation. We apply our schema to a case study of the many-analyst football study, where we extract the analytical decisions from the final reports of each team, generate the corresponding code scripts, and validate the results against the published results in the original paper. We also demonstrate how to specify and explore alternatives for a specific step in the analysis using our schema.
+
+
+The paper is organized as follows. In @sec-lit-review, we review the relevant literature on communication of data analysis and reproducibility, as well as agentic data science. In @sec-method, we present our methodology, including the schema for describing data analysis and the process for generating and validating code from the schema by LLMs. In @sec-application, we apply our methodology to the many-analyst football study and present our results. Finally, in @sec-discussion, we discuss the implications of our work and potential future directions.
+
+
+# Literature review {#sec-lit-review}
+ 
+## Communication of data analysis and reproducibility
 
 ## Agentic data science
 
-## Communication of data analysis
-
-## AI for reproducibility
-
-# Methodology 
+# Methodology {#sec-method}
 
 ## A schema for describing data analysis
 
@@ -92,7 +109,7 @@ The cardinality of this space, $|\mathcal{M}| = \prod_{i=1}^n k_i$, quantifies t
 
 
 
-# Application: many-analysts football study
+# Application: many-analysts football study {#sec-application}
 
 The many-analysts study posits fixed research questions on a fixed dataset and invites teams of researchers to analyze the problem with whatever software they're comfortable with. In @silberzahn2018, one question is to answer whether soccer referees are more likely to give red cards to dark-skin-toned player than to light-skin-toned players. The provided dataset contains two raters' rating to the picture of players, the number of redcard received for each player/referee dyade out of the number of games, and a collection of player, referee, and game characteristics: player birthday, height, weight, player position, league country, number of victories, ties, and defeats, and number of yellow and red cards received. Most groups take a modelling approach to estimate the effect of skin rating on the red card issued with varied distribution assumptions (linear, logistic, and poisson) and covariate choices as fixed and random effects. The study is comprised of an initial analysis conducted separately by each team, followed by a round-robin peer evaluation round, and then each group presents their final analysis after incorporating the feedback from the discussion and presents the results in a way they would in a published article with formal Method section. All the materials related to the study is publicly available on the Open Science Framework (OSF).
 
@@ -186,6 +203,8 @@ re_df |>
   arrange(group, term) |> 
   knitr::kable(digits = 4)
 ```
+
+# Discussion {#sec-discussion}
 
 
 # Appendix {.unnumbered}

@@ -8,7 +8,7 @@
 
 <meta name="author" content="H. Sherry Zhang">
 <meta name="author" content="Roger D. Peng">
-<meta name="dcterms.date" content="2026-05-18">
+<meta name="dcterms.date" content="2026-05-25">
 <meta name="keywords" content="3 to 6 keywords, that do not appear in the title">
 
 <title>Title</title>
@@ -100,27 +100,27 @@ window.Quarto = {
    
   <ul>
   <li><a href="#sec-intro" id="toc-sec-intro" class="nav-link active" data-scroll-target="#sec-intro"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#literature-review" id="toc-literature-review" class="nav-link" data-scroll-target="#literature-review"><span class="header-section-number">2</span> Literature review</a>
+  <li><a href="#sec-lit-review" id="toc-sec-lit-review" class="nav-link" data-scroll-target="#sec-lit-review"><span class="header-section-number">2</span> Literature review</a>
   <ul class="collapse">
-  <li><a href="#agentic-data-science" id="toc-agentic-data-science" class="nav-link" data-scroll-target="#agentic-data-science"><span class="header-section-number">2.1</span> Agentic data science</a></li>
-  <li><a href="#communication-of-data-analysis" id="toc-communication-of-data-analysis" class="nav-link" data-scroll-target="#communication-of-data-analysis"><span class="header-section-number">2.2</span> Communication of data analysis</a></li>
-  <li><a href="#ai-for-reproducibility" id="toc-ai-for-reproducibility" class="nav-link" data-scroll-target="#ai-for-reproducibility"><span class="header-section-number">2.3</span> AI for reproducibility</a></li>
+  <li><a href="#communication-of-data-analysis-and-reproducibility" id="toc-communication-of-data-analysis-and-reproducibility" class="nav-link" data-scroll-target="#communication-of-data-analysis-and-reproducibility"><span class="header-section-number">2.1</span> Communication of data analysis and reproducibility</a></li>
+  <li><a href="#agentic-data-science" id="toc-agentic-data-science" class="nav-link" data-scroll-target="#agentic-data-science"><span class="header-section-number">2.2</span> Agentic data science</a></li>
   </ul></li>
-  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology"><span class="header-section-number">3</span> Methodology</a>
+  <li><a href="#sec-method" id="toc-sec-method" class="nav-link" data-scroll-target="#sec-method"><span class="header-section-number">3</span> Methodology</a>
   <ul class="collapse">
   <li><a href="#a-schema-for-describing-data-analysis" id="toc-a-schema-for-describing-data-analysis" class="nav-link" data-scroll-target="#a-schema-for-describing-data-analysis"><span class="header-section-number">3.1</span> A schema for describing data analysis</a></li>
   <li><a href="#describing-alternatives" id="toc-describing-alternatives" class="nav-link" data-scroll-target="#describing-alternatives"><span class="header-section-number">3.2</span> Describing alternatives</a></li>
   <li><a href="#generating-and-validating-code-from-the-schema-by-llm" id="toc-generating-and-validating-code-from-the-schema-by-llm" class="nav-link" data-scroll-target="#generating-and-validating-code-from-the-schema-by-llm"><span class="header-section-number">3.3</span> Generating and validating code from the schema by LLM</a></li>
   </ul></li>
-  <li><a href="#application-many-analysts-football-study" id="toc-application-many-analysts-football-study" class="nav-link" data-scroll-target="#application-many-analysts-football-study"><span class="header-section-number">4</span> Application: many-analysts football study</a>
+  <li><a href="#sec-application" id="toc-sec-application" class="nav-link" data-scroll-target="#sec-application"><span class="header-section-number">4</span> Application: many-analysts football study</a>
   <ul class="collapse">
   <li><a href="#exploring-alternatives" id="toc-exploring-alternatives" class="nav-link" data-scroll-target="#exploring-alternatives"><span class="header-section-number">4.1</span> Exploring alternatives</a></li>
   </ul></li>
+  <li><a href="#sec-discussion" id="toc-sec-discussion" class="nav-link" data-scroll-target="#sec-discussion"><span class="header-section-number">5</span> Discussion</a></li>
   <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
   <ul class="collapse">
-  <li><a href="#built-in-prompts" id="toc-built-in-prompts" class="nav-link" data-scroll-target="#built-in-prompts"><span class="header-section-number">4.2</span> Built-in prompts</a></li>
+  <li><a href="#built-in-prompts" id="toc-built-in-prompts" class="nav-link" data-scroll-target="#built-in-prompts"><span class="header-section-number">5.1</span> Built-in prompts</a></li>
   </ul></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5</span> References</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6</span> References</a></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="paper-schema.pdf"><i class="bi bi-file-pdf"></i>PDF (jasa)</a></li></ul></div></nav>
 </div>
@@ -160,7 +160,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 18, 2026</p>
+      <p class="date">May 25, 2026</p>
     </div>
   </div>
   
@@ -186,20 +186,26 @@ window.Quarto = {
 
 <section id="sec-intro" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>Reporting the sequence of steps and decisions taken in a data analysis is a crucial part of presenting evidence in publications for new scientific discoveries. Modern data analyses have grown in complexity, with data coming from multiple sources and are potential spatial, temporal, and multivariate nature. To ensure the reproducibility of reported results, good practices are advocated to make code scripts publicly available or adopt literate programming techniques. To this date, reproducibility checks by the journals have been a standard screening process in the publication pipeline in statistics.</p>
+<p>One implicit assumption the current practices operates under is that an analysis becomes reproducible, hence understandable, once all the reproducible materials are made available. Specifically, understandable implies that an independent researcher should be able to, without much difficulty, track the steps that have been done on the data and understand why each step was taken. In practice, however, reconstructing an analysis is rarely straightfoward. Instead, it is often a frustrating cycle of trial and error, hitting failure points with little feedback on when things go wrong. Part of the reason is that the two media (manuscripts and code scripts) serve different communication goals. A manuscript is a curated narrative designed to present new scientific discoveries, rather than an algorithmic log of the data analysis workfllow. Code scripts, on the other hand, show all the computational details but don’t inherently carry the underlying scientific rationale behind each step. Additionally, code scripts reflect author’s choice of pragramming language, personal coding style, and customized abstractions built to streamline repetitive analytical tasks. These all create obstables for readers attempting to parse the code and hinder their ability to confidently modify or extend the analysis.</p>
+<!-- comprehend why alternative analytical paths were discarded -->
+<!-- Under these reporting conventions, a division of labor is assumed: the manuscript text provides the high-level conceptual justifications, while the accompanying code serves as a detailed record of execution. 
+
+assuming they would make the same reporting choices and prose writing style as the original authors, and that they are as familiar with the script as the original authors. -->
+<p>Hence, a gap still exists between an analysis being machine replicable and reader understandable, requiring researchers to spend a non-trivial amount of time piecing together information from the manuscript and code scripts. With recent advances in large language models (LLMs), we have the opportunity to rethink how we can present data analysis in a way that is more structured and to facilitate comprehension and exploration of alternatives. LLMs have shown remarkable capabilities in understanding human language and in generating code from natural language descriptions. This opens up new possibilities to bridge the gap from reproducibility to understandability.</p>
+<p>In this paper, we present a schema designed to describe data analysis in a structured way that captures the key decisions and their justifications, as well as the inputs and outputs of each step. We also demonstrate how this schema can be used to generate code scripts from textual descriptions of analyses, and to explore alternative analytical paths given the power of LLMs for code generation. We apply our schema to a case study of the many-analyst football study, where we extract the analytical decisions from the final reports of each team, generate the corresponding code scripts, and validate the results against the published results in the original paper. We also demonstrate how to specify and explore alternatives for a specific step in the analysis using our schema.</p>
+<p>The paper is organized as follows. In <a href="#sec-lit-review" class="quarto-xref">Section&nbsp;2</a>, we review the relevant literature on communication of data analysis and reproducibility, as well as agentic data science. In <a href="#sec-method" class="quarto-xref">Section&nbsp;3</a>, we present our methodology, including the schema for describing data analysis and the process for generating and validating code from the schema by LLMs. In <a href="#sec-application" class="quarto-xref">Section&nbsp;4</a>, we apply our methodology to the many-analyst football study and present our results. Finally, in <a href="#sec-discussion" class="quarto-xref">Section&nbsp;5</a>, we discuss the implications of our work and potential future directions.</p>
 </section>
-<section id="literature-review" class="level1" data-number="2">
+<section id="sec-lit-review" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Literature review</h1>
-<section id="agentic-data-science" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="agentic-data-science"><span class="header-section-number">2.1</span> Agentic data science</h2>
+<section id="communication-of-data-analysis-and-reproducibility" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="communication-of-data-analysis-and-reproducibility"><span class="header-section-number">2.1</span> Communication of data analysis and reproducibility</h2>
 </section>
-<section id="communication-of-data-analysis" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="communication-of-data-analysis"><span class="header-section-number">2.2</span> Communication of data analysis</h2>
-</section>
-<section id="ai-for-reproducibility" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="ai-for-reproducibility"><span class="header-section-number">2.3</span> AI for reproducibility</h2>
+<section id="agentic-data-science" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="agentic-data-science"><span class="header-section-number">2.2</span> Agentic data science</h2>
 </section>
 </section>
-<section id="methodology" class="level1" data-number="3">
+<section id="sec-method" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Methodology</h1>
 <section id="a-schema-for-describing-data-analysis" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="a-schema-for-describing-data-analysis"><span class="header-section-number">3.1</span> A schema for describing data analysis</h2>
@@ -225,7 +231,7 @@ A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_
 <h2 data-number="3.3" class="anchored" data-anchor-id="generating-and-validating-code-from-the-schema-by-llm"><span class="header-section-number">3.3</span> Generating and validating code from the schema by LLM</h2>
 </section>
 </section>
-<section id="application-many-analysts-football-study" class="level1" data-number="4">
+<section id="sec-application" class="level1" data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> Application: many-analysts football study</h1>
 <p>The many-analysts study posits fixed research questions on a fixed dataset and invites teams of researchers to analyze the problem with whatever software they’re comfortable with. In <span class="citation" data-cites="silberzahn2018">Silberzahn et al. (<a href="#ref-silberzahn2018" role="doc-biblioref">2018</a>)</span>, one question is to answer whether soccer referees are more likely to give red cards to dark-skin-toned player than to light-skin-toned players. The provided dataset contains two raters’ rating to the picture of players, the number of redcard received for each player/referee dyade out of the number of games, and a collection of player, referee, and game characteristics: player birthday, height, weight, player position, league country, number of victories, ties, and defeats, and number of yellow and red cards received. Most groups take a modelling approach to estimate the effect of skin rating on the red card issued with varied distribution assumptions (linear, logistic, and poisson) and covariate choices as fixed and random effects. The study is comprised of an initial analysis conducted separately by each team, followed by a round-robin peer evaluation round, and then each group presents their final analysis after incorporating the feedback from the discussion and presents the results in a way they would in a published article with formal Method section. All the materials related to the study is publicly available on the Open Science Framework (OSF).</p>
 <p>From the report presented by each team, we can use LLM to convert the decisions into the schema designed and generate the corresponding coding script. From the write-up reports, we extract the sentences relevant to the decisions made in the final analysis by the team. This step is needed because the original skin rating is 1-5 but later changed to 0-1 and also many teams report their initial analysis and how their final analysis modify on top of the initial analysis. We do this to avoid confusion on reading comprehension with LLM. For general methodology write-up, this step is not necessarily needed [TODO: write it better].</p>
@@ -366,10 +372,13 @@ Table&nbsp;1: Summary of random effect estimates for Group 5. The three models (
 </div>
 </section>
 </section>
+<section id="sec-discussion" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Discussion</h1>
+</section>
 <section id="appendix" class="level1 unnumbered">
 <h1 class="unnumbered">Appendix</h1>
-<section id="built-in-prompts" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="built-in-prompts"><span class="header-section-number">4.2</span> Built-in prompts</h2>
+<section id="built-in-prompts" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="built-in-prompts"><span class="header-section-number">5.1</span> Built-in prompts</h2>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -584,12 +593,12 @@ step-another-method ...</code></pre>
 </div>
 </section>
 </section>
-<section id="references" class="level1 unnumbered" data-number="5">
+<section id="references" class="level1 unnumbered" data-number="6">
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">5 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">6 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-lme4" class="csl-entry" role="listitem">
 Bates, D., Mächler, M., Bolker, B., and Walker, S. (2015), <span>“Fitting linear mixed-effects models using <span class="nocase">lme4</span>,”</span> <em>Journal of Statistical Software</em>, 67, 1–48. <a href="https://doi.org/10.18637/jss.v067.i01">https://doi.org/10.18637/jss.v067.i01</a>.
 </div>
