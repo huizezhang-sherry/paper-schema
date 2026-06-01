@@ -8,7 +8,7 @@
 
 <meta name="author" content="H. Sherry Zhang">
 <meta name="author" content="Roger D. Peng">
-<meta name="dcterms.date" content="2026-05-25">
+<meta name="dcterms.date" content="2026-06-01">
 <meta name="keywords" content="3 to 6 keywords, that do not appear in the title">
 
 <title>Title</title>
@@ -108,8 +108,8 @@ window.Quarto = {
   <li><a href="#sec-method" id="toc-sec-method" class="nav-link" data-scroll-target="#sec-method"><span class="header-section-number">3</span> Methodology</a>
   <ul class="collapse">
   <li><a href="#a-schema-for-describing-data-analysis" id="toc-a-schema-for-describing-data-analysis" class="nav-link" data-scroll-target="#a-schema-for-describing-data-analysis"><span class="header-section-number">3.1</span> A schema for describing data analysis</a></li>
-  <li><a href="#describing-alternatives" id="toc-describing-alternatives" class="nav-link" data-scroll-target="#describing-alternatives"><span class="header-section-number">3.2</span> Describing alternatives</a></li>
-  <li><a href="#generating-and-validating-code-from-the-schema-by-llm" id="toc-generating-and-validating-code-from-the-schema-by-llm" class="nav-link" data-scroll-target="#generating-and-validating-code-from-the-schema-by-llm"><span class="header-section-number">3.3</span> Generating and validating code from the schema by LLM</a></li>
+  <li><a href="#sec-alternative" id="toc-sec-alternative" class="nav-link" data-scroll-target="#sec-alternative"><span class="header-section-number">3.2</span> Describing alternatives</a></li>
+  <li><a href="#workflow" id="toc-workflow" class="nav-link" data-scroll-target="#workflow"><span class="header-section-number">3.3</span> Workflow</a></li>
   </ul></li>
   <li><a href="#sec-application" id="toc-sec-application" class="nav-link" data-scroll-target="#sec-application"><span class="header-section-number">4</span> Application: many-analysts football study</a>
   <ul class="collapse">
@@ -118,7 +118,7 @@ window.Quarto = {
   <li><a href="#sec-discussion" id="toc-sec-discussion" class="nav-link" data-scroll-target="#sec-discussion"><span class="header-section-number">5</span> Discussion</a></li>
   <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
   <ul class="collapse">
-  <li><a href="#built-in-prompts" id="toc-built-in-prompts" class="nav-link" data-scroll-target="#built-in-prompts"><span class="header-section-number">5.1</span> Built-in prompts</a></li>
+  <li><a href="#app-prompt" id="toc-app-prompt" class="nav-link" data-scroll-target="#app-prompt"><span class="header-section-number">5.1</span> Built-in prompts</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6</span> References</a></li>
   </ul>
@@ -160,7 +160,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 25, 2026</p>
+      <p class="date">June 1, 2026</p>
     </div>
   </div>
   
@@ -209,26 +209,84 @@ assuming they would make the same reporting choices and prose writing style as t
 <h1 data-number="3"><span class="header-section-number">3</span> Methodology</h1>
 <section id="a-schema-for-describing-data-analysis" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="a-schema-for-describing-data-analysis"><span class="header-section-number">3.1</span> A schema for describing data analysis</h2>
-<p>We represent a data analysis, <span class="math inline">\(\mathcal{S} = \{A_1, A_2, \cdots, A_n\}\)</span>, as a sequence of <span class="math inline">\(n\)</span> analytical step, <span class="math inline">\(A_i\)</span>, applied to a dataset <span class="math inline">\(\mathcal{D}\)</span>, where each step <span class="math inline">\(A_i\)</span> is defined as</p>
+<p>We represent a data analysis, <span class="math inline">\(\mathcal{S} = \{A_1, A_2, \cdots, A_n\}\)</span>, as a sequence of <span class="math inline">\(n\)</span> analytical step, <span class="math inline">\(A_i\)</span>, applied to a dataset <span class="math inline">\(\mathcal{D}\)</span>, where each step <span class="math inline">\(A_i\)</span> is defined as a tuple:</p>
 <p><span class="math display">\[\begin{equation}
 A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
 \end{equation}\]</span></p>
-<p>The components of <span class="math inline">\(A_i\)</span> are partitioned into a required triplet <span class="math inline">\((f_{i}, \pi_{i}, r_{i})\)</span> and a set of optional parameters <span class="math inline">\((\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})\)</span>. <span class="math inline">\(f_{i} \in \mathcal{F}\)</span> denotes the methodological fork that defines the <strong>objective</strong> of the analytical step (e.g.&nbsp;<span class="math inline">\(f_{i}\)</span> could be “handle missing data” [TODO: more examples]). Each fork is an open question that invites multiple justifiable approaches, rather than a closed decision that has already been resolved. The second component of the tuple, <span class="math inline">\(\pi_{i} \in \Pi\)</span>, represents the analytical <strong>decision</strong> made to resolve the fork <span class="math inline">\(f_{i}\)</span>, where <span class="math inline">\(i\)</span> indexes the specific choice among a set of justifiable alternatives <span class="math inline">\(\Pi\)</span>. For example, if <span class="math inline">\(f_{i}\)</span> is “handle missing data”, then <span class="math inline">\(\pi_{i}\)</span> could be “listwise deletion”, “multiple imputation”, or “model-based approach”. The term <span class="math inline">\(r_{i}\)</span> is the epistemic or theoretical <strong>justification</strong> provided for selecting path <span class="math inline">\(\pi_{i}\)</span>. This field bridges the gap between raw code and scientific intent, ensuring that the justification of the analysis is preserved alongside the decision.</p>
-<p>The operational flow of the analysis is governed by the input and output spaces, <span class="math inline">\(\mathcal{I}_{i}\)</span> and <span class="math inline">\(\mathcal{O}_{i}\)</span>. To maintain computational integrity, the analysis must satisfy a sequential consistency constraint: the inputs for any given step must be grounded in the existing data state, comprising the original dataset and all prior transformations. Formally, we require:</p>
-<p><span class="math display">\[\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j &lt; i} \mathcal{O}_{j} \right), \quad \forall i \in \{2, \dots, n\}\]</span></p>
-<p>When the schema is extracted by Large Language Models (LLMs), we introduce a confidence score, <span class="math inline">\(\omega_{i}\)</span> (low, medium, high), that can be used to trigger a clarification question when the confidence is low. The confidence score can be particularly useful in cases where the source text is ambiguous, guiding the LLM to seek additional information or clarification to improve the accuracy of the schema extraction.</p>
+<p>The components of <span class="math inline">\(A_i\)</span> are partitioned into a required triplet <span class="math inline">\((f_{i}, \pi_{i}, r_{i})\)</span> and a set of optional components <span class="math inline">\((\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})\)</span>. The first component of the triplet, <span class="math inline">\(f_{i} \in \mathcal{F}\)</span>, defines the <strong>objective</strong> of a data analysis step that invites multiple justifiable approaches. The second component, <span class="math inline">\(\pi_{i} \in \Pi\)</span>, represents the data analysis <strong>decision</strong> made to achieve the objective <span class="math inline">\(f_{i}\)</span>, which can be read from both the manuscript and from the code script. The term <span class="math inline">\(r_{i}\)</span> is the <strong>justification</strong> provided for choosing the decision <span class="math inline">\(\pi_{i}\)</span>. This field is usually provided in the manuscript but not the code script to show the scientific intent of the step. As an example, consider the three steps involved in calculating the Human Development Index (HDI):</p>
+<ol type="1">
+<li>Scale all four variables (life expectancy, expected years of schooling, mean years of schooling, and GNI per capita) to a [0, 1] range using their corresponding upper and lower limits.</li>
+<li>Combine the two education-related variables (expected years of schooling and mean years of schooling) into a single education variable.</li>
+<li>Combine the three core dimensions (health, education, and income) into a single index using a geometric mean.</li>
+</ol>
+<p>Structuring this information into a schema is involves defining the objective, decision, and justification for each step. While the decision (what is to be done) and the justification (why it is done) are generally clear, the objective requires identifying what the step is trying to achieve. In other words, it represents the broader goal that could potentially be met through alternative methods (formally introduced in <a href="#sec-alternative" class="quarto-xref">Section&nbsp;3.2</a> ). For instance, in step 3, the objective is to combine the three dimensions. While a simple arithmetic mean could be an alternative solution for this goal, the geometric mean is specifically chosen because it penalizes uneven development among the three dimensions—this reasoning forms the justification. This process results in the basic schema shown in <a href="#lst-schema" class="quarto-xref">Listing&nbsp;1</a>:</p>
+<div id="lst-schema" class="listing quarto-float quarto-figure quarto-figure-left anchored">
+<figure class="quarto-float quarto-float-lst figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-schema-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Listing&nbsp;1: An example schema that specifies the steps in calculating Human Development Index (HDI).
+</figcaption>
+<div aria-describedby="lst-schema-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<pre><code>meta:
+  type: schema
+nodes:
+- tag: step-scaling
+  objective: how to handle variables in different scales?
+  decision: apply min-max scaling to each variable 
+  rationale: to convert the variables to the same scale for future construction of a single index
+- tag: step-education
+  objective: how to combine the two education-related variables?
+  decision: take the average
+  rationale: the arithmetic mean allows perfect substitutability between the two variables
+- tag: step-combine
+  objective: how to combine the three dimensions into a single index?
+  decision: use the geometric mean
+  rationale: the geometric mean penalizes uneven development among the three core dimensions</code></pre>
+</div>
+</figure>
+</div>
+<p>On the optional components of a data analysis step <span class="math inline">\(A_i\)</span>, the operational flow of the analysis is governed by the input and output spaces, <span class="math inline">\(\mathcal{I}_{i}\)</span> and <span class="math inline">\(\mathcal{O}_{i}\)</span>, once a dataset is provided. While the output of a step can be a pseudo object that not currently exist, the inputs for any given step must be within the existing data scope, comprising variables in the original dataset and all outputs from previous steps. Formally, we require:</p>
+<p><span class="math display">\[\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j &lt; i} \mathcal{O}_{j} \right), \quad \forall i \in \{2, \dots, n\}.\]</span></p>
+<p>A schema can also be automatically extracted by Large Language Models (LLMs) from text. If a dataset is provided, the inputs and outputs will also automatically inferred during the extraction. We also introduce a categorical confidence score, <span class="math inline">\(\omega_{i}\)</span> (low, medium, high) that can be useful in case when the source text is ambiguous to guide the LLM to ask for clarification to consolidate the schema extraction.</p>
 </section>
-<section id="describing-alternatives" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="describing-alternatives"><span class="header-section-number">3.2</span> Describing alternatives</h2>
-<p>A single analysis <span class="math inline">\(\mathcal{S}\)</span> represents one realized path in the decision space. In data analysis, there are often multiple plausible paths that can be taken to address the same research question, each with its own set of assumptions and implications.</p>
-<p>For each step <span class="math inline">\(i\)</span> in the sequence, to fulfill each fork <span class="math inline">\(f_i\)</span>, there could be <span class="math inline">\(k_i\)</span> decision choices to choose from: <span class="math inline">\(\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}\)</span></p>
-<p>To identify a specific path through the multiverse, we define a selection vector <span class="math inline">\(r = (r_1, r_2, \dots, r_n)\)</span>, where <span class="math inline">\(r_i \in \{1, \dots, k_i\}\)</span>. A single realized analysis sequence, <span class="math inline">\(\mathcal{S}^{r}\)</span>, is then the ordered sequence: <span class="math display">\[\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}\]</span></p>
-<p>A multiverse is defined as the Cartesian product of these sets:</p>
-<p><span class="math display">\[\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}\]</span></p>
-<p>The cardinality of this space, <span class="math inline">\(|\mathcal{M}| = \prod_{i=1}^n k_i\)</span>, quantifies the total number of unique, fully-specified analysis.</p>
+<section id="sec-alternative" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-alternative"><span class="header-section-number">3.2</span> Describing alternatives</h2>
+<p>While one analysis represents a realized series of choices, alternatives can often be taken for to address the same objective, each with its own set of assumptions and implications. For each step <span class="math inline">\(i\)</span> in the sequence, to fulfill each fork <span class="math inline">\(f_i\)</span>, there could be <span class="math inline">\(k_i\)</span> decision choices to choose from: <span class="math inline">\(\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}\)</span>. We can define a selection vector <span class="math inline">\(r = (r_1, r_2, \dots, r_n)\)</span>, where <span class="math inline">\(r_i \in \{1, \dots, k_i\}\)</span>, to describe an analysis, comprised of specific series of decisions: <span class="math inline">\(\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}\)</span>. A multiverse, used to describe the entire decision spae, is defined as the Cartesian product of these sets: <span class="math inline">\(\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}\)</span>. The cardinality of this space, <span class="math inline">\(|\mathcal{M}| = \prod_{i=1}^n k_i\)</span>, quantifies the total number of unique, fully-specified analysis.</p>
+<p>Returning to the HDI example, in step 3, instead of a geometric mean, an arithmetic mean to combine the three dimensions into a single index. It may not be the best decisions, but still a plausible one to achieve the objective of this step. <a href="#lst-alternatives" class="quarto-xref">Listing&nbsp;2</a> demonstrates how this single alternative is structured in an alternative YAML file. Additional alternatives can be specified by adding items to the <code>alternatives</code> list.</p>
+<div id="lst-alternatives" class="listing quarto-float quarto-figure quarto-figure-left anchored">
+<figure class="quarto-float quarto-float-lst figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-alternatives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Listing&nbsp;2: An example YAML file for specifying alternative for Step 3 in calculating Human Development Index (HDI).
+</figcaption>
+<div aria-describedby="lst-alternatives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<pre><code>meta:
+  type: alternative
+  step: step-combine
+  objective: how to combine the three dimensions into a single index?
+alternatives:
+  - id: arith-mean
+    decision: use an arithmetic mean
+    rationale: a simple average of the three dimensions</code></pre>
+</div>
+</figure>
+</div>
 </section>
-<section id="generating-and-validating-code-from-the-schema-by-llm" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="generating-and-validating-code-from-the-schema-by-llm"><span class="header-section-number">3.3</span> Generating and validating code from the schema by LLM</h2>
+<section id="workflow" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="workflow"><span class="header-section-number">3.3</span> Workflow</h2>
+<p>The overall workflow for schema-based data analysis is illustrated in <a href="#fig-workflow" class="quarto-xref">Figure&nbsp;1</a>. A schema can be created either manually from a template or automatically generated by an LLM from a natural-language manuscript. Once created, the schema serves as a structured specification that guides a second LLM in generating the code for the analysis. To improve reliability, our design include a third LLM agent responsible for code validation. While recent LLMs can generate reasonable code based on prompt, they do not consistently achieve perfect accuracy. The validation process runs the generated script in a sandbox environment and if an error occurs, the third LLM agent is invoked to diagnose the script. The validation agent receives the generated code together with the error message adn teh correponding line number produced during execution, and returns a fixed version of the script. The revised script is then re-executed in the sandbox. This cycle continues until the code runs successfully, a maximum number of attempt is reached, or the user terminates the process. As will be show in <a href="#sec-application" class="quarto-xref">Section&nbsp;4</a>, this validation process resolves the majority of R syntax issues encountered during data wrangling and statistical modelling tasks. On top of supporting a single analytical specification, the workflow also allows users to agument a schema with an alternative YAML file. This expands the original schema into a multiverse of parallel schemas, each representing a different set of decision choices. The same code generation and validation workflow is then applied independently to each schema, producing a corresponding set of validation scripts.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-workflow" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/workflow.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Overview of the schema-driven analysis workflow. Schemas can be authored manually or generated from natural language manuscripts by an LLM. Schemas are used to generate code, which is validated through iterative execution in a sandboxed environment and repaired when errors occur. Alternative specifications can expand a schema into a multiverse of parallel analyses.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="sec-application" class="level1" data-number="4">
@@ -245,13 +303,13 @@ A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_
 <img src="figures/res-updated.png" class="img-fluid figure-img" width="750">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-res-updated-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Comparison of the odd ratio of the effect skin color on receiving red cards in football games from our simulation with the schema (simulated) vs.&nbsp;the reported estimated effect size in <span class="citation" data-cites="silberzahn2018">Silberzahn et al. (<a href="#ref-silberzahn2018" role="doc-biblioref">2018</a>)</span> (published). Teams are arranged by the difference in odd ratio of our simulation and the reported value. For most teams, the simulation successfully recovers the odd ratio reported by each analyst team, larger variations are seen in the following teams: Team 1, 9, 15, 21, 23, and 27.
+Figure&nbsp;2: Comparison of the odd ratio of the effect skin color on receiving red cards in football games from our simulation with the schema (simulated) vs.&nbsp;the reported estimated effect size in <span class="citation" data-cites="silberzahn2018">Silberzahn et al. (<a href="#ref-silberzahn2018" role="doc-biblioref">2018</a>)</span> (published). Teams are arranged by the difference in odd ratio of our simulation and the reported value. For most teams, the simulation successfully recovers the odd ratio reported by each analyst team, larger variations are seen in the following teams: Team 1, 9, 15, 21, 23, and 27.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-res-updated" class="quarto-xref">Figure&nbsp;1</a> shows the agreement of the estimated effect size, in odd ratio, from our experiments (simulated) and the published effect size in <span class="citation" data-cites="silberzahn2018">Silberzahn et al. (<a href="#ref-silberzahn2018" role="doc-biblioref">2018</a>)</span> (published). For most teams, the simulation successfully recovers the odd ratio reported by each analyst team, larger variations are seen in the following teams: Team 1, 9, 15, 21, 23, and 27. Here we listed the reasons for these discrepencies upon investigation:</p>
+<p><a href="#fig-res-updated" class="quarto-xref">Figure&nbsp;2</a> shows the agreement of the estimated effect size, in odd ratio, from our experiments (simulated) and the published effect size in <span class="citation" data-cites="silberzahn2018">Silberzahn et al. (<a href="#ref-silberzahn2018" role="doc-biblioref">2018</a>)</span> (published). For most teams, the simulation successfully recovers the odd ratio reported by each analyst team, larger variations are seen in the following teams: Team 1, 9, 15, 21, 23, and 27. Here we listed the reasons for these discrepencies upon investigation:</p>
 <ul>
 <li><strong>Team 27</strong>: the diffference comes from the ambiguity of the method description, the final approach sections says <em>In addition to the independent variables specified in the initial approach (skin-tone rating, goals scored, games played, yellow cards, and mean explicit and implicit bias) a variable for player position was included, as well as a variable for the league of the player.</em> The author is intended to include the interaction effect of rating and position/ league country as other variables in the initial approach, but the LLM interprets it as only include the main effects. This error can be easily caught by comparing the reproducible script provided by the author.</li>
 <li><strong>Team 9</strong>: the authors mistake player country for referee country in the text description, but their parameter estimation table suggests they are using player country (countryCode - Germany: France) instead.</li>
@@ -271,11 +329,11 @@ u_{j} &amp;\sim N(0, \sigma^2_{\text{player}}), \quad \mathbf{v}_{k} \sim N\left
 u_{j} &amp;\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}), \quad \mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)
 \end{align*}\]</span></p>
 <p>where <span class="math inline">\(p\)</span> denotes the probability of a player receiving a red card, and <span class="math inline">\(X\)</span> represents the player’s skin tone rating. The subscripts <span class="math inline">\(i, j, k,\)</span> and <span class="math inline">\(m\)</span> index the individual observation, player, referee, and the referee’s home country, respectively. The parameter <span class="math inline">\(\beta_0\)</span> represents the global baseline log-odds of receiving a red card, and <span class="math inline">\(\beta_1\)</span> estimates the fixed effect of a player’s skin tone. The random structures account for multi-level variation across groupings with varying intercepts and/or slopes: (1) scalar random intercepts (<span class="math inline">\(\sigma^2\)</span>) capture baseline shifts for players across all specifications (<span class="math inline">\(u_j \sim N(0, \sigma^2_{\text{player}})\)</span>) and for individual referees in Models 1 and 3 (<span class="math inline">\(v_k \sim N(0, \sigma^2_{\text{ref}})\)</span>); and (2) variance-covariance matrices (<span class="math inline">\(\mathbf{\Sigma}\)</span>) accommodate random slopes, allowing the effect of skin tone to vary across individual referees in Model 2 (<span class="math inline">\(\mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right)\)</span>) and across referee countries in Model 3 (<span class="math inline">\(\mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)\)</span>).</p>
-<p>The full workflow of experimenting with alternatives is summarized in <a href="#fig-alt-workflow" class="quarto-xref">Figure&nbsp;2</a>. Alternatives to a specific step are specified in a YAML file in <a href="#lst-yaml-alternative" class="quarto-xref">Listing&nbsp;1</a>, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability. <a href="#tbl-random-effects" class="quarto-xref">Table&nbsp;1</a> summarizes the estimated random effect from the workflow. [TODO: expand more here]</p>
+<p>The full workflow of experimenting with alternatives is summarized in <a href="#fig-alt-workflow" class="quarto-xref">Figure&nbsp;3</a>. Alternatives to a specific step are specified in a YAML file in <a href="#lst-yaml-alternative" class="quarto-xref">Listing&nbsp;3</a>, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability. <a href="#tbl-random-effects" class="quarto-xref">Table&nbsp;1</a> summarizes the estimated random effect from the workflow. [TODO: expand more here]</p>
 <div id="lst-yaml-alternative" class="listing quarto-float quarto-figure quarto-figure-left anchored">
 <figure class="quarto-float quarto-float-lst figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-yaml-alternative-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Listing&nbsp;1: Example of a YAML file specifying alternatives for the random effects structure in the many-analyst analysis of Group 5.
+Listing&nbsp;3: Example of a YAML file specifying alternatives for the random effects structure in the many-analyst analysis of Group 5.
 </figcaption>
 <div aria-describedby="lst-yaml-alternative-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <pre><code>meta:
@@ -303,7 +361,7 @@ alternatives:
 <img src="https://thevanillaroom.co.uk/wp-content/uploads/2023/12/900px-Image-Placeholder.jpg" style="width:30.0%;height:30.0%" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alt-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Workflow for generating and validating code for alternatives. The YAML file specifies the alternatives for a specific step, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability.
+Figure&nbsp;3: Workflow for generating and validating code for alternatives. The YAML file specifies the alternatives for a specific step, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability.
 </figcaption>
 </figure>
 </div>
@@ -377,8 +435,8 @@ Table&nbsp;1: Summary of random effect estimates for Group 5. The three models (
 </section>
 <section id="appendix" class="level1 unnumbered">
 <h1 class="unnumbered">Appendix</h1>
-<section id="built-in-prompts" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="built-in-prompts"><span class="header-section-number">5.1</span> Built-in prompts</h2>
+<section id="app-prompt" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="app-prompt"><span class="header-section-number">5.1</span> Built-in prompts</h2>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">

@@ -71,42 +71,76 @@ The paper is organized as follows. In @sec-lit-review, we review the relevant li
 
 ## A schema for describing data analysis
 
-We represent a data analysis, $\mathcal{S} = \{A_1, A_2, \cdots, A_n\}$, as a sequence of $n$ analytical step, $A_i$, applied to a dataset $\mathcal{D}$, where each step $A_i$ is defined as
+We represent a data analysis, $\mathcal{S} = \{A_1, A_2, \cdots, A_n\}$, as a sequence of $n$ analytical step, $A_i$, applied to a dataset $\mathcal{D}$, where each step $A_i$ is defined as a tuple:
 
 \begin{equation}
 A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
 \end{equation}
 
-The components of $A_i$ are partitioned into a required triplet $(f_{i}, \pi_{i}, r_{i})$ and a set of optional parameters $(\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})$. $f_{i} \in \mathcal{F}$ denotes the methodological fork that defines the **objective** of the analytical step (e.g. $f_{i}$ could be "handle missing data" [TODO: more examples]). Each fork is an open question that invites multiple justifiable approaches, rather than a closed decision that has already been resolved. The second component of the tuple, $\pi_{i} \in \Pi$, represents the analytical **decision** made to resolve the fork $f_{i}$, where $i$ indexes the specific choice among a set of justifiable alternatives $\Pi$. For example, if $f_{i}$ is "handle missing data", then $\pi_{i}$ could be "listwise deletion", "multiple imputation", or "model-based approach". The term $r_{i}$ is the epistemic or theoretical **justification** provided for selecting path $\pi_{i}$. This field bridges the gap between raw code and scientific intent, ensuring that the justification of the analysis is preserved alongside the decision. 
+The components of $A_i$ are partitioned into a required triplet $(f_{i}, \pi_{i}, r_{i})$ and a set of optional components $(\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})$. The first component of the triplet, $f_{i} \in \mathcal{F}$, defines the **objective** of a data analysis step that invites multiple justifiable approaches. The second component, $\pi_{i} \in \Pi$, represents the data analysis **decision** made to achieve the objective $f_{i}$, which can be read from both the manuscript and from the code script. The term $r_{i}$ is the **justification** provided for choosing the decision $\pi_{i}$. This field is usually provided in the manuscript but not the code script to show the scientific intent of the step. As an example, consider the three steps involved in calculating the Human Development Index (HDI):
 
-The operational flow of the analysis is governed by the input and output spaces, $\mathcal{I}_{i}$ and $\mathcal{O}_{i}$. To maintain computational integrity, the analysis must satisfy a sequential consistency constraint: the inputs for any given step must be grounded in the existing data state, comprising the original dataset and all prior transformations. Formally, we require:
+  1) Scale all four variables (life expectancy, expected years of schooling, mean years of schooling, and GNI per capita) to a [0, 1] range using their corresponding upper and lower limits.
+  2) Combine the two education-related variables (expected years of schooling and mean years of schooling) into a single education variable.
+  3) Combine the three core dimensions (health, education, and income) into a single index using a geometric mean. 
 
-$$\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j < i} \mathcal{O}_{j} \right), \quad \forall i \in \{2, \dots, n\}$$
+Structuring this information into a schema is involves defining the objective, decision, and justification for each step. While the decision (what is to be done) and the justification (why it is done) are generally clear, the objective requires identifying what the step is trying to achieve. In other words, it represents the broader goal that could potentially be met through alternative methods (formally introduced in @sec-alternative ). For instance, in step 3, the objective is to combine the three dimensions. While a simple arithmetic mean could be an alternative solution for this goal, the geometric mean is specifically chosen because it penalizes uneven development among the three dimensions—this reasoning forms the justification. This process results in the basic schema shown in @lst-schema:
 
-When the schema is extracted by Large Language Models (LLMs), we introduce a confidence score, $\omega_{i}$ (low, medium, high), that can be used to trigger a clarification question when the confidence is low.  The confidence score can be particularly useful in cases where the source text is ambiguous, guiding the LLM to seek additional information or clarification to improve the accuracy of the schema extraction.
+:::{#lst-schema lst-cap="An example schema that specifies the steps in calculating Human Development Index (HDI)."}
+````
+meta:
+  type: schema
+nodes:
+- tag: step-scaling
+  objective: how to handle variables in different scales?
+  decision: apply min-max scaling to each variable 
+  rationale: to convert the variables to the same scale for future construction of a single index
+- tag: step-education
+  objective: how to combine the two education-related variables?
+  decision: take the average
+  rationale: the arithmetic mean allows perfect substitutability between the two variables
+- tag: step-combine
+  objective: how to combine the three dimensions into a single index?
+  decision: use the geometric mean
+  rationale: the geometric mean penalizes uneven development among the three core dimensions
+````
+:::
 
-## Describing alternatives
+On the optional components of a data analysis step $A_i$, the operational flow of the analysis is governed by the input and output spaces, $\mathcal{I}_{i}$ and $\mathcal{O}_{i}$, once a dataset is provided. While the output of a step can be a pseudo object that not currently exist, the inputs for any given step must be within the existing data scope, comprising variables in the original dataset and all outputs from previous steps. Formally, we require:
 
-A single analysis $\mathcal{S}$ represents one realized path in the decision space. In data analysis, there are often multiple plausible paths that can be taken to address the same research question, each with its own set of assumptions and implications. 
+$$\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j < i} \mathcal{O}_{j} \right), \quad \forall i \in \{2, \dots, n\}.$$
 
-For each step $i$ in the sequence, to fulfill each fork $f_i$, there could be $k_i$ decision choices to choose from: $\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}$
+A schema can also be automatically extracted by Large Language Models (LLMs) from text. If a dataset is provided, the inputs and outputs will also automatically inferred during the extraction. We also introduce a categorical confidence score, $\omega_{i}$ (low, medium, high) that can be useful in case when the source text is ambiguous to guide the LLM to ask for clarification to consolidate the schema extraction. 
 
-To identify a specific path through the multiverse, we define a selection vector $r = (r_1, r_2, \dots, r_n)$, where $r_i \in \{1, \dots, k_i\}$. A single realized analysis sequence, $\mathcal{S}^{r}$, is then the ordered sequence:
-$$\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}$$
+## Describing alternatives {#sec-alternative}
 
-A multiverse is defined as the Cartesian product of these sets:
+While one analysis represents a realized series of choices, alternatives can often be taken for to address the same objective, each with its own set of assumptions and implications. For each step $i$ in the sequence, to fulfill each fork $f_i$, there could be $k_i$ decision choices to choose from: $\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}$. We can define a selection vector $r = (r_1, r_2, \dots, r_n)$, where $r_i \in \{1, \dots, k_i\}$, to describe an analysis, comprised of specific series of decisions: $\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}$. A multiverse, used to describe the entire decision spae, is defined as the Cartesian product of these sets: $\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}$. The cardinality of this space, $|\mathcal{M}| = \prod_{i=1}^n k_i$, quantifies the total number of unique, fully-specified analysis. 
 
-$$\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}$$
+Returning to the HDI example, in step 3, instead of a geometric mean, an arithmetic mean to combine the three dimensions into a single index. It may not be the best decisions, but still a plausible one to achieve the objective of this step. @lst-alternatives demonstrates how this single alternative is structured in an alternative YAML file. Additional alternatives can be specified by adding items to the `alternatives` list.
 
+:::{#lst-alternatives lst-cap="An example YAML file for specifying alternative for Step 3 in calculating Human Development Index (HDI)."}
+````
+meta:
+  type: alternative
+  step: step-combine
+  objective: how to combine the three dimensions into a single index?
+alternatives:
+  - id: arith-mean
+    decision: use an arithmetic mean
+    rationale: a simple average of the three dimensions
+````
+:::
 
+## Workflow 
 
-The cardinality of this space, $|\mathcal{M}| = \prod_{i=1}^n k_i$, quantifies the total number of unique, fully-specified analysis.
-
-
-## Generating and validating code from the schema by LLM
-
-
-
+The overall workflow for schema-based data analysis is illustrated in @fig-workflow. A schema can be created either manually from a template or automatically generated by an LLM from a natural-language manuscript. Once created, the schema serves as a structured specification that guides a second LLM in generating the code for the analysis. To improve reliability, our design include a third LLM agent responsible for code validation. While recent LLMs can generate reasonable code based on prompt, they do not consistently achieve perfect accuracy. The validation process runs the generated script in a sandbox environment and if an error occurs, the third LLM agent is invoked to diagnose the script. The validation agent receives the generated code together with the error message adn teh correponding line number produced during execution, and returns a fixed version of the script. The revised script is then re-executed in the sandbox. This cycle continues until the code runs successfully, a maximum number of attempt is reached, or the user terminates the process. As will be show in @sec-application, this validation process resolves the majority of R syntax issues encountered during data wrangling and statistical modelling tasks. On top of supporting a single analytical specification, the workflow also allows users to agument a schema with an alternative YAML file. This expands the original schema into a multiverse of parallel schemas, each representing a different set of decision choices. The same code generation and validation workflow is then applied independently to each schema, producing a corresponding set of validation scripts.
+ 
+```{r}
+#| label: fig-workflow
+#| out.width: 100%
+#| echo: false
+#| fig.cap: "Overview of the schema-driven analysis workflow. Schemas can be authored manually or generated from natural language manuscripts by an LLM. Schemas are used to generate code, which is validated through iterative execution in a sandboxed environment and repaired when errors occur. Alternative specifications can expand a schema into a multiverse of parallel analyses."
+knitr::include_graphics(here::here("figures/workflow.png"))
+```
 
 
 # Application: many-analysts football study {#sec-application}
@@ -209,7 +243,7 @@ re_df |>
 
 # Appendix {.unnumbered}
 
-## Built-in prompts
+## Built-in prompts {#app-prompt}
 
 :::{.callout-note}
 
