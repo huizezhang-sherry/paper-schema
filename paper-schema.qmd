@@ -4,6 +4,7 @@ format:
   jasa-pdf:
     keep-tex: true
     number-sections: true
+    code-overflow: wrap
     include-in-header:
       - text: |
           \usepackage{amsmath}
@@ -11,6 +12,7 @@ format:
     journal:
       blinded: false
   jasa-html:
+    code-overflow: wrap
     number-sections: true
 date: last-modified
 author:
@@ -66,6 +68,8 @@ The paper is organized as follows. In @sec-lit-review, we review the relevant li
 ## Communication of data analysis and reproducibility
 
 ## Agentic data science
+
+
 
 # Methodology {#sec-method}
 
@@ -210,16 +214,6 @@ alternatives:
     rationale: ""
 ````
 :::
-
-```{r}
-#| label: fig-alt-workflow
-#| out.height: 30%
-#| out.width: 30%
-#| echo: false
-#| fig.cap: "Workflow for generating and validating code for alternatives. The YAML file specifies the alternatives for a specific step, which is then processed to generate multiple copies of the full schema. The code for each schema are then generated separately, and validated to ensure its syntactic correctness and executability."
-knitr::include_graphics("https://thevanillaroom.co.uk/wp-content/uploads/2023/12/900px-Image-Placeholder.jpg")
-```
-
 ```{r}
 #| echo: false
 #| message: false
@@ -240,10 +234,11 @@ re_df |>
 
 # Discussion {#sec-discussion}
 
+During the many-analysts football study, we document a set of observations regarding the performance of LLMs in parsing schemas, generating code, and performing validation. We find that LLMs requires a fairly precise specification in order to generate the code correctly for the intended random effect structure. For an educated statistician, the phrase "a random effect of referee number across average rating" would typically imply both a random intercept and a random slope. However, we observe that LLMs interpret this speicification literally as a random slope only. This suggests the gap between the latest models and human analysts in specialized statistical knowledge. Across the validation process, the LLM agent successfully corrects a range of implementation issues, including errors caused by overflowing comments and other syntax issues. However, we also observe challenges in data reshaping tasks when the transformation requires changes in the unit of analysis. In the study, some teams decide to transform the data from the original aggregated player-referee dyad-level format to game-level format. This transformation requires disaggregating aggregated outcome counts (win, loss, and draw) into individual game records, changing the unit of analysis from dyads to matches. We also observe some difficulties in parsing birth dates. Since the LLM does not have access to the underlying raw data, due to privacy constraint, it must rely on trial and error when inferring the correct date formats (“DD-MM-YYYY.”). This suggests that certain types of data analysis tasks may not be fully automatable in settings where the model cannot directly inspect the data, even if the data is theoretically available for computation.
 
 # Appendix {.unnumbered}
 
-## Built-in prompts {#app-prompt}
+## Built-in prompts {#app-prompt .unnumbered}
 
 :::{.callout-note}
 
