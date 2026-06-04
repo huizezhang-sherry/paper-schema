@@ -25,10 +25,11 @@ author:
       - name: University of Texas at Austin
         department: Department of Statistics and Data Sciences
 abstract: |
-  This is the abstract. It should be no more than 250 words and should not contain any references or displayed equations. The abstract should be a single paragraph and should not be subdivided into sections. The abstract should provide a concise summary of the paper, including the motivation, methods, results, and conclusions.
+  
+  Current reproducibility practices make it possible to regenerate computational results, but they do not necessarily make data analyses easier to understand. Readers seeking to comprehend an analysis must often reconstruct the sequence of analytical decisions from information scattered across manuscripts, supplementary materials, and code scripts. Exploring alternative analytical choices is even more challenging, as it requires understanding and modifying code that may be unfamiliar or difficult to interpret. To address these challenges, we propose a schema that represents data analyses as a structured sequence of analytical decisions, together with their inputs, outputs, and rationale. Coupled with large language models (LLMs), the schema can be derived from textual descriptions of analyses and used to generate executable code. The structured representation also facilitates the exploration of alternative analytical choices, either automatically proposed by the LLM or explicitly specified by the user, enabling the generation and comparison of multiple analytical workflows. We demonstrate the proposed framework using the Many-Analysts Football Study, where analytical decisions are extracted from published reports, translated into the schema, and used to generate and validate corresponding analysis scripts.
 keywords:
-  - 3 to 6 keywords
-  - that do not appear in the title
+  - Reproducibility
+  - Large Language Models (LLMs)
 bibliography: bibliography.bib  
 ---
 
@@ -46,7 +47,7 @@ library(broom.mixed)
 Reporting the sequence of steps and decisions taken in a data analysis is a crucial part of presenting evidence in publications for new scientific discoveries. Modern data analyses have grown in complexity, with data coming from multiple sources and are potential spatial, temporal, and multivariate nature. To ensure the reproducibility of reported results, good practices are advocated to make code scripts publicly available or adopt literate programming techniques. To this date, reproducibility checks by the journals have been a standard screening process in the publication pipeline in statistics. 
 
 
-One implicit assumption the current practices operates under is that an analysis becomes reproducible, hence understandable, once all the reproducible materials are made available. Specifically, understandable implies that an independent researcher should be able to, without much difficulty, track the steps that have been done on the data and understand why each step was taken. In practice, however, reconstructing an analysis is rarely straightfoward. Instead, it is often a frustrating cycle of trial and error, hitting failure points with little feedback on when things go wrong. Part of the reason is that the two media (manuscripts and code scripts) serve different communication goals. A manuscript is a curated narrative designed to present new scientific discoveries, rather than an algorithmic log of the data analysis workfllow. Code scripts, on the other hand, show all the computational details but don't inherently carry the underlying scientific rationale behind each step. Additionally, code scripts reflect author's choice of pragramming language, personal coding style, and customized abstractions built to streamline repetitive analytical tasks. These all create obstables for readers attempting to parse the code and hinder their ability to confidently modify or extend the analysis. 
+One implicit assumption the current practices operate under is that an analysis becomes reproducible, hence understandable, once all the reproducible materials are made available. Specifically, understandable implies that an independent researcher should be able to, without much difficulty, track the steps that have been done on the data and understand why each step was taken. In practice, however, reconstructing an analysis is rarely straightfoward. Instead, it is often a frustrating cycle of trial and error, hitting failure points with little feedback on when things go wrong. Part of the reason is that the two media (manuscripts and code scripts) serve different communication goals. A manuscript is a curated narrative designed to present new scientific discoveries, rather than an algorithmic log of the data analysis workflow. Code scripts, on the other hand, show all the computational details but don't inherently carry the underlying scientific rationale behind each step. Additionally, code scripts reflect author's choice of programming language, personal coding style, and customized abstractions built to streamline repetitive analytical tasks. These all create obstacles for readers attempting to parse the code and hinder their ability to confidently modify or extend the analysis. 
 
 <!-- comprehend why alternative analytical paths were discarded -->
 
@@ -65,11 +66,44 @@ The paper is organized as follows. In @sec-lit-review, we review the relevant li
 
 # Literature review {#sec-lit-review}
  
-## Communication of data analysis and reproducibility
+## Reproducibility and communication of data analysis
 
-## Agentic data science
+<!-- * Science and replication
+
+* reproduciblity crisis, advocates for reproducibility [@Peng2011]
+
+* have been a central development in statistical research, brings in open access platform for data and code storage, e.g. GitHub, FigShare, Open Science Framework (OSF) among others
+
+* brings literal programming tools such as Sweave, R Markdown, Jupyter notebook, and the latest Quarto. 
+
+* these standards also get incorporated into jounral submission [@Peng2011] through data and code availability requirement. The journal of American Statistical Association has an associate editor of reproducibility and an reproducibility award to implement the standard for inclusion of code and data along with publication [@jasa]. These implementations have also been seen in other domains for example epidemiology [@Ioannidis et al., 2005], psychology and political science. 
+
+* These implementations have set the standard and examples for reproducibility practices in academia. While how each domain adopts these practices varies, recent meta research has shown the greate improvement across domains. 
+
+* While replicability and reproducibility emphasize the analysis can be machine-reproducible, another aspect focus rather on comprehension. 
+
+Scientific analyses increasingly rely on complex computational workflows that are difficult to convey through manuscripts alone. [provenance literature; exploratory data analysis as an iterative workflow that are not fully captured in traditional publications. ]
+
+As Donald Knuth (1984) said 
+
+> Instead of imagining that our main task is to instruct a computer what to do, let us concentrate rather on explaining to human beings what we want a computer to do.
+
+and also from Harold Abelson and Gerald Sussman in Structure and Interpretation of Computer Programs:
+
+> Programs must be written for people to read, and only incidentally for machines to execute. 
+
+Code is an execution artifact rather than an optimal communication medium. -->
 
 
+The reproducibility movement has been a major development in modern scientific research, motivated in part by concerns regarding the replication of published findings and the increasing reliance on computational methods across disciplines. In statistics, advocates of reproducible research argue that scientific claims should be accompanied by the data and code necessary to regenerate reported results [@peng_reproducible_2011]. This movement has led to the adoption of platforms for hosting research artifacts, including GitHub, Figshare, Open Science Framework (OSF), and Zenodo. Literate programming tools such as Sweave [@Leisch2002], R Markdown [@knitr], Jupyter Notebooks [@jupyter], and Quarto [@Allaire_Quarto_2026], have further promotes the integration of narrative and computation within a single document. These practices have increasingly been incorporated into journal policies through data and code availability requirements. For example, the *Journal of the American Statistical Association* introduced an associate editor for reproducibility and a reproducibility award to encourate and recognize these practices [@wrobel_partnering_2024]. Similar requirements have emerged across disciplines and have continued to improve the reproducibility of published research [@kohler_read_2026; @xu_scaling_2026].
+
+While these developments have improved the ability to reproduce computational results, they are not designed to make analyses easier to understand. Reproducibility concerns whether a result can be regenerated given the data, code, and computational environment, whereas comprehension concerns whether the audience can reconstruct the analytical decisions made by the authors, understand the rationale behind those decisions, and confidently modify the code to explore alternative choices. This distinction becomes increasingly important as data analyses grow in complexity. Decisions related to data preprocessing and exploratory data analysis are often reported only briefly in manuscripts and left as technical details for readers to infer from supplementary materials. Many decisions are not made in a linear fashion but emerge through an iterative process [@zhang_inside_2025; @jun2022hypothesis; @jun2022], and it is not entirely clear how this iterative nature of data analysis can be communicated. Making changes to an existing script can often be difficult because analytical decisions are intertwined with implementation details, project-specific abstractions, and dependencies across different parts of the workflow, requiring readers to consider how modifications propagate through upstream and downstream components. As a result, readers seeking to understand, modify, or extend an analysis must often reconstruct the underlying rationale by piecing together information scattered across manuscripts, code scripts, and supplementary materials.
+
+## Large Language Models for Data Analysis
+
+Advances in Large Language Models (LLMs) have led to widespread use of these systems for code generation tasks, including code completion and program repair [@jiang2026survey; @shah_automating_2026]. Early work on code-oriented LLMs demonstrated strong capabilities in translating natural language descriptions into executable programs, with models such as Codex achieving substantial improvements on benchmark programming tasks [@chen2021codex; @lai_ds1000_2023; @huang_executionbased_2022]. These capabilities have led to broad adoption of coding assistants thorugh web interfaces, APIs adn integrated development environments. In the R ecosystem, packages such as `ellmer` [@ellmer], `chatLLM` [@chatLLM], and `LLMAgentR` [@LLMAgentR] provides increasingly accessible interfaces for access to latest LLM models. 
+
+Building on these advances, recent work explores fully automated systems that use multiple LLM agents to plan, generate, execute, and refine data analyses [@jansen2025; @hu_automated_2024]. Our work relies on the same underlying capability of translating analytical specifications into code, but differs in its view of what should be automated. Data analysis is often underdetermined, with many plausible choices regarding data preprocessing, transformation, aggregation, and model specification [@gao_nonstandard_2026; @bertran_many_2026; @luo_can_2025], by contrast, once these analytical decisions have been specified, translating them into executable code is often a comparatively straightforward task. This distinction motivates our focus on representing analytical decisions explicitly and using LLMs to translate those decisions into code.
 
 # Methodology {#sec-method}
 

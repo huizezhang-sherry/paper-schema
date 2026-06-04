@@ -176,7 +176,7 @@
 \hypersetup{
   pdftitle={Title},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
-  pdfkeywords={3 to 6 keywords, that do not appear in the title},
+  pdfkeywords={Reproducibility, Large Language Models (LLMs)},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -195,7 +195,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\date{June 1, 2026}
+\date{June 3, 2026}
 \title{\bf Title}
 \author{
 H. Sherry Zhang\\
@@ -210,15 +210,30 @@ Austin\\
 \bigskip
 \bigskip
 \begin{abstract}
-This is the abstract. It should be no more than 250 words and should not
-contain any references or displayed equations. The abstract should be a
-single paragraph and should not be subdivided into sections. The
-abstract should provide a concise summary of the paper, including the
-motivation, methods, results, and conclusions.
+Current reproducibility practices make it possible to regenerate
+computational results, but they do not necessarily make data analyses
+easier to understand. Readers seeking to comprehend an analysis must
+often reconstruct the sequence of analytical decisions from information
+scattered across manuscripts, supplementary materials, and code scripts.
+Exploring alternative analytical choices is even more challenging, as it
+requires understanding and modifying code that may be unfamiliar or
+difficult to interpret. To address these challenges, we propose a schema
+that represents data analyses as a structured sequence of analytical
+decisions, together with their inputs, outputs, and rationale. Coupled
+with large language models (LLMs), the schema can be derived from
+textual descriptions of analyses and used to generate executable code.
+The structured representation also facilitates the exploration of
+alternative analytical choices, either automatically proposed by the LLM
+or explicitly specified by the user, enabling the generation and
+comparison of multiple analytical workflows. We demonstrate the proposed
+framework using the Many-Analysts Football Study, where analytical
+decisions are extracted from published reports, translated into the
+schema, and used to generate and validate corresponding analysis
+scripts.
 \end{abstract}
 
 \noindent%
-{\it Keywords:} 3 to 6 keywords, that do not appear in the title
+{\it Keywords:} Reproducibility, Large Language Models (LLMs)
 \vfill
 
 \newpage
@@ -237,7 +252,7 @@ publicly available or adopt literate programming techniques. To this
 date, reproducibility checks by the journals have been a standard
 screening process in the publication pipeline in statistics.
 
-One implicit assumption the current practices operates under is that an
+One implicit assumption the current practices operate under is that an
 analysis becomes reproducible, hence understandable, once all the
 reproducible materials are made available. Specifically, understandable
 implies that an independent researcher should be able to, without much
@@ -249,12 +264,12 @@ when things go wrong. Part of the reason is that the two media
 (manuscripts and code scripts) serve different communication goals. A
 manuscript is a curated narrative designed to present new scientific
 discoveries, rather than an algorithmic log of the data analysis
-workfllow. Code scripts, on the other hand, show all the computational
+workflow. Code scripts, on the other hand, show all the computational
 details but don't inherently carry the underlying scientific rationale
 behind each step. Additionally, code scripts reflect author's choice of
-pragramming language, personal coding style, and customized abstractions
+programming language, personal coding style, and customized abstractions
 built to streamline repetitive analytical tasks. These all create
-obstables for readers attempting to parse the code and hinder their
+obstacles for readers attempting to parse the code and hinder their
 ability to confidently modify or extend the analysis.
 
 Hence, a gap still exists between an analysis being machine replicable
@@ -294,10 +309,85 @@ and potential future directions.
 
 \section{Literature review}\label{sec-lit-review}
 
-\subsection{Communication of data analysis and
-reproducibility}\label{communication-of-data-analysis-and-reproducibility}
+\subsection{Reproducibility and communication of data
+analysis}\label{reproducibility-and-communication-of-data-analysis}
 
-\subsection{Agentic data science}\label{agentic-data-science}
+The reproducibility movement has been a major development in modern
+scientific research, motivated in part by concerns regarding the
+replication of published findings and the increasing reliance on
+computational methods across disciplines. In statistics, advocates of
+reproducible research argue that scientific claims should be accompanied
+by the data and code necessary to regenerate reported results
+\citep{peng_reproducible_2011}. This movement has led to the adoption of
+platforms for hosting research artifacts, including GitHub, Figshare,
+Open Science Framework (OSF), and Zenodo. Literate programming tools
+such as Sweave \citep{Leisch2002}, R Markdown \citep{knitr}, Jupyter
+Notebooks \citep{jupyter}, and Quarto \citep{Allaire_Quarto_2026}, have
+further promotes the integration of narrative and computation within a
+single document. These practices have increasingly been incorporated
+into journal policies through data and code availability requirements.
+For example, the \emph{Journal of the American Statistical Association}
+introduced an associate editor for reproducibility and a reproducibility
+award to encourate and recognize these practices
+\citep{wrobel_partnering_2024}. Similar requirements have emerged across
+disciplines and have continued to improve the reproducibility of
+published research \citep{kohler_read_2026, xu_scaling_2026}.
+
+While these developments have improved the ability to reproduce
+computational results, they are not designed to make analyses easier to
+understand. Reproducibility concerns whether a result can be regenerated
+given the data, code, and computational environment, whereas
+comprehension concerns whether the audience can reconstruct the
+analytical decisions made by the authors, understand the rationale
+behind those decisions, and confidently modify the code to explore
+alternative choices. This distinction becomes increasingly important as
+data analyses grow in complexity. Decisions related to data
+preprocessing and exploratory data analysis are often reported only
+briefly in manuscripts and left as technical details for readers to
+infer from supplementary materials. Many decisions are not made in a
+linear fashion but emerge through an iterative process
+\citep{zhang_inside_2025, jun2022hypothesis, jun2022}, and it is not
+entirely clear how this iterative nature of data analysis can be
+communicated. Making changes to an existing script can often be
+difficult because analytical decisions are intertwined with
+implementation details, project-specific abstractions, and dependencies
+across different parts of the workflow, requiring readers to consider
+how modifications propagate through upstream and downstream components.
+As a result, readers seeking to understand, modify, or extend an
+analysis must often reconstruct the underlying rationale by piecing
+together information scattered across manuscripts, code scripts, and
+supplementary materials.
+
+\subsection{Large Language Models for Data
+Analysis}\label{large-language-models-for-data-analysis}
+
+Advances in Large Language Models (LLMs) have led to widespread use of
+these systems for code generation tasks, including code completion and
+program repair \citep{jiang2026survey, shah_automating_2026}. Early work
+on code-oriented LLMs demonstrated strong capabilities in translating
+natural language descriptions into executable programs, with models such
+as Codex achieving substantial improvements on benchmark programming
+tasks \citep{chen2021codex, lai_ds1000_2023, huang_executionbased_2022}.
+These capabilities have led to broad adoption of coding assistants
+thorugh web interfaces, APIs adn integrated development environments. In
+the R ecosystem, packages such as \texttt{ellmer} \citep{ellmer},
+\texttt{chatLLM} \citep{chatLLM}, and \texttt{LLMAgentR}
+\citep{LLMAgentR} provides increasingly accessible interfaces for access
+to latest LLM models.
+
+Building on these advances, recent work explores fully automated systems
+that use multiple LLM agents to plan, generate, execute, and refine data
+analyses \citep{jansen2025, hu_automated_2024}. Our work relies on the
+same underlying capability of translating analytical specifications into
+code, but differs in its view of what should be automated. Data analysis
+is often underdetermined, with many plausible choices regarding data
+preprocessing, transformation, aggregation, and model specification
+\citep{gao_nonstandard_2026, bertran_many_2026, luo_can_2025}, by
+contrast, once these analytical decisions have been specified,
+translating them into executable code is often a comparatively
+straightforward task. This distinction motivates our focus on
+representing analytical decisions explicitly and using LLMs to translate
+those decisions into code.
 
 \section{Methodology}\label{sec-method}
 
@@ -729,14 +819,14 @@ the transformation requires changes in the unit of analysis. In the
 study, some teams decide to transform the data from the original
 aggregated player-referee dyad-level format to game-level format. This
 transformation requires disaggregating aggregated outcome counts (win,
-loss, draw) into individual game records, changing the unit of analysis
-from dyads to matches. We also observe some difficulties in parsing
-birth dates. Since the LLM does not have access to the underlying raw
-data, due to privacy constraint, it must rely on trial and error when
-inferring the correct date formats (``DD-MM-YYYY.''). This suggests that
-certain types of data analysis tasks may not be fully automatable in
-settings where the model cannot directly inspect the data, even if the
-data is theoretically available for computation.
+loss, and draw) into individual game records, changing the unit of
+analysis from dyads to matches. We also observe some difficulties in
+parsing birth dates. Since the LLM does not have access to the
+underlying raw data, due to privacy constraint, it must rely on trial
+and error when inferring the correct date formats (``DD-MM-YYYY.'').
+This suggests that certain types of data analysis tasks may not be fully
+automatable in settings where the model cannot directly inspect the
+data, even if the data is theoretically available for computation.
 
 \section*{Appendix}\label{appendix}
 \addcontentsline{toc}{section}{Appendix}
@@ -744,7 +834,7 @@ data is theoretically available for computation.
 \subsection*{Built-in prompts}\label{app-prompt}
 \addcontentsline{toc}{subsection}{Built-in prompts}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacityback=0, bottomrule=.15mm, coltitle=black, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, colback=white, breakable, arc=.35mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, bottomtitle=1mm, leftrule=.75mm, opacityback=0, coltitle=black, colback=white, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, breakable, colframe=quarto-callout-note-color-frame, left=2mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, arc=.35mm, rightrule=.15mm, colbacktitle=quarto-callout-note-color!10!white]
 
 \begin{verbatim}
 You are an expert methodologist and data pipeline architect. I will
@@ -812,7 +902,7 @@ NA
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacityback=0, bottomrule=.15mm, coltitle=black, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, colback=white, breakable, arc=.35mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, bottomtitle=1mm, leftrule=.75mm, opacityback=0, coltitle=black, colback=white, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, breakable, colframe=quarto-callout-note-color-frame, left=2mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, arc=.35mm, rightrule=.15mm, colbacktitle=quarto-callout-note-color!10!white]
 
 \begin{verbatim}
 You are an expert R programmer. Attached is a text document
@@ -829,7 +919,7 @@ start with markdown formatting blocks (like ```R) or backticks.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacityback=0, bottomrule=.15mm, coltitle=black, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, colback=white, breakable, arc=.35mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, bottomtitle=1mm, leftrule=.75mm, opacityback=0, coltitle=black, colback=white, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, breakable, colframe=quarto-callout-note-color-frame, left=2mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, arc=.35mm, rightrule=.15mm, colbacktitle=quarto-callout-note-color!10!white]
 
 \begin{verbatim}
 You are an expert R developer and automated debugging agent. The user
@@ -854,7 +944,7 @@ character must be R code.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacityback=0, bottomrule=.15mm, coltitle=black, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, colframe=quarto-callout-note-color-frame, colback=white, breakable, arc=.35mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, bottomtitle=1mm, leftrule=.75mm, opacityback=0, coltitle=black, colback=white, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, breakable, colframe=quarto-callout-note-color-frame, left=2mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, arc=.35mm, rightrule=.15mm, colbacktitle=quarto-callout-note-color!10!white]
 
 \begin{verbatim}
 You are an expert Data Analyst and Methodologist. You are reviewing
