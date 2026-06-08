@@ -11,7 +11,7 @@
 <meta name="dcterms.date" content="2026-06-08">
 <meta name="keywords" content="Reproducibility, Large Language Models (LLMs), Data analysis">
 
-<title>Title</title>
+<title>Code availability is not enough: A schema-based representation for comprehensible and extensible data analysis</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -129,7 +129,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Title</h1>
+<h1 class="title">Code availability is not enough: A schema-based representation for comprehensible and extensible data analysis</h1>
 </div>
 
 
@@ -244,11 +244,11 @@ A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_
 <li>Combine the two education variables (expected years of schooling and mean years of schooling) into a single education variable.</li>
 <li>Combine the three dimensions (health, education, and income) into a single index using a geometric mean.</li>
 </ol>
-<p>In Step 3, the objective is to combine the three dimensions. While a simple arithmetic mean could be an alternative decision to fulfill this goal, the geometric mean (the decision) is chosen because it penalizes uneven development among the three dimensions (the justification). The full schema for constructing HDI is presented in <a href="#lst-schema" class="quarto-xref">Listing&nbsp;1</a>:</p>
+<p>In Step 3, the objective is to combine the three dimensions. While a simple arithmetic mean could be an alternative decision to fulfill this goal, the geometric mean (the decision) is chosen because it penalizes uneven development among the three dimensions (the justification). The full schema for constructing HDI is presented in <a href="#lst-schema" class="quarto-xref">Listing&nbsp;1</a>.</p>
 <div id="lst-schema" class="listing quarto-float quarto-figure quarto-figure-left anchored">
 <figure class="quarto-float quarto-float-lst figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-schema-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Listing&nbsp;1: An example schema for calculating Human Development Index (HDI).
+Listing&nbsp;1: An example schema for calculating Human Development Index (HDI)
 </figcaption>
 <div aria-describedby="lst-schema-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <pre><code>meta:
@@ -257,15 +257,18 @@ nodes:
 - tag: step-scaling
   objective: how to handle variables in different scales?
   decision: apply min-max scaling to each variable 
-  rationale: to convert the variables to the same scale for future construction of a single index
+  rationale: to convert the variables to the same scale for future 
+    construction of a single index
 - tag: step-education
   objective: how to combine the two education-related variables?
   decision: take the average
-  rationale: the arithmetic mean allows perfect substitutability between the two variables
+  rationale: the arithmetic mean allows perfect substitutability 
+    between the two variables
 - tag: step-combine
   objective: how to combine the three dimensions into a single index?
   decision: use the geometric mean
-  rationale: the geometric mean penalizes uneven development among the three core dimensions</code></pre>
+  rationale: the geometric mean penalizes uneven development 
+    among the three core dimensions</code></pre>
 </div>
 </figure>
 </div>
@@ -315,8 +318,7 @@ Figure&nbsp;1: Overview of the schema-driven analysis workflow. Schemas can be a
 </section>
 <section id="usage" class="level2" data-number="3.4">
 <h2 data-number="3.4" class="anchored" data-anchor-id="usage"><span class="header-section-number">3.4</span> Usage</h2>
-<p>From an author’s perspective: provide it as part of the supplementary materials - verify the results through LLM.</p>
-<p>from a reader’s perspective: having the schema would allow easier exploration of the alternatives, modify code also involves modifying upstream and downstream code, LLM allows it to be automated.</p>
+<p>The schema workflow is useful for both readers and authors of a paper. From the reader’s perspective, the schema makes it easier to explore alternatives of an analysis through natural language interaction. In addition, modifying a code script typically requires coordinating changes across upstream and downstream components, the proposed workflows enables such code generation to be automated with LLMs. From an author’s perspective, the schema can be included in the supplementary materials, where it serves to document the data analysis workflow in a procedural but descriptive manner.</p>
 </section>
 </section>
 <section id="sec-application" class="level1" data-number="4">
@@ -382,10 +384,13 @@ alternatives:
     path: "a random effect of player and referee"
     rationale: ""
   - id: "gm2"
-    path: "a random effect of player and referee, and a random effect of skin-tone across referees"
+    path: "a random effect of player and referee, and a random effect 
+      of skin-tone across referees"
     rationale: ""
   - id: "gm3"
-    path: "a random effect of player, referee, and referees' countries of origin, and a random effect of skin tone across referees' countries of origin"
+    path: "a random effect of player, referee, and referees' countries
+       of origin, and a random effect of skin tone across referees'
+      countries of origin"
     rationale: ""</code></pre>
 </div>
 </figure>
