@@ -196,7 +196,7 @@ analysis},
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\date{June 4, 2026}
+\date{June 8, 2026}
 \title{\bf Title}
 \author{
 H. Sherry Zhang\\
@@ -399,61 +399,56 @@ analysis}\label{a-schema-for-describing-data-analysis}
 
 We represent a data analysis,
 \(\mathcal{S} = \{A_1, A_2, \cdots, A_n\}\), as a sequence of \(n\)
-analytical step, \(A_i\), applied to a dataset \(\mathcal{D}\), where
-each step \(A_i\) is defined as a tuple:
+analytical step \(A_i\), applied to a dataset \(\mathcal{D}\), where
+each step, \(A_i\), is defined as a tuple:
 
 \begin{equation}
 A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
 \end{equation}
 
-The components of \(A_i\) are partitioned into a required triplet
-\((f_{i}, \pi_{i}, r_{i})\) and a set of optional components
+The components of \(A_i\) can be partitioned into two parts: a required
+triplet \((f_{i}, \pi_{i}, r_{i})\) and an optional triplet
 \((\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})\). The first component
-of the triplet, \(f_{i} \in \mathcal{F}\), defines the
-\textbf{objective} of a data analysis step that invites multiple
-justifiable approaches. The second component, \(\pi_{i} \in \Pi\),
-represents the data analysis \textbf{decision} made to achieve the
-objective \(f_{i}\), which can be read from both the manuscript and from
-the code script. The term \(r_{i}\) is the \textbf{justification}
-provided for choosing the decision \(\pi_{i}\). This field is usually
-provided in the manuscript but not the code script to show the
-scientific intent of the step. As an example, consider the three steps
-involved in calculating the Human Development Index (HDI):
+of the triplet, \(f_{i} \in \mathcal{F}\) is the \emph{objective} of a
+step. The second component, \(\pi_{i} \in \Pi\), represents the specific
+\emph{decision} made to achieve the objective \(f_{i}\) and the term
+\(r_{i}\) is the \emph{justification} provided for choosing the decision
+\(\pi_{i}\). Structuring this information into a schema involves
+defining the three components described above for each step. While the
+decision (what has been done) and the justification (why it is done) are
+generally clear, the objective requires identifying what the step is
+trying to achieve. In other words, it represents the broader goal that
+could potentially be fulfilled through other alternative choices
+(formally introduced in Section~\ref{sec-alternative}). As an example,
+consider the description for calculating the Human Development Index
+(HDI):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
 \tightlist
 \item
   Scale all four variables (life expectancy, expected years of
-  schooling, mean years of schooling, and GNI per capita) to a {[}0,
-  1{]} range using their corresponding upper and lower limits.
+  schooling, mean years of schooling, and GNI per capita) to the {[}0,
+  1{]} range.
 \item
-  Combine the two education-related variables (expected years of
-  schooling and mean years of schooling) into a single education
-  variable.
+  Combine the two education variables (expected years of schooling and
+  mean years of schooling) into a single education variable.
 \item
-  Combine the three core dimensions (health, education, and income) into
-  a single index using a geometric mean.
+  Combine the three dimensions (health, education, and income) into a
+  single index using a geometric mean.
 \end{enumerate}
 
-Structuring this information into a schema is involves defining the
-objective, decision, and justification for each step. While the decision
-(what is to be done) and the justification (why it is done) are
-generally clear, the objective requires identifying what the step is
-trying to achieve. In other words, it represents the broader goal that
-could potentially be met through alternative methods (formally
-introduced in Section~\ref{sec-alternative} ). For instance, in step 3,
-the objective is to combine the three dimensions. While a simple
-arithmetic mean could be an alternative solution for this goal, the
-geometric mean is specifically chosen because it penalizes uneven
-development among the three dimensions---this reasoning forms the
-justification. This process results in the basic schema shown in
+In Step 3, the objective is to combine the three dimensions. While a
+simple arithmetic mean could be an alternative decision to fulfill this
+goal, the geometric mean (the decision) is chosen because it penalizes
+uneven development among the three dimensions (the justification). The
+full schema for constructing HDI is presented in
 Listing~\ref{lst-schema}:
 
 \begin{codelisting}
 
-\caption{\label{lst-schema}An example schema that specifies the steps in
-calculating Human Development Index (HDI).}
+\caption{\label{lst-schema}An example schema for calculating Human
+Development Index (HDI).}
 
 \centering{
 
@@ -481,46 +476,48 @@ nodes:
 
 On the optional components of a data analysis step \(A_i\), the
 operational flow of the analysis is governed by the input and output
-spaces, \(\mathcal{I}_{i}\) and \(\mathcal{O}_{i}\), once a dataset is
-provided. While the output of a step can be a pseudo object that not
-currently exist, the inputs for any given step must be within the
-existing data scope, comprising variables in the original dataset and
-all outputs from previous steps. Formally, we require:
+spaces, \(\mathcal{I}_{i}\) and \(\mathcal{O}_{i}\) respectively, once a
+dataset is provided. While the output of a step can be a pseudo object
+that not currently exist in the dataset, the inputs for any given step
+must be within the existing data scope, comprising variables in the
+original dataset and all outputs from previous steps. Formally, we
+require:
 
 \[\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j < i} \mathcal{O}_{j} \right), \quad \forall i \in \{2, \dots, n\}.\]
 
-A schema can also be automatically extracted by Large Language Models
-(LLMs) from text. If a dataset is provided, the inputs and outputs will
-also automatically inferred during the extraction. We also introduce a
-categorical confidence score, \(\omega_{i}\) (low, medium, high) that
-can be useful in case when the source text is ambiguous to guide the LLM
-to ask for clarification to consolidate the schema extraction.
+When the schema is extracted automatically by Large Language Models
+(LLMs) from text, the inputs and outputs will be inferred by the LLMs,
+if a dataset is provided. We also introduce a categorical confidence
+score, \(\omega_{i}\) (low, medium, high) that can be useful in case
+when the source text is ambiguous to guide the LLM to ask for
+clarification to consolidate the schema extraction.
 
 \subsection{Describing alternatives}\label{sec-alternative}
 
-While one analysis represents a realized series of choices, alternatives
-can often be taken for to address the same objective, each with its own
-set of assumptions and implications. For each step \(i\) in the
-sequence, to fulfill each fork \(f_i\), there could be \(k_i\) decision
-choices to choose from:
-\(\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}\). We can define a
-selection vector \(r = (r_1, r_2, \dots, r_n)\), where
-\(r_i \in \{1, \dots, k_i\}\), to describe an analysis, comprised of
+At each step, one decision choice is made by the researchers to address
+an objective, however the choice is often not the only possible one. For
+step \(i\), there could be \(k_i\) decision choices that fulfill the
+objective \(f_i\): \(\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}\).
+We can define a selection vector \(r = (r_1, r_2, \dots, r_n)\), where
+\(r_i \in \{1, \dots, k_i\}\), to describe an analysis comprised of
 specific series of decisions:
 \(\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}\).
-A multiverse, used to describe the entire decision spae, is defined as
+A multiverse, used to describe the entire decision space, is defined as
 the Cartesian product of these sets:
 \(\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}\).
 The cardinality of this space, \(|\mathcal{M}| = \prod_{i=1}^n k_i\),
 quantifies the total number of unique, fully-specified analysis.
 
-Returning to the HDI example, in step 3, instead of a geometric mean, an
-arithmetic mean to combine the three dimensions into a single index. It
-may not be the best decisions, but still a plausible one to achieve the
-objective of this step. Listing~\ref{lst-alternatives} demonstrates how
-this single alternative is structured in an alternative YAML file.
-Additional alternatives can be specified by adding items to the
-\texttt{alternatives} list.
+Returning to the HDI example, in Step 3, instead of a geometric mean, an
+arithmetic mean is another possibility to combine the three dimensions
+into a single index. It may not be the best decision, but still a
+plausible one to derive a single index from the three dimensions, hence
+achieve the objective of this step. Listing~\ref{lst-alternatives} shows
+the structure of an alternative YAML file. The \texttt{meta} section
+identifies the file type (an alternative file rather than a schema file)
+and specifies the analysis step and the objective under consideration.
+Individual alternatives are defined as entries in the alternatives list,
+allowing multiple alternatives to be specified within a single file.
 
 \begin{codelisting}
 
@@ -548,27 +545,28 @@ alternatives:
 
 The overall workflow for schema-based data analysis is illustrated in
 Figure~\ref{fig-workflow}. A schema can be created either manually from
-a template or automatically generated by an LLM from a natural-language
+the template or automatically by an LLM from a natural-language
 manuscript. Once created, the schema serves as a structured
 specification that guides a second LLM in generating the code for the
-analysis. To improve reliability, our design include a third LLM agent
-responsible for code validation. While recent LLMs can generate
-reasonable code based on prompt, they do not consistently achieve
-perfect accuracy. The validation process runs the generated script in a
-sandbox environment and if an error occurs, the third LLM agent is
-invoked to diagnose the script. The validation agent receives the
-generated code together with the error message adn teh correponding line
-number produced during execution, and returns a fixed version of the
-script. The revised script is then re-executed in the sandbox. This
-cycle continues until the code runs successfully, a maximum number of
-attempt is reached, or the user terminates the process. As will be show
-in Section~\ref{sec-application}, this validation process resolves the
+analysis. To improve reliability, our design includes a third LLM agent
+which is responsible for code validation. While the latest LLMs can
+generate reasonable code based on prompt, they do not consistently
+achieve perfect accuracy. The validation process runs the generated
+script in a sandbox environment and if an error occurs, a third LLM
+agent will be employed to diagnose the script. The validation agent
+receives the generated code together with the error message and the
+correponding line number produced during the execution, and returns a
+newer version of the script. The revised script is then re-executed in
+the sandbox and this cycle continues until one of the three conditions
+is met: the code runs successfully, a maximum number of attempt is
+reached, or the user terminates the process. As will be show in
+Section~\ref{sec-application}, this validation process resolves the
 majority of R syntax issues encountered during data wrangling and
 statistical modelling tasks. On top of supporting a single analytical
 specification, the workflow also allows users to agument a schema with
 an alternative YAML file. This expands the original schema into a
-multiverse of parallel schemas, each representing a different set of
-decision choices. The same code generation and validation workflow is
+multiverse of parallel schemas, each representing a different sequence
+of decision choices. The same code generation and validation workflow is
 then applied independently to each schema, producing a corresponding set
 of validation scripts.
 
@@ -601,59 +599,62 @@ upstream and downstream code, LLM allows it to be automated.
 \section{Application: many-analysts football
 study}\label{sec-application}
 
-The many-analysts study posits fixed research questions on a fixed
-dataset and invites teams of researchers to analyze the problem with
-whatever software they're comfortable with. In \citet{silberzahn2018},
-one question is to answer whether soccer referees are more likely to
-give red cards to dark-skin-toned player than to light-skin-toned
-players. The provided dataset contains two raters' rating to the picture
-of players, the number of redcard received for each player/referee dyade
-out of the number of games, and a collection of player, referee, and
-game characteristics: player birthday, height, weight, player position,
+In this section, we apply our methodology to the many-analyst football
+by \citet{silberzahn2018} to reproduce the reported estimated effect
+size by each team. During this process, we identify some errors in the
+original reports and highlight failure modes of current LLMs.
+
+\citet{silberzahn2018} invites 29 research groups to conduct the same
+data analysis to answer the question whether soccer referees are more
+likely to give red cards to dark-skin-toned player than to
+light-skin-toned players. The provided dataset contains two raters' skin
+color rating to players' picture, the aggregated number of red card
+received by a player from a referee across all matches in that
+player-referee pair, and other relevant player, referee, and game
+characteristics: player birthday, height, weight, player position,
 league country, number of victories, ties, and defeats, and number of
-yellow and red cards received. Most groups take a modelling approach to
-estimate the effect of skin rating on the red card issued with varied
-distribution assumptions (linear, logistic, and poisson) and covariate
-choices as fixed and random effects. The study is comprised of an
-initial analysis conducted separately by each team, followed by a
-round-robin peer evaluation round, and then each group presents their
-final analysis after incorporating the feedback from the discussion and
-presents the results in a way they would in a published article with
-formal Method section. All the materials related to the study is
-publicly available on the Open Science Framework (OSF).
+yellow and red cards received. Most participating groups take a
+modelling approach to estimate the effect of skin rating on the red card
+issued with variation in distributional assumptions (linear, logistic,
+and poisson) and in the specification of fixed and random effects. In
+\citet{silberzahn2018}, each group first conducted an initial analysis
+separately, followed by a round-robin peer evaluation. Each group was
+then gave the opportunity to incorporate feedback from the discussion
+and submitted a final analysis as a report with a formal Method section.
+All the materials related to the study is publicly available on the Open
+Science Framework (OSF).
 
 From the report presented by each team, we can use LLM to convert the
-decisions into the schema designed and generate the corresponding coding
-script. From the write-up reports, we extract the sentences relevant to
-the decisions made in the final analysis by the team. This step is
-needed because the original skin rating is 1-5 but later changed to 0-1
-and also many teams report their initial analysis and how their final
-analysis modify on top of the initial analysis. We do this to avoid
-confusion on reading comprehension with LLM. For general methodology
-write-up, this step is not necessarily needed {[}TODO: write it
-better{]}.
+methodology description into the schema we propose and generate the
+corresponding code script. We observe that most reports are structured
+to first describe the initial data analysis and then the changes made in
+the final analysis. To avoid testing LLMs' ability to reconstruct how
+analysis steps are modified, overturned, or carried over from the intial
+to the final analysis, we extract the descriptions relevant to the final
+analysis.
 
-We send the text description of the extractetd decisions for LLM to
-generate the schema and the code script for each analysis. The code
-script is run by a separate LLM to validate for potential syntax errors.
-We manually in-place replace the \texttt{glm()} command with
-\texttt{fixest::feglm()} \citep{fixest} for generalized linear model and
-the \texttt{lme4::glmer()} \citep{lme4} function with
+We send the text description of each team for LLM to generate the schema
+and then generate the code script from the schema. The code script is
+run by a separate LLM to validate for potential syntax errors.
+
+To accelerate the evaluation of each script, we manually in-place
+replace the \texttt{glm()} command with \texttt{fixest::feglm()}
+\citep{fixest} for generalized linear model and the
+\texttt{lme4::glmer()} \citep{lme4} function with
 \texttt{glmmTMB::glmmTMB()} \citep{glmmTMB-1} for generalized mix-effect
-model to speed up the evaluation of eaach script. These two functions
-are in-place replacements of the classic functions for estimating the
-relevant model with implementation with multi-threading in C++
-\citep{fixest} and with Template Model Builder (TMB) \citep{glmmTMB-2}
-for better performance. This replacement should not affect the
-estimation of the effect size. All the LLM-related simulations are
-conducted with claude-opus-4.5.
+model after the scripts are generated but before the validation. These
+two functions are in-place replacements of the standard functions for
+estimating the relevant model with multi-threading in C++ \citep{fixest}
+and Template Model Builder (TMB) \citep{glmmTMB-2} for better
+performance. This replacement should not affect the estimation of the
+effect size. All the LLM-related simulations are conducted with
+claude-opus-4.5.
 
-In the validation phase, all team scripts were successfully executed.
-Notably, 10\% of the scripts (n = 2) yielded successful results without
-requiring any automated syntax corrections by the validator, whereas the
-vast majority (90\%) reached completion after two or three iterations.
-The most frequent correction involved resolving broken and overflow
-syntax in comments.
+Across the 25 teams we reproduce, all team scripts were successfully
+executed after the validation phase. Notably, two scripts run
+successfully without any validation whereas the vast majority reached
+completion after two or three iterations. The most frequent correction
+involved resolving broken and overflow syntax in comments.
 
 \begin{figure}
 
@@ -674,37 +675,36 @@ Team 1, 9, 15, 21, 23, and 27.}
 
 \end{figure}%
 
-Figure~\ref{fig-res-updated} shows the agreement of the estimated effect
-size, in odd ratio, from our experiments (simulated) and the published
-effect size in \citet{silberzahn2018} (published). For most teams, the
-simulation successfully recovers the odd ratio reported by each analyst
-team, larger variations are seen in the following teams: Team 1, 9, 15,
-21, 23, and 27. Here we listed the reasons for these discrepencies upon
-investigation:
+Figure~\ref{fig-res-updated} shows the comparison of the estimated
+effect size, in odd ratio, from our workflow (simulated) and those
+reported in \citet{silberzahn2018} (published). Our workflow
+successfully recovers the odd ratio reported in most teams, although
+larger variation is observed in the following teams: Team 1, 9, 15, 21,
+23, and 27. We further investigate the reports and generated scripts for
+these teams and find that the discrepancy arises from a combination of
+ambiguities from the report and LLM's accuracy.
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Team 27}: the diffference comes from the ambiguity of the
-  method description, the final approach sections says \emph{In addition
-  to the independent variables specified in the initial approach
-  (skin-tone rating, goals scored, games played, yellow cards, and mean
-  explicit and implicit bias) a variable for player position was
-  included, as well as a variable for the league of the player.} The
-  author is intended to include the interaction effect of rating and
-  position/ league country as other variables in the initial approach,
-  but the LLM interprets it as only include the main effects. This error
-  can be easily caught by comparing the reproducible script provided by
-  the author.
+  \textbf{Team 27}: the difference comes from the ambiguity of the
+  method description, the authors state that ``In addition to the
+  independent variables specified in the initial approach, \ldots{} a
+  variable for player position was included, as well as a variable for
+  the league of the player.'' This description could be interpreted as a
+  shorthand for extending the model with the interaction of additional
+  covariates as how other covariates enters the mdoel in the initial
+  approach, but the LLM adopts a literal interpretation with only the
+  main effect.
 \item
-  \textbf{Team 9}: the authors mistake player country for referee
-  country in the text description, but their parameter estimation table
-  suggests they are using player country (countryCode - Germany: France)
-  instead.
+  \textbf{Team 9}: the authors describe ``referee country'' in the text
+  as a covariate for the model, but the reported estimation table
+  suggests they use ``player country'' instead.
 \item
-  \textbf{Team 23 and 1}: the discrepency comes from the LLM fails to
-  properly reshape the data from a player-referee dyad per observation
-  to per game observation. The schema properly identifies this step but
+  \textbf{Team 1 and 23}: the discrepency comes from the LLM fails to
+  properly reshape the data from player-referee pair level to game
+  level, which requires disaggregate the win, loss, and draw count into
+  individual game records. The schema properly identifies this step but
   the generated code doesn't execute this step properly and create a
   silent error with the validator.
 \item
@@ -713,24 +713,29 @@ investigation:
   script). In SPSS, the factor variables are estimated with effect
   coding, where the coefficients are compared to the grand mean, rather
   than to the reference group (dummy coding) in R. After changing the
-  \texttt{contrast} options, we obtain the reported odd ratio.
+  \texttt{contrast} option in R, we obtain the reported odd ratio.
 \end{itemize}
 
 \subsection{Exploring alternatives}\label{exploring-alternatives}
 
-To demonstrate the functionality for specifying alternatives in Section
-3.2, we use Group 5 from the football study above as an example. Group 5
-uses a binomial generalized linear mixed model (GLMM) to estimate the
-effect of skin tone rating on the number of red cards received using a
-logit link function:
+During the modelling process, researchers may consider a range of
+alternative specifications, such as different covariate and random
+effects structures, before arriving at a final model. This can be seen
+as a set of alternative decisions within the same modelling step, which
+fits naturally into the schema workflow described in
+Section~\ref{sec-alternative}. As an example, we use Team 5 for the
+above football study to demonstrate the use case. Team 5 uses a binomial
+generalized linear mixed model (GLMM) to estimate the effect of skin
+tone rating on the number of red cards received using a logit link
+function, but tests different random effect structures:
 
 \begin{align*}
 \textbf{Model 1 (gm1):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{k} \\
 u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}) \\[1.5em]
 \textbf{Model 2 (gm2):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{0k} + v_{1k} X_{ijk} \\
-u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad \mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right) \\[1.5em]
+u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad \mathbf{v}_{k} \sim N\left(\mathbf{0}, \boldsymbol{\Sigma}_{\text{ref}}\right) \\[1.5em]
 \textbf{Model 3 (gm3):} \quad \text{logit}(p_{ijkm}) &= \beta_0 + \beta_1 X_{ijkm} + u_{j} + v_{k} + w_{0m} + w_{1m} X_{ijkm} \\
-u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}), \quad \mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)
+u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}), \quad \mathbf{w}_{m} \sim N\left(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}}\right)
 \end{align*}
 
 where \(p\) denotes the probability of a player receiving a red card,
@@ -739,26 +744,32 @@ and \(X\) represents the player's skin tone rating. The subscripts
 referee, and the referee's home country, respectively. The parameter
 \(\beta_0\) represents the global baseline log-odds of receiving a red
 card, and \(\beta_1\) estimates the fixed effect of a player's skin
-tone. The random structures account for multi-level variation across
-groupings with varying intercepts and/or slopes: (1) scalar random
-intercepts (\(\sigma^2\)) capture baseline shifts for players across all
-specifications (\(u_j \sim N(0, \sigma^2_{\text{player}})\)) and for
-individual referees in Models 1 and 3
-(\(v_k \sim N(0, \sigma^2_{\text{ref}})\)); and (2) variance-covariance
-matrices (\(\mathbf{\Sigma}\)) accommodate random slopes, allowing the
-effect of skin tone to vary across individual referees in Model 2
-(\(\mathbf{v}_{k} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{ref}}\right)\))
-and across referee countries in Model 3
-(\(\mathbf{w}_{m} \sim N\left(\mathbf{0}, \mathbf{\Sigma}_{\text{country}}\right)\)).
+tone. The random effect include
 
-The full workflow of experimenting with alternatives is summarized in
-\textbf{?@fig-alt-workflow}. Alternatives to a specific step are
-specified in a YAML file in Listing~\ref{lst-yaml-alternative}, which is
-then processed to generate multiple copies of the full schema. The code
-for each schema are then generated separately, and validated to ensure
-its syntactic correctness and executability.
-Table~\ref{tbl-random-effects} summarizes the estimated random effect
-from the workflow. {[}TODO: expand more here{]}
+\begin{itemize}
+\tightlist
+\item
+  a random intercept for players,
+  \(u_j \sim N(0, \sigma^2_{\text{player}})\), in Model 1, 2, and 3,
+\item
+  a random intercept for referee,
+  \(v_k \sim N(0, \sigma^2_{\text{ref}})\), in Model 1 and 3, an
+  additional random sloope for referee in Model 2, and
+\item
+  a random intercept and slope for referee countries,
+  \(\mathbf{w}_{m} \sim N\left(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}}\right)\),
+  in Model 3.
+\end{itemize}
+
+These alternatives are specified in a separate YAML file described in
+Section~\ref{sec-alternative} as Listing~\ref{lst-yaml-alternative}.
+This file is then merged with the original schema to produce one
+separate schema for each alternative for code generation and validaiton.
+The validated scripts are then executed to obtain the estimated random
+effects in Table~\ref{tbl-random-effects}. This results matches with the
+random effects reported in the team report, subject to rounding errors.
+Similarly, the model fitting statistics can be extracted from the
+estimation for selecting the best fit.
 
 \begin{codelisting}
 
@@ -858,8 +869,6 @@ tasks may not be fully automatable in settings where the model cannot
 directly inspect the data, even if the data is theoretically available
 for computation.
 
-TODO: how do we modularize data analysis
-
 \newpage
 
 \section*{Appendix}\label{appendix}
@@ -868,7 +877,7 @@ TODO: how do we modularize data analysis
 \subsection*{Built-in prompts}\label{app-prompt}
 \addcontentsline{toc}{subsection}{Built-in prompts}
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, left=2mm, coltitle=black, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, bottomtitle=1mm, opacityback=0, opacitybacktitle=0.6, colback=white, leftrule=.75mm, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, rightrule=.15mm, titlerule=0mm, breakable]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, arc=.35mm, toprule=.15mm, bottomtitle=1mm, breakable, colframe=quarto-callout-note-color-frame, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, colback=white, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, bottomrule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, opacitybacktitle=0.6]
 
 \begin{verbatim}
 You are an expert methodologist and data pipeline architect. I will
@@ -936,7 +945,7 @@ NA
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, left=2mm, coltitle=black, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, bottomtitle=1mm, opacityback=0, opacitybacktitle=0.6, colback=white, leftrule=.75mm, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, rightrule=.15mm, titlerule=0mm, breakable]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, arc=.35mm, toprule=.15mm, bottomtitle=1mm, breakable, colframe=quarto-callout-note-color-frame, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, colback=white, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, bottomrule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, opacitybacktitle=0.6]
 
 \begin{verbatim}
 You are an expert R programmer. Attached is a text document
@@ -953,7 +962,7 @@ start with markdown formatting blocks (like ```R) or backticks.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, left=2mm, coltitle=black, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, bottomtitle=1mm, opacityback=0, opacitybacktitle=0.6, colback=white, leftrule=.75mm, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, rightrule=.15mm, titlerule=0mm, breakable]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, arc=.35mm, toprule=.15mm, bottomtitle=1mm, breakable, colframe=quarto-callout-note-color-frame, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, colback=white, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, bottomrule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, opacitybacktitle=0.6]
 
 \begin{verbatim}
 You are an expert R developer and automated debugging agent. The user
@@ -978,7 +987,7 @@ character must be R code.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, left=2mm, coltitle=black, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, bottomtitle=1mm, opacityback=0, opacitybacktitle=0.6, colback=white, leftrule=.75mm, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, rightrule=.15mm, titlerule=0mm, breakable]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, arc=.35mm, toprule=.15mm, bottomtitle=1mm, breakable, colframe=quarto-callout-note-color-frame, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, colback=white, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, bottomrule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, opacitybacktitle=0.6]
 
 \begin{verbatim}
 You are an expert Data Analyst and Methodologist. You are reviewing
