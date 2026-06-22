@@ -98,6 +98,8 @@ Building on these advances, recent work explores fully automated systems that us
 
 # Methodology {#sec-method}
 
+As traditional reproducibility practices have become insufficient for understanding complex modern data analyses, we have designed two complementary YAML schemas and the associated workflow to better support comprehension and extensibility in applied data analysis. Our workflow is designed to be 1) decision-centric: analyses are represented as a sequence of decisions with explicit rationale, and 2) reader-oriented exploration: readers can inspect, compare, and extend those decisions.
+
 ## A schema for describing data analysis
 
 We represent a data analysis, $\mathcal{S} = \{A_1, A_2, \cdots, A_n\}$, as a sequence of $n$ analytical step $A_i$, applied to a dataset $\mathcal{D}$, where each step, $A_i$, is defined as a tuple:
@@ -106,7 +108,7 @@ We represent a data analysis, $\mathcal{S} = \{A_1, A_2, \cdots, A_n\}$, as a se
 A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
 \end{equation}
 
-The components of $A_i$ can be partitioned into two parts: a required triplet $(f_{i}, \pi_{i}, r_{i})$ and an optional triplet $(\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})$. The first component of the triplet, $f_{i} \in \mathcal{F}$ is the *objective* of a step. The second component, $\pi_{i} \in \Pi$, represents the specific *decision* made to achieve the objective $f_{i}$ and the term $r_{i}$ is the *justification* provided for choosing the decision $\pi_{i}$. Structuring this information into a schema involves defining the three components described above for each step. While the decision (what has been done) and the justification (why it is done) are generally clear, the objective requires identifying what the step is trying to achieve. In other words, it represents the broader goal that could potentially be fulfilled through other alternative choices (formally introduced in @sec-alternative). As an example, consider the description for calculating the Human Development Index (HDI):
+The components of $A_i$ can be partitioned into two parts: a required triplet $(f_{i}, \pi_{i}, r_{i})$ and an optional triplet $(\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})$. The first component of the triplet, $f_{i} \in \mathcal{F}$ is the *objective* of a step. The second component, $\pi_{i} \in \Pi$, represents the specific *decision* made to achieve the objective $f_{i}$ and the term $r_{i}$ is the *justification* provided for choosing the decision $\pi_{i}$. Structuring this information into a schema involves defining the three components described above for each step. While the decision (what has been done) and the justification (why it is done) are generally clear, the objective requires identifying what the step is trying to achieve. In other words, it represents the broader goal that could potentially be fulfilled through other alternative choices (formally introduced in @sec-alternative). As an example, consider the description for calculating the Human Development Index (HDI) [@hdi]:
 
   1) Scale all four variables (life expectancy, expected years of schooling, mean years of schooling, and GNI per capita) to the [0, 1] range.
   2) Combine the two education variables (expected years of schooling and mean years of schooling) into a single education variable.
@@ -174,10 +176,7 @@ The overall workflow for schema-based data analysis is illustrated in @fig-workf
 knitr::include_graphics(here::here("figures/workflow.png"))
 ```
 
-
-## Usage
-
-The schema workflow is useful for both readers and authors of a paper. From the reader's perspective, the schema makes it easier to explore alternatives of an analysis through natural language interaction. In addition, modifying a code script typically requires coordinating changes across upstream and downstream components, the proposed workflows enables such code generation to be automated with LLMs. From an author's perspective, the schema can be included in the supplementary materials, where it serves to document the data analysis workflow in a procedural but descriptive manner.
+Returning to the HDI example, the proposed workflow allows both authors and readers to interact with a data analysis through natural language. The schema in @lst-schema is straightforward to construct from a template and can be included as supplementary material to docuemnt the analytical workflow. An author may use the "code generation and validation" path in @fig-workflow to automatically generate the analysis script for computing HDI and validate its accuracy. A reader, on the other hand, may wish to explore how the HDI values or country rankings change if the original arithmetic mean (instead of the geometry mean) is used. By combining the original schema in @lst-schema with the alternative specification @lst-alternatives, the "alternative generation" path produces a corresponding analysis script for each alternative with LLMs. In contrast, modifying an existing code script by hand typically requires manually coordinating changes across upstream and downstream code. By representing analyses as a sequence of structured analytical decisions, our workflow allows LLMs to automate much of this process, making it easier to understand the sequence of steps taken in the analysis and to explore alternatives.
 
 
 # Application: many-analysts football study {#sec-application}
