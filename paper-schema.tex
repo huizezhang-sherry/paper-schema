@@ -113,6 +113,7 @@
 \addtolength{\topmargin}{-1in}%
 \usepackage{amsmath}
 \usepackage{amssymb}
+\AtBeginDocument{\floatplacement{codelisting}{H}}
 \makeatletter
 \@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
 \@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
@@ -196,7 +197,7 @@ analysis},
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\date{June 15, 2026}
+\date{June 22, 2026}
 \title{\bf Code availability is not enough: A schema-based
 representation for comprehensible and extensible data analysis}
 \author{
@@ -842,7 +843,7 @@ for computation.
 \subsection*{Built-in prompts}\label{app-prompt}
 \addcontentsline{toc}{subsection}{Built-in prompts}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, colback=white, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, bottomtitle=1mm, opacityback=0, titlerule=0mm, leftrule=.75mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, left=2mm, arc=.35mm, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, bottomtitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, opacityback=0, breakable, toptitle=1mm, colback=white, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, arc=.35mm, leftrule=.75mm, toprule=.15mm, coltitle=black, left=2mm]
 
 \begin{verbatim}
 You are an expert methodologist and data pipeline architect. I will
@@ -910,7 +911,7 @@ NA
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, colback=white, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, bottomtitle=1mm, opacityback=0, titlerule=0mm, leftrule=.75mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, left=2mm, arc=.35mm, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, bottomtitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, opacityback=0, breakable, toptitle=1mm, colback=white, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, arc=.35mm, leftrule=.75mm, toprule=.15mm, coltitle=black, left=2mm]
 
 \begin{verbatim}
 You are an expert R programmer. Attached is a text document
@@ -927,7 +928,7 @@ start with markdown formatting blocks (like ```R) or backticks.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, colback=white, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, bottomtitle=1mm, opacityback=0, titlerule=0mm, leftrule=.75mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, left=2mm, arc=.35mm, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, bottomtitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, opacityback=0, breakable, toptitle=1mm, colback=white, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, arc=.35mm, leftrule=.75mm, toprule=.15mm, coltitle=black, left=2mm]
 
 \begin{verbatim}
 You are an expert R developer and automated debugging agent. The user
@@ -952,7 +953,7 @@ character must be R code.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, colback=white, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, bottomtitle=1mm, opacityback=0, titlerule=0mm, leftrule=.75mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, left=2mm, arc=.35mm, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, bottomtitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, opacityback=0, breakable, toptitle=1mm, colback=white, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, arc=.35mm, leftrule=.75mm, toprule=.15mm, coltitle=black, left=2mm]
 
 \begin{verbatim}
 You are an expert Data Analyst and Methodologist. You are reviewing

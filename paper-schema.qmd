@@ -9,6 +9,7 @@ format:
       - text: |
           \usepackage{amsmath}
           \usepackage{amssymb}
+          \AtBeginDocument{\floatplacement{codelisting}{H}}
     journal:
       blinded: false
   jasa-html:
@@ -294,7 +295,7 @@ Across the validation process, the LLM successfully corrects a range of implemen
 # Prompt: Extracting the schema from the text
 
 ```{r echo = FALSE}
-tines::prompt_extract_schema(text = "[inset text here]", data_dict = NA)
+tines::prompt_extract_schema(text = "[inset text here]", data_dict = NA)  
 ```
 
 :::
