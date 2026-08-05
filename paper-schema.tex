@@ -197,7 +197,7 @@ analysis},
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\date{July 21, 2026}
+\date{August 5, 2026}
 \title{\bf Code availability is not enough: A schema-based
 representation for comprehensible and extensible data analysis}
 \author{
@@ -579,25 +579,38 @@ received by a player from a referee across all matches in that
 player-referee pair, and other relevant player, referee, and game
 characteristics: player birthday, height, weight, player position,
 league country, number of victories, ties, and defeats, and number of
-yellow and red cards received. Most participating groups take a
-modelling approach to estimate the effect of skin rating on the red card
-issued with variation in distributional assumptions (linear, logistic,
-and poisson) and in the specification of fixed and random effects. In
-\citet{silberzahn2018}, each group first conducted an initial analysis
-separately, followed by a round-robin peer evaluation. Each group was
-then gave the opportunity to incorporate feedback from the discussion
-and submitted a final analysis as a report with a formal Method section.
-All the materials related to the study is publicly available on the Open
-Science Framework (OSF).
+yellow and red cards received. In \citet{silberzahn2018}, each group
+first conducted an initial analysis separately, followed by a
+round-robin peer evaluation. Each group was then gave the opportunity to
+incorporate feedback from the discussion and submitted a final analysis
+as a report with a formal Method section. All the materials related to
+the study is publicly available on the Open Science Framework (OSF).
 
-From the report presented by each team, we can use LLM to convert the
-methodology description into the schema we propose and generate the
-corresponding code script. We observe that most reports are structured
-to first describe the initial data analysis and then the changes made in
-the final analysis. To avoid testing LLMs' ability to reconstruct how
-analysis steps are modified, overturned, or carried over from the intial
-to the final analysis, we extract the descriptions relevant to the final
-analysis.
+Based on the reports presented by each team, most participating groups
+adopted a modelling approach to estimate the effect of skin color rating
+on the likelihood of receiving a red card. As an illustrative example,
+Group 5 first transformed the data into player--game observations,
+resulting in a binary response variable for whether a player received a
+red card, and removed observations with missing values using listwise
+deletion. The resulting data were modelled using a generalized linear
+mixed model (GLMM) with a binomial error distribution. The average skin
+color rating from two raters was used as the primary covariate, and its
+estimated coefficient was the main parameter of interest. To account for
+unobserved heterogeneity, the model included random effects for player
+and referee, as well as the average skin color rating across referee's
+country of origin. While Group 5's analysis illustrates one possible
+approach, other groups may adopt different data preprocessing decisions,
+distributional assumptions (e.g., linear, logistic, or Poisson models),
+specification of fixed and random effects, or conduct the analysis in a
+Bayesian framework.
+
+We use LLM to convert the methodology description into the schema we
+propose and generate the corresponding code script. We observe that most
+reports are structured to first describe the initial data analysis and
+then the changes made in the final analysis. To avoid testing LLMs'
+ability to reconstruct how analysis steps are modified, overturned, or
+carried over from the intial to the final analysis, we extract the
+descriptions relevant to the final analysis.
 
 We send the text description of each team for LLM to generate the schema
 and then generate the code script from the schema. The code script is
@@ -846,7 +859,7 @@ for computation.
 \subsection*{Built-in prompts}\label{app-prompt}
 \addcontentsline{toc}{subsection}{Built-in prompts}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, toptitle=1mm, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, opacityback=0, titlerule=0mm, opacitybacktitle=0.6, coltitle=black, leftrule=.75mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, bottomrule=.15mm, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, leftrule=.75mm, colback=white, coltitle=black, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, titlerule=0mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
 
 \begin{verbatim}
 You are an expert methodologist and data pipeline architect. I will
@@ -914,7 +927,7 @@ NA
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, toptitle=1mm, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, opacityback=0, titlerule=0mm, opacitybacktitle=0.6, coltitle=black, leftrule=.75mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, bottomrule=.15mm, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, leftrule=.75mm, colback=white, coltitle=black, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, titlerule=0mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
 
 \begin{verbatim}
 You are an expert R programmer. Attached is a text document
@@ -931,7 +944,7 @@ start with markdown formatting blocks (like ```R) or backticks.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, toptitle=1mm, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, opacityback=0, titlerule=0mm, opacitybacktitle=0.6, coltitle=black, leftrule=.75mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, bottomrule=.15mm, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, leftrule=.75mm, colback=white, coltitle=black, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, titlerule=0mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
 
 \begin{verbatim}
 You are an expert R developer and automated debugging agent. The user
@@ -956,7 +969,7 @@ character must be R code.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, toptitle=1mm, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, opacityback=0, titlerule=0mm, opacitybacktitle=0.6, coltitle=black, leftrule=.75mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, bottomrule=.15mm, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, leftrule=.75mm, colback=white, coltitle=black, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, titlerule=0mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
 
 \begin{verbatim}
 You are an expert Data Analyst and Methodologist. You are reviewing
