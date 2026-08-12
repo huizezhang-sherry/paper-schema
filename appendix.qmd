@@ -1,0 +1,45 @@
+---
+title: "Appendix to Code availability is not enough: A schema-based representation for comprehensible and extensible data analysis"
+format: pdf
+---
+
+## Built-in prompts {#app-prompt .unnumbered}
+
+:::{.callout-note}
+
+# Prompt: Extracting the schema from the text
+
+```{r echo = FALSE}
+tines::prompt_extract_schema(text = "[inset text here]", data_dict = NA)  
+```
+
+:::
+
+:::{.callout-note}
+
+# Prompt: generating code from the schema
+
+```{r echo = FALSE}
+tines::prompt_gen_code()
+```
+:::
+
+
+:::{.callout-note}
+
+# Prompt: validating the code generated 
+
+```{r echo = FALSE}
+cat(strwrap(tines:::build_sys_prompt(data = "[insert the path to the data]"), width = 70), sep = "\n")
+```
+:::
+
+:::{.callout-note}
+
+# Prompt: generating alternatives for a specific step
+
+```{r echo = FALSE}
+tines::prompt_alternatives(step = "[inset step number here]")
+```
+
+:::

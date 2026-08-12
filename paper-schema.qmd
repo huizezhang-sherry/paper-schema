@@ -1,10 +1,12 @@
 ---
 title: "Code availability is not enough: A schema-based representation for comprehensible and extensible data analysis"
 format:
-  jasa-pdf:
+  tandf-pdf:
     keep-tex: true
     number-sections: true
     code-overflow: wrap
+    fontsize: 12pt
+    linestretch: 1.15
     include-in-header:
       - text: |
           \usepackage{amsmath}
@@ -12,20 +14,28 @@ format:
           \AtBeginDocument{\floatplacement{codelisting}{H}}
     journal:
       blinded: false
-  jasa-html:
-    code-overflow: wrap
-    number-sections: true
-
+csl: apa.csl
 date: last-modified
 author:
   - name: H. Sherry Zhang
-    affiliations:
-      - name: University of Texas at Austin
-        department: Department of Statistics and Data Sciences
+    email: hsherryzhang@utexas.edu
+    attributes:
+      corresponding: true
+    affiliations: 
+        - id: 1
+          name: University of Texas at Austin
+          department: Department of Statistics and Data Sciences
+          city: Texas
+          country: United States
+          postal-code: 78705
   - name: Roger D. Peng
-    affiliations:
-      - name: University of Texas at Austin
-        department: Department of Statistics and Data Sciences
+    affiliations: 
+        - id: 1
+          name: University of Texas at Austin
+          department: Department of Statistics and Data Sciences
+          city: Texas
+          country: United States
+          postal-code: 78705
 abstract: |
   Current reproducibility practices have greatly improved our ability to replicate published results, but they do not necessarily make data analyses easier to understand. Audience seeking to comprehend an analysis need to piece together information scattered across manuscripts and code scripts to understand the sequence of analytical steps and the rationale behind them, with some details may not explicitly recorded in either source. Exploring alternative analytical choices is even more challenging, as it requires understanding and modifying code that may be unfamiliar and consider how it would impact upstream and downstream code. To address these challenges, we propose a schema that represents data analyses as a collectino of analytical decisions, together with their justification, inputs, and outputs. Coupled with large language models (LLMs), the schema can be inferred from natural language descriptions and translated into analysis scripts. The structured representation also enables exploration of alternative analytical choices, allowing multiple analytical workflows to be generated and compared. We demonstrate the proposed workflow using the many-analysts football study, where LLMs create the schema from the decision chocies in team reports, generate corresponding analysis scripts, and explore alternative random effect specifications. As an intermediate representation between the manuscript and code scripts, our schema makes analyses more comprehensible and extendable from a reader's perspective. 
 keywords:
@@ -180,7 +190,8 @@ In this section, we apply our methodology to the many-analyst football by @silbe
 
 @silberzahn2018 invites 29 research groups to conduct the same data analysis to answer the question whether soccer referees are more likely to give red cards to dark-skin-toned player than to light-skin-toned players. The provided dataset contains two raters' skin color rating to players' picture, the aggregated number of red card received by a player from a referee across all matches in that player-referee pair, and other relevant player, referee, and game characteristics: player birthday, height, weight, player position, league country, number of victories, ties, and defeats, and number of yellow and red cards received. In @silberzahn2018, each group first conducted an initial analysis separately, followed by a round-robin peer evaluation. Each group was then gave the opportunity to incorporate feedback from the discussion and submitted a final analysis as a report with a formal Method section. All the materials related to the study is publicly available on the Open Science Framework (OSF).
 
-Based on the reports presented by each team, most participating groups adopted a modelling approach to estimate the effect of skin color rating on the likelihood of receiving a red card. As an illustrative example, Group 5 first transformed the data into player–game observations, resulting in a binary response variable for whether a player received a red card, and removed observations with missing values using listwise deletion. The resulting data were modelled using a generalized linear mixed model (GLMM) with a binomial error distribution. The average skin color rating from two raters was used as the primary covariate, and its estimated coefficient was the main parameter of interest. To account for unobserved heterogeneity, the model included random effects for player and referee, as well as the average skin color rating across referee's country of origin. While Group 5's analysis illustrates one possible approach, other groups may adopt different data preprocessing decisions, distributional assumptions (e.g., linear, logistic, or Poisson models), specification of fixed and random effects, or conduct the analysis in a Bayesian framework.
+Based on the reports presented by each team, most participating groups adopted a modelling approach to estimate the effect of skin color rating on the likelihood of receiving a red card. As an illustrative example, Group 5 first transformed the data into player–game observations, resulting in a binary response variable for whether a player received a red card, and removed observations with missing values using listwise deletion. The resulting data were modelled using a generalized linear mixed model (GLMM) with a binomial error distribution. The average skin color rating from two raters was used as the primary covariate, and its estimated coefficient was the main pa
+rameter of interest. To account for unobserved heterogeneity, the model included random effects for player and referee, as well as the average skin color rating across referee's country of origin. While Group 5's analysis illustrates one possible approach, other groups may adopt different data preprocessing decisions, distributional assumptions (e.g., linear, logistic, or Poisson models), specification of fixed and random effects, or conduct the analysis in a Bayesian framework.
 
 We use LLM to convert the methodology description into the schema we propose and generate the corresponding code script. We observe that most reports are structured to first describe the initial data analysis and then the changes made in the final analysis. To avoid testing LLMs' ability to reconstruct how analysis steps are modified, overturned, or carried over from the intial to the final analysis, we extract the descriptions relevant to the final analysis. 
 
@@ -274,56 +285,15 @@ re_df |>
 
 # Discussion {#sec-discussion}
 
-Our results highlight a persistent gap between computational reproducibility and analytical understandability in modern data analysis workflows. While current reproducibility practices ensure that published results can be regenerated from shared data and code, as analyses grow in complexity and involve iterative decision-making processes, they are less of an idea for readers to understand the analysis. Our proposed schema addresses this gap by introducing an intermediate representation that explicitly encodes analytical decisions to bridge between narrative descriptions and implementation details. When coupled with large language models, this representation enables the extraction of analytical structure from written reports and its translation into analysis scripts, while also supporting the exploration of alternative analytical choices. 
+Our results highlight a persistent gap between computational reproducibility and analytical understandability in modern data analysis workflows. While current reproducibility practices ensure that published results can be regenerated from shared data and code, as analyses grow in complexity and involve iterative decision-making processes, they are less of an ideal for readers to understand. Our proposed schema addresses this gap by introducing an intermediate representation that explicitly encodes analytical decisions to bridge between narrative descriptions and implementation details. When coupled with LLMs, this representation enables the extraction of analytical structure from written reports and its translation into analysis scripts, and supporting the exploration of alternative analytical choices. 
 
 To further examine how this workflow behaves in practice, we apply it to the many-analysts football study. This analysis allows us to identify errors in the original reports and to characterize failure modes of current LLMs to generate code for data science. In particular, we find that LLMs requires a fairly precise specification in order to generate the code correctly for the intended random effect structure. For an educated statistician, the phrase "a random effect of referee number across average rating" would typically imply both a random intercept and a random slope. However, we observe that LLMs interpret this speicification literally as a random slope only. This suggests the gap between the latest models and human analysts in specialized statistical knowledge [@sun_lambda_2026]. 
 
 Across the validation process, the LLM successfully corrects a range of implementation issues, including errors caused by overflowing comments and other syntax issues. However, we also observe challenges in data reshaping tasks when the transformation requires changes in the unit of analysis. In the study, some teams decide to transform the data from the original aggregated player-referee dyad-level format to game-level format. This transformation requires disaggregating aggregated outcome counts (win, loss, and draw) into individual game records, changing the unit of analysis from dyads to matches. We also observe some difficulties in parsing birth dates. Since the LLM does not have access to the underlying raw data, due to privacy constraint, it must rely on trial and error when inferring the correct date formats (“DD-MM-YYYY.”). This suggests that certain types of data analysis tasks may not be fully automatable in settings where the model cannot directly inspect the data, even if the data is theoretically available for computation.
 
-\newpage
-
-# Appendix {.unnumbered}
-
-## Built-in prompts {#app-prompt .unnumbered}
-
-:::{.callout-note}
-
-# Prompt: Extracting the schema from the text
-
-```{r echo = FALSE}
-tines::prompt_extract_schema(text = "[inset text here]", data_dict = NA)  
-```
-
-:::
-
-:::{.callout-note}
-
-# Prompt: generating code from the schema
-
-```{r echo = FALSE}
-tines::prompt_gen_code()
-```
-:::
+The reproducibility-understandability issue considered in this work is still at an early stage, several software decision choices are worth examining. We currently implement a prototype as an R package, although the understandability problem is broadly applicable to statistical analyses and is not associated to any particular programming language. Hence, we envision the implementation eventually evolving into a general purpose tool, such as a command-line utility, that can support analyses across different programming languages. In the current implementation, analytical decisions are recorded in a single YAML file. An alternative would be to record individual decisions in separate Markdown files. While YAML files provide an explicit structure for machine readability, markdown files offers greater flexibility for documenting decisions. Recording decisions in separate files would also allow files to be linked across time to understand how decisions evolve or change over the course of an analysis and can potentially support a broader research-management system iattributes decisions to individual researchers and maintains a record of the changes leading to the final analysis. 
 
 
-:::{.callout-note}
-
-# Prompt: validating the code generated 
-
-```{r echo = FALSE}
-cat(strwrap(tines:::build_sys_prompt(data = "[insert the path to the data]"), width = 70), sep = "\n")
-```
-:::
-
-:::{.callout-note}
-
-# Prompt: generating alternatives for a specific step
-
-```{r echo = FALSE}
-tines::prompt_alternatives(step = "[inset step number here]")
-```
-
-:::
 
 
 # References

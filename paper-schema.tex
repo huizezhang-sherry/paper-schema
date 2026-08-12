@@ -5,7 +5,8 @@
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
-  12pt]{article}
+  12pt,
+]{interact}
 \usepackage{xcolor}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{5}
@@ -29,6 +30,7 @@
   \usepackage[]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
+\usepackage{setspace}
 \makeatletter
 \@ifundefined{KOMAClassName}{% if non-KOMA class
   \IfFileExists{parskip.sty}{%
@@ -91,6 +93,39 @@
 \makeatother
 
 
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 
 
@@ -102,34 +137,12 @@
 
 
  
-\usepackage[]{natbib}
-\bibliographystyle{agsm}
 
 
-\addtolength{\oddsidemargin}{-.5in}%
-\addtolength{\evensidemargin}{-1in}%
-\addtolength{\textwidth}{1in}%
-\addtolength{\textheight}{1.7in}%
-\addtolength{\topmargin}{-1in}%
 \usepackage{amsmath}
 \usepackage{amssymb}
 \AtBeginDocument{\floatplacement{codelisting}{H}}
-\makeatletter
-\@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
-\@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
-\definecolor{quarto-callout-color}{HTML}{909090}
-\definecolor{quarto-callout-note-color}{HTML}{0758E5}
-\definecolor{quarto-callout-important-color}{HTML}{CC1914}
-\definecolor{quarto-callout-warning-color}{HTML}{EB9113}
-\definecolor{quarto-callout-tip-color}{HTML}{00A047}
-\definecolor{quarto-callout-caution-color}{HTML}{FC5300}
-\definecolor{quarto-callout-color-frame}{HTML}{acacac}
-\definecolor{quarto-callout-note-color-frame}{HTML}{4582ec}
-\definecolor{quarto-callout-important-color-frame}{HTML}{d9534f}
-\definecolor{quarto-callout-warning-color-frame}{HTML}{f0ad4e}
-\definecolor{quarto-callout-tip-color-frame}{HTML}{02b875}
-\definecolor{quarto-callout-caution-color-frame}{HTML}{fd7e14}
-\makeatother
+\usepackage{orcidlink}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -187,31 +200,18 @@ analysis},
   pdfcreator={LaTeX via pandoc}}
 
 
+\title{Code availability is not enough: A schema-based representation
+for comprehensible and extensible data analysis}
+\author{H. Sherry Zhang$\textsuperscript{1}$, Roger D.
+Peng$\textsuperscript{1}$}
 
+\thanks{CONTACT: H. Sherry
+Zhang. Email: \href{mailto:hsherryzhang@utexas.edu}{\nolinkurl{hsherryzhang@utexas.edu}}. }
 \begin{document}
-
-
-\def\spacingset#1{\renewcommand{\baselinestretch}%
-{#1}\small\normalsize} \spacingset{1}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\date{August 5, 2026}
-\title{\bf Code availability is not enough: A schema-based
-representation for comprehensible and extensible data analysis}
-\author{
-H. Sherry Zhang\\
-Department of Statistics and Data Sciences, University of Texas at
-Austin\\
-and\\Roger D. Peng\\
-Department of Statistics and Data Sciences, University of Texas at
-Austin\\
-}
+\captionsetup{labelsep=space}
 \maketitle
-
-\bigskip
-\bigskip
+\textsuperscript{1} Department of Statistics and Data
+Sciences, University of Texas at Austin, Texas, United States
 \begin{abstract}
 Current reproducibility practices have greatly improved our ability to
 replicate published results, but they do not necessarily make data
@@ -236,16 +236,14 @@ alternative random effect specifications. As an intermediate
 representation between the manuscript and code scripts, our schema makes
 analyses more comprehensible and extendable from a reader's perspective.
 \end{abstract}
-
-\noindent%
-{\it Keywords:} Reproducibility, Large Language Models (LLMs), Data
-analysis
-\vfill
-
-\newpage
-\spacingset{1.9} % DON'T change the spacing!
+\begin{keywords}
+\def\sep{;\ }
+Reproducibility\sep Large Language Models (LLMs)\sep 
+Data analysis
+\end{keywords}
 
 
+\setstretch{1.15}
 \section{Introduction}\label{sec-intro}
 
 The reproducibility movement has been a major development in modern
@@ -253,13 +251,12 @@ scientific research, motivated in part by concerns regarding the
 replication of published findings and the increasing reliance on
 computational methods across disciplines. In statistics, advocates of
 reproducible research argue that scientific claims should be accompanied
-by the data and code necessary to regenerate reported results
-\citep{peng_reproducible_2011}. These practices have greatly improved
-the reproducibility of published results across scientific domains
-\citep{kohler_read_2026, xu_scaling_2026} and have been incorporated
-into journal policies through data and code availability requirements
-(see the \emph{Journal of the American Statistical Association}
-editorial \citep{wrobel_partnering_2024}).
+by the data and code necessary to regenerate reported results (Peng,
+2011). These practices have greatly improved the reproducibility of
+published results across scientific domains (Kohler et al., 2026; Xu \&
+Yang, 2026) and have been incorporated into journal policies through
+data and code availability requirements (see the \emph{Journal of the
+American Statistical Association} editorial (Wrobel et al., 2024)).
 
 An implicit assumption underlying current practices is that
 reproducibility implies understandability, given that the data and the
@@ -273,9 +270,9 @@ piece of analysis has become non-trivial. Decisions related to data
 preprocessing and exploratory data analysis are often reported only
 briefly in manuscripts and left as technical details for readers to
 infer from supplementary materials. Many decisions are not made in a
-linear fashion but emerge through an iterative process
-\citep{zhang_inside_2025, jun2022hypothesis, jun2022}, and it is not
-entirely clear how this iterative nature of data analysis can be
+linear fashion but emerge through an iterative process (Jun, Birchfield,
+et al., 2022; Jun, Seo, et al., 2022; Zhang \& Peng, 2025), and it is
+not entirely clear how this iterative nature of data analysis can be
 communicated. Making changes to an existing script can often be
 difficult because analytical decisions are intertwined with
 implementation details, project-specific abstractions, and dependencies
@@ -288,26 +285,26 @@ supplementary materials to fully understand an analysis.
 
 Advances in Large Language Models (LLMs) have led to widespread use of
 these systems for code generation tasks, including code completion and
-program repair \citep{jiang2026survey, shah_automating_2026}. Early work
-on code-oriented LLMs demonstrated strong capabilities in translating
+program repair (Jiang et al., 2026; Shah et al., 2026). Early work on
+code-oriented LLMs demonstrated strong capabilities in translating
 natural language descriptions into executable programs, with models such
 as Codex achieving substantial improvements on benchmark programming
-tasks \citep{chen2021codex, lai_ds1000_2023, huang_executionbased_2022}.
-These capabilities have led to broad adoption of coding assistants
-thorugh web interfaces, APIs and integrated development environments. In
-the R ecosystem, packages such as \texttt{ellmer} \citep{ellmer},
-\texttt{chatLLM} \citep{chatLLM}, and \texttt{LLMAgentR}
-\citep{LLMAgentR} provides increasingly accessible interfaces for access
-to latest LLM models.
+tasks (Chen et al., 2021; Huang et al., 2022; Lai et al., 2023). These
+capabilities have led to broad adoption of coding assistants thorugh web
+interfaces, APIs and integrated development environments. In the R
+ecosystem, packages such as \texttt{ellmer} (Wickham et al., 2025),
+\texttt{chatLLM} (Owusu Boakye, 2026a), and \texttt{LLMAgentR} (Owusu
+Boakye, 2026b) provides increasingly accessible interfaces for access to
+latest LLM models.
 
 Building on these advances, recent work explores fully automated systems
 that use multiple LLM agents to plan, generate, execute, and refine data
-analyses \citep{jansen2025, hu_automated_2024}. Our work relies on the
+analyses (Hu et al., 2024; Jansen et al., 2025). Our work relies on the
 same underlying capability of translating analytical specifications into
 code, but differs in its view of what should be automated. Data analysis
 is often underdetermined, with many plausible choices regarding data
 preprocessing, transformation, aggregation, and model specification
-\citep{gao_nonstandard_2026, bertran_many_2026, luo_can_2025}, by
+(Bertran et al., 2026; Gao \& Xiao, 2026; Luo et al., 2025), by
 contrast, once these analytical decisions have been specified,
 translating them into executable code is often a comparatively
 straightforward task. This distinction motivates our focus on
@@ -373,7 +370,7 @@ trying to achieve. In other words, it represents the broader goal that
 could potentially be fulfilled through other alternative choices
 (formally introduced in Section~\ref{sec-alternative}). As an example,
 consider the description for calculating the Human Development Index
-(HDI) \citep{hdi}:
+(HDI) (United Nations Development Programme, 2025):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
@@ -566,11 +563,11 @@ analysis and to explore alternatives.
 study}\label{sec-application}
 
 In this section, we apply our methodology to the many-analyst football
-by \citet{silberzahn2018} to reproduce the reported estimated effect
+by Silberzahn et al. (2018) to reproduce the reported estimated effect
 size by each team. During this process, we identify some errors in the
 original reports and highlight failure modes of current LLMs.
 
-\citet{silberzahn2018} invites 29 research groups to conduct the same
+Silberzahn et al. (2018) invites 29 research groups to conduct the same
 data analysis to answer the question whether soccer referees are more
 likely to give red cards to dark-skin-toned player than to
 light-skin-toned players. The provided dataset contains two raters' skin
@@ -579,7 +576,7 @@ received by a player from a referee across all matches in that
 player-referee pair, and other relevant player, referee, and game
 characteristics: player birthday, height, weight, player position,
 league country, number of victories, ties, and defeats, and number of
-yellow and red cards received. In \citet{silberzahn2018}, each group
+yellow and red cards received. In Silberzahn et al. (2018), each group
 first conducted an initial analysis separately, followed by a
 round-robin peer evaluation. Each group was then gave the opportunity to
 incorporate feedback from the discussion and submitted a final analysis
@@ -595,14 +592,14 @@ red card, and removed observations with missing values using listwise
 deletion. The resulting data were modelled using a generalized linear
 mixed model (GLMM) with a binomial error distribution. The average skin
 color rating from two raters was used as the primary covariate, and its
-estimated coefficient was the main parameter of interest. To account for
-unobserved heterogeneity, the model included random effects for player
-and referee, as well as the average skin color rating across referee's
-country of origin. While Group 5's analysis illustrates one possible
-approach, other groups may adopt different data preprocessing decisions,
-distributional assumptions (e.g., linear, logistic, or Poisson models),
-specification of fixed and random effects, or conduct the analysis in a
-Bayesian framework.
+estimated coefficient was the main pa rameter of interest. To account
+for unobserved heterogeneity, the model included random effects for
+player and referee, as well as the average skin color rating across
+referee's country of origin. While Group 5's analysis illustrates one
+possible approach, other groups may adopt different data preprocessing
+decisions, distributional assumptions (e.g., linear, logistic, or
+Poisson models), specification of fixed and random effects, or conduct
+the analysis in a Bayesian framework.
 
 We use LLM to convert the methodology description into the schema we
 propose and generate the corresponding code script. We observe that most
@@ -617,17 +614,17 @@ and then generate the code script from the schema. The code script is
 run by a separate LLM to validate for potential syntax errors.
 
 To accelerate the evaluation of each script, we manually in-place
-replace the \texttt{glm()} command with \texttt{fixest::feglm()}
-\citep{fixest} for generalized linear model and the
-\texttt{lme4::glmer()} \citep{lme4} function with
-\texttt{glmmTMB::glmmTMB()} \citep{glmmTMB-1} for generalized mix-effect
-model after the scripts are generated but before the validation. These
-two functions are in-place replacements of the standard functions for
-estimating the relevant model with multi-threading in C++ \citep{fixest}
-and Template Model Builder (TMB) \citep{glmmTMB-2} for better
-performance. This replacement should not affect the estimation of the
-effect size. All the LLM-related simulations are conducted with
-claude-opus-4.5.
+replace the \texttt{glm()} command with \texttt{fixest::feglm()} (Bergé
+et al., 2026) for generalized linear model and the
+\texttt{lme4::glmer()} (Bates et al., 2015) function with
+\texttt{glmmTMB::glmmTMB()} (Brooks et al., 2017) for generalized
+mix-effect model after the scripts are generated but before the
+validation. These two functions are in-place replacements of the
+standard functions for estimating the relevant model with
+multi-threading in C++ (Bergé et al., 2026) and Template Model Builder
+(TMB) (McGillycuddy et al., 2025) for better performance. This
+replacement should not affect the estimation of the effect size. All the
+LLM-related simulations are conducted with claude-opus-4.5.
 
 Across the 25 teams we reproduce, all team scripts were successfully
 executed after the validation phase. Notably, two scripts run
@@ -646,7 +643,7 @@ involved resolving broken and overflow syntax in comments.
 \caption{\label{fig-res-updated}Comparison of the odd ratio of the
 effect skin color on receiving red cards in football games from our
 simulation with the schema (simulated) vs.~the reported estimated effect
-size in \citet{silberzahn2018} (published). Teams are arranged by the
+size in Silberzahn et al. (2018) (published). Teams are arranged by the
 difference in odd ratio of our simulation and the reported value. For
 most teams, the simulation successfully recovers the odd ratio reported
 by each analyst team, larger variations are seen in the following teams:
@@ -656,7 +653,7 @@ Team 1, 9, 15, 21, 23, and 27.}
 
 Figure~\ref{fig-res-updated} shows the comparison of the estimated
 effect size, in odd ratio, from our workflow (simulated) and those
-reported in \citet{silberzahn2018} (published). Our workflow
+reported in Silberzahn et al. (2018) (published). Our workflow
 successfully recovers the odd ratio reported in most teams, although
 larger variation is observed in the following teams: Team 1, 9, 15, 21,
 23, and 27. We further investigate the reports and generated scripts for
@@ -812,14 +809,13 @@ reproducibility and analytical understandability in modern data analysis
 workflows. While current reproducibility practices ensure that published
 results can be regenerated from shared data and code, as analyses grow
 in complexity and involve iterative decision-making processes, they are
-less of an idea for readers to understand the analysis. Our proposed
-schema addresses this gap by introducing an intermediate representation
-that explicitly encodes analytical decisions to bridge between narrative
-descriptions and implementation details. When coupled with large
-language models, this representation enables the extraction of
-analytical structure from written reports and its translation into
-analysis scripts, while also supporting the exploration of alternative
-analytical choices.
+less of an ideal for readers to understand. Our proposed schema
+addresses this gap by introducing an intermediate representation that
+explicitly encodes analytical decisions to bridge between narrative
+descriptions and implementation details. When coupled with LLMs, this
+representation enables the extraction of analytical structure from
+written reports and its translation into analysis scripts, and
+supporting the exploration of alternative analytical choices.
 
 To further examine how this workflow behaves in practice, we apply it to
 the many-analysts football study. This analysis allows us to identify
@@ -832,7 +828,7 @@ across average rating'' would typically imply both a random intercept
 and a random slope. However, we observe that LLMs interpret this
 speicification literally as a random slope only. This suggests the gap
 between the latest models and human analysts in specialized statistical
-knowledge \citep{sun_lambda_2026}.
+knowledge (Sun et al., 2026).
 
 Across the validation process, the LLM successfully corrects a range of
 implementation issues, including errors caused by overflowing comments
@@ -851,193 +847,195 @@ tasks may not be fully automatable in settings where the model cannot
 directly inspect the data, even if the data is theoretically available
 for computation.
 
-\newpage
+The reproducibility-understandability issue considered in this work is
+still at an early stage, several software decision choices are worth
+examining. We currently implement a prototype as an R package, although
+the understandability problem is broadly applicable to statistical
+analyses and is not associated to any particular programming language.
+Hence, we envision the implementation eventually evolving into a general
+purpose tool, such as a command-line utility, that can support analyses
+across different programming languages. In the current implementation,
+analytical decisions are recorded in a single YAML file. An alternative
+would be to record individual decisions in separate Markdown files.
+While YAML files provide an explicit structure for machine readability,
+markdown files offers greater flexibility for documenting decisions.
+Recording decisions in separate files would also allow files to be
+linked across time to understand how decisions evolve or change over the
+course of an analysis and can potentially support a broader
+research-management system iattributes decisions to individual
+researchers and maintains a record of the changes leading to the final
+analysis.
 
-\section*{Appendix}\label{appendix}
-\addcontentsline{toc}{section}{Appendix}
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
 
-\subsection*{Built-in prompts}\label{app-prompt}
-\addcontentsline{toc}{subsection}{Built-in prompts}
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-lme4}
+Bates, D., Mächler, M., Bolker, B., \& Walker, S. (2015). Fitting linear
+mixed-effects models using {lme4}. \emph{Journal of Statistical
+Software}, \emph{67}(1), 1--48.
+\url{https://doi.org/10.18637/jss.v067.i01}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: Extracting the schema from the text}, leftrule=.75mm, colback=white, coltitle=black, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, titlerule=0mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
+\bibitem[\citeproctext]{ref-fixest}
+Bergé, L. R., Butts, K., \& McDermott, G. (2026). Fast and user-friendly
+econometrics estimations: {T}he {R} package fixest. \emph{arXiv Preprint
+arXiv:2601.21749}. \url{https://doi.org/10.48550/arXiv.2601.21749}
 
-\begin{verbatim}
-You are an expert methodologist and data pipeline architect. I will
-provide a text describing a multiverse analysis and a summary of the
-actual dataset being used.
+\bibitem[\citeproctext]{ref-bertran_many_2026}
+Bertran, M., Fogliato, R., \& Wu, Z. S. (2026). \emph{Many {AI}
+{Analysts}, {One} {Dataset}: {Navigating} the {Agentic} {Data} {Science}
+{Multiverse}}. arXiv. \url{https://doi.org/10.48550/arXiv.2602.18710}
 
-=== YOUR TASK ===
+\bibitem[\citeproctext]{ref-glmmTMB-1}
+Brooks, M. E., Kristensen, K., van Benthem, K. J., Magnusson, A., Berg,
+C. W., Nielsen, A., Skaug, H. J., Maechler, M., \& Bolker, B. M. (2017).
+{glmmTMB} balances speed and flexibility among packages for
+zero-inflated generalized linear mixed modeling. \emph{The R Journal},
+\emph{9}(2), 378--400. \url{https://doi.org/10.32614/RJ-2017-066}
 
-Extract a chronological list of methodological decisions (nodes) AND
-map the exact data flow (inputs/outputs) for each node
-simultaneously.
+\bibitem[\citeproctext]{ref-chen2021codex}
+Chen, M., Tworek, J., Jun, H., et al. (2021). Evaluating large language
+models trained on code. \emph{arXiv Preprint arXiv:2107.03374}.
+\url{https://arxiv.org/abs/2107.03374}
 
-=== RULES ===
+\bibitem[\citeproctext]{ref-gao_nonstandard_2026}
+Gao, R., \& Xiao, S. C. (2026). \emph{Nonstandard {Errors} in {AI}
+{Agents}}. arXiv. \url{https://doi.org/10.48550/arXiv.2603.16744}
 
-1. THEORY EXTRACTION: For each node, extract:
+\bibitem[\citeproctext]{ref-hu_automated_2024}
+Hu, S., Lu, C., \& Clune, J. (2024, October). \emph{Automated {Design}
+of {Agentic} {Systems}}.
+\url{https://openreview.net/forum?id=t9U3LW7JVX}
 
-- 'id': A unique snake_case identifier.
+\bibitem[\citeproctext]{ref-huang_executionbased_2022}
+Huang, J., Wang, C., Zhang, J., Yan, C., Cui, H., Inala, J. P., Clement,
+C., \& Duan, N. (2022). Execution-based {Evaluation} for {Data}
+{Science} {Code} {Generation} {Models}. In E. Dragut, Y. Li, L. Popa, S.
+Vucetic, \& S. Srivastava (Eds.), \emph{Proceedings of the {Fourth}
+{Workshop} on {Data} {Science} with {Human}-in-the-{Loop} ({Language}
+{Advances})} (pp. 28--36). Association for Computational Linguistics.
+\url{https://doi.org/10.18653/v1/2022.dash-1.5}
 
-- 'fork': MUST be framed as an open methodological goal that invites
-multiple possible approaches. It must NOT describe the final choice.
+\bibitem[\citeproctext]{ref-jansen2025}
+Jansen, J. A., Manukyan, A., Khoury, N. A., \& Akalin, A. (2025).
+Leveraging large language models for data analysis automation.
+\emph{PLOS ONE}, \emph{20}(2), e0317084.
+\url{https://doi.org/10.1371/journal.pone.0317084}
 
-- 'path': A 'path' is strictly a POSITIVE methodological decision
-that has potential theoretical alternatives, chosen to resolve the
-'fork'.
+\bibitem[\citeproctext]{ref-jiang2026survey}
+Jiang, J., Wang, F., Shen, J., Kim, S., \& Kim, S. (2026). A survey on
+large language models for code generation. \emph{ACM Transactions on
+Software Engineering and Methodology}, \emph{35}(2), 1--72.
 
-- 'rationale': WHY that decision (the path) was made, extracted from
-the text.
+\bibitem[\citeproctext]{ref-jun2022hypothesis}
+Jun, E., Birchfield, M., De Moura, N., Heer, J., \& Just, R. (2022).
+Hypothesis formalization: Empirical findings, software limitations, and
+design implications. \emph{ACM Transactions on Computer-Human
+Interaction (TOCHI)}, \emph{29}(1), 1--28.
 
-2. DATA MAPPING: Assign 'inputs' (EXACT column names from the dataset
-OR outputs from previous nodes) and 'outputs' (invented snake_case
-objects like 'df_clean' or 'ranef_spec').
+\bibitem[\citeproctext]{ref-jun2022}
+Jun, E., Seo, A., Heer, J., \& Just, R. (2022). \emph{Tisane: Authoring
+statistical models via formal reasoning from conceptual and data
+relationships}. \emph{CHI '22}, 116.
+\url{https://doi.org/10.1145/3491102.3501888}
 
-3. ANTI-ABSTRACTION (CRITICAL): If the text lists specific variables
-(e.g., 'centered rater, meanIAT'), DO NOT summarize them away. You
-MUST capture those specific variables in the 'inputs' array.
+\bibitem[\citeproctext]{ref-kohler_read_2026}
+Kohler, B., Zollikofer, D., Einsiedler, J., Hoyle, A., \& Ash, E.
+(2026). \emph{Read the {Paper}, {Write} the {Code}: {Agentic}
+{Reproduction} of {Social}-{Science} {Results}}. arXiv.
+\url{https://doi.org/10.48550/arXiv.2604.21965}
 
-4. INLINE ARRAYS: Format arrays strictly on one line: `inputs: [var1,
-var2]`.
+\bibitem[\citeproctext]{ref-lai_ds1000_2023}
+Lai, Y., Li, C., Wang, Y., Zhang, T., Zhong, R., Zettlemoyer, L., Yih,
+W.-T., Fried, D., Wang, S., \& Yu, T. (2023). {DS}-1000: {A} {Natural}
+and {Reliable} {Benchmark} for {Data} {Science} {Code} {Generation}.
+\emph{Proceedings of the 40th {International} {Conference} on {Machine}
+{Learning}}, 18319--18345.
+\url{https://proceedings.mlr.press/v202/lai23b.html}
 
-5. CONFIDENCE & CLARIFICATION: Rate your mapping confidence (HIGH,
-MEDIUM, LOW). If the text abstracts a step and you cannot confidently
-match it to specific dataset columns, set confidence to LOW and
-autogenerate a 'clarification_question' asking the user which exact
-columns to use. If HIGH, output 'null'.
+\bibitem[\citeproctext]{ref-luo_can_2025}
+Luo, A., Du, J., Tian, F., Xian, X., Specht, R., Wang, G., Bi, X.,
+Fleming, C., Srinivasa, J., Kundu, A., Hong, M., \& Ding, J. (2025). Can
+{Agentic} {AI} {Match} the {Performance} of {Human} {Data} {Scientists}?
+\emph{2025 {IEEE} 10th {International} {Workshop} on {Computational}
+{Advances} in {Multi}-{Sensor} {Adaptive} {Processing} ({CAMSAP})},
+206--210. \url{https://doi.org/10.1109/CAMSAP66162.2025.11423949}
 
-6. Output ONLY valid YAML without markdown formatting.
+\bibitem[\citeproctext]{ref-glmmTMB-2}
+McGillycuddy, M., Warton, D. I., Popovic, G., \& Bolker, B. M. (2025).
+Parsimoniously fitting large multivariate random effects in {glmmTMB}.
+\emph{Journal of Statistical Software}, \emph{112}(1), 1--19.
+\url{https://doi.org/10.18637/jss.v112.i01}
 
-=== REQUIRED YAML STRUCTURE EXAMPLE ===
+\bibitem[\citeproctext]{ref-chatLLM}
+Owusu Boakye, K. D. N. (2026a). \emph{chatLLM: A flexible interface for
+'LLM' API interactions}.
+\url{https://doi.org/10.32614/CRAN.package.chatLLM}
 
-meta: type: schema nodes: - fork: variables are in different scales
-path: apply min-max scaling to each variable justification: to put
-them on the same scale for combination id: step-scaling confidence:
-high - fork: combine the school variables into one dimension path:
-average exp sch and avg sch justification: the most intuitive way id:
-step-education confidence: low
+\bibitem[\citeproctext]{ref-LLMAgentR}
+Owusu Boakye, K. D. N. (2026b). \emph{LLMAgentR: Language model agents
+in r for AI workflows and research}.
+\url{https://doi.org/10.32614/CRAN.package.LLMAgentR}
 
-=== DATASET SUMMARY ===
+\bibitem[\citeproctext]{ref-peng_reproducible_2011}
+Peng, R. D. (2011). Reproducible {Research} in {Computational}
+{Science}. \emph{Science}, \emph{334}(6060), 1226--1227.
+\url{https://doi.org/10.1126/science.1213847}
 
-NA
+\bibitem[\citeproctext]{ref-shah_automating_2026}
+Shah, S. M. H., Hopfgartner, F., \& Bleier, A. (2026). \emph{Automating
+{Computational} {Reproducibility} in {Social} {Science}: {Comparing}
+{Prompt}-{Based} and {Agent}-{Based} {Approaches}}.
+\url{https://doi.org/10.1145/3774905.3795485}
 
-=== METHODOLOGY TEXT ===
+\bibitem[\citeproctext]{ref-silberzahn2018}
+Silberzahn, R., Uhlmann, E. L., Martin, D. P., Anselmi, P., Aust, F.,
+Awtrey, E., Bahník, Š., Bai, F., Bannard, C., Bonnier, E., Carlsson, R.,
+Cheung, F., Christensen, G., Clay, R., Craig, M. A., Dalla Rosa, A.,
+Dam, L., Evans, M. H., Flores Cervantes, I., \ldots{} Nosek, B. A.
+(2018). Many Analysts, One Data Set: Making Transparent How Variations
+in Analytic Choices Affect Results. \emph{Advances in Methods and
+Practices in Psychological Science}, \emph{1}(3), 337--356.
+\url{https://doi.org/10.1177/2515245917747646}
 
-[inset text here]
-\end{verbatim}
+\bibitem[\citeproctext]{ref-sun_lambda_2026}
+Sun, M., Han, R., Jiang, B., Qi, H., Sun, D., Yuan, Y., \& Huang, J.
+(2026). {LAMBDA}: {A} {Large} {Model} {Based} {Data} {Agent}.
+\emph{Journal of the American Statistical Association}, \emph{121},
+1--13. \url{https://doi.org/10.1080/01621459.2025.2510000}
 
-\end{tcolorbox}
+\bibitem[\citeproctext]{ref-hdi}
+United Nations Development Programme. (2025). \emph{Human development
+report 2025}. United Nations Development Programme.
+\url{https://hdr.undp.org/}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating code from the schema}, leftrule=.75mm, colback=white, coltitle=black, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, titlerule=0mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
+\bibitem[\citeproctext]{ref-ellmer}
+Wickham, H., Cheng, J., Jacobs, A., Aden-Buie, G., \& Schloerke, B.
+(2025). \emph{Ellmer: Chat with large language models}.
+\url{https://doi.org/10.32614/CRAN.package.ellmer}
 
-\begin{verbatim}
-You are an expert R programmer. Attached is a text document
-containing a SCHEMA that defines a data processing pipeline.
+\bibitem[\citeproctext]{ref-wrobel_partnering_2024}
+Wrobel, J., Hector, E. C., Crawford, L., McGowan, L. D., Silva, N. da,
+Goldsmith, J., Hicks, S., Kane, M., Lee, Y., Mayrink, V., Paciorek, C.
+J., Usher, T., \& Wolfson, J. (2024). Partnering {With} {Authors} to
+{Enhance} {Reproducibility} at {JASA}. \emph{Journal of the American
+Statistical Association}, \emph{119}(546), 795--797.
+\url{https://doi.org/10.1080/01621459.2024.2340557}
 
-No data file is specified - if data loading is required, use a
-sensible placeholder or note it in a comment. Your task is to write a
-complete, working R script that implements this pipeline
-step-by-step. Use modern R practices (like dplyr or base pipe) and
-ensure variables flow correctly from one step to the next as defined
-by the inputs and outputs. Output ONLY the complete R script. Do not
-start with markdown formatting blocks (like ```R) or backticks.
-\end{verbatim}
+\bibitem[\citeproctext]{ref-xu_scaling_2026}
+Xu, Y., \& Yang, L. Y. (2026). \emph{Scaling {Reproducibility}: {An}
+{AI}-{Assisted} {Workflow} for {Large}-{Scale} {Replication} and
+{Reanalysis}}. arXiv. \url{https://doi.org/10.48550/arXiv.2602.16733}
 
-\end{tcolorbox}
+\bibitem[\citeproctext]{ref-zhang_inside_2025}
+Zhang, H. S., \& Peng, R. D. (2025). Inside {Out}: {Externalizing}
+{Assumptions} in {Data} {Analysis} as {Validation} {Checks}.
+\emph{Journal of Data Science}, 1--18.
+\url{https://doi.org/10.6339/25-JDS1206}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: validating the code generated}, leftrule=.75mm, colback=white, coltitle=black, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, titlerule=0mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
+\end{CSLReferences}
 
-\begin{verbatim}
-You are an expert R developer and automated debugging agent. The user
-has provided a data file located at the relative path: `data/[insert
-the path to the data]'. Your purpose is to receive broken R scripts,
-diagnose the execution error, and return the corrected script.
-
-CRITICAL INSTRUCTIONS: 1. Fix the bug while preserving the original
-intent and logic of the script.  2. If the error is a missing
-package, add the necessary `library()` call at the top.  3. If the
-error is a missing variable, ensure it is properly initialized before
-use.  4. Do NOT hallucinate new data files or external dependencies
-unless explicitly provided in the context.
-
-STRICT OUTPUT CONSTRAINTS: - You must output ONLY valid, fully
-executable R code.  - Absolutely NO markdown formatting. Do NOT wrap
-your response in ```R or ```.  - Absolutely NO conversational filler,
-greetings, explanations, or comments about what you fixed.  - The
-first character of your response must be R code, and the last
-character must be R code.
-\end{verbatim}
-
-\end{tcolorbox}
-
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Prompt: generating alternatives for a specific step}, leftrule=.75mm, colback=white, coltitle=black, bottomtitle=1mm, toptitle=1mm, rightrule=.15mm, titlerule=0mm, arc=.35mm, toprule=.15mm, opacitybacktitle=0.6]
-
-\begin{verbatim}
-You are an expert Data Analyst and Methodologist. You are reviewing
-an analysis schema to identify "Forking Paths" -- alternative
-analytical choices that are equally valid but distinct from the
-current approach.
-
-=== DEFINITIONS ===
-
-The schema provided to you consists of steps with:
-
-- **ACTION**: The goal of the step (What needs to be done).
-
-- **DECISION**: The specific implementation chosen (How it is done).
-
-- **JUSTIFICATION**: The reasoning behind that decision.
-
-- **ID**: The unique identifier for the step (kebab-case).
-
-=== TASK ===
-
-Focus specifically on the step tagged: "[inset step number here]".
-Your goal is to generate 3 distinct, valid alternatives for this
-step.
-
-For each alternative: 1. **Keep the same ACTION** (the goal remains
-constant).
-
-2. **Change the DECISION** to a different but methodologically sound
-approach.
-
-3. **Provide a new JUSTIFICATION** explaining why this alternative is
-valid.
-
-4. **Create a new ID** that reflects the new decision (must be
-kebab-case).
-
-=== OUTPUT FORMAT ===
-
-Please output the result in **strictly valid YML format**.
-
-**Crucial Formatting Rules:**
-
-1. Include a `meta` section at the top with `type: alternative` and
-the `step`.
-
-2. Output strictly valid YML. All text values (decision,
-justification) must be enclosed in double quotes ("). Do not use
-block styles (| or >). Do not wrap lines or insert \n characters
-within the quotes; keep the text as a single continuous string.
-
-3. Do not include markdown code fences (like ```yml) or
-conversational text. Just the raw YML.
-
-=== REQUIRED YML STRUCTURE EXAMPLE ===
-
-meta: type: tines_alternative step: [inset step number here]
-alternatives: - id: step-new-method-name action: Repeat the original
-action decision: "Description of the new decision..."  justification:
-"This is the reasoning for why this alternative is valid."  - id:
-step-another-method ...
-\end{verbatim}
-
-\end{tcolorbox}
-
-
-\renewcommand\refname{References}
-\bibliography{bibliography.bib}
 
 
 
