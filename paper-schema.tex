@@ -211,7 +211,7 @@ Zhang. Email: \href{mailto:hsherryzhang@utexas.edu}{\nolinkurl{hsherryzhang@utex
 \captionsetup{labelsep=space}
 \maketitle
 \textsuperscript{1} Department of Statistics and Data
-Sciences, University of Texas at Austin, Texas, United States
+Science, University of Texas at Austin, Texas, United States
 \begin{abstract}
 Current reproducibility practices have greatly improved our ability to
 replicate published results, but they do not necessarily make data
@@ -265,7 +265,7 @@ Specifically, understandable implies that an independent researcher
 should be able to, without much difficulty, track the decisions made by
 the authors, understand the rationale behind those decisions, and
 comfortably modify the code to explore alternative choices. As data
-analysis grown in complexity in modern applied research, understanding a
+analysis grows in complexity in modern applied research, understanding a
 piece of analysis has become non-trivial. Decisions related to data
 preprocessing and exploratory data analysis are often reported only
 briefly in manuscripts and left as technical details for readers to
@@ -294,7 +294,7 @@ capabilities have led to broad adoption of coding assistants through web
 interfaces, APIs and integrated development environments. In the R
 ecosystem, packages such as \texttt{ellmer} (Wickham et al., 2025),
 \texttt{chatLLM} (Owusu Boakye, 2026a), and \texttt{LLMAgentR} (Owusu
-Boakye, 2026b) provides increasingly accessible interfaces for access to
+Boakye, 2026b) provide increasingly accessible interfaces for access to
 latest LLM models.
 
 Building on these advances, recent work explores fully automated systems
@@ -352,25 +352,25 @@ analytical step \(A_i\), applied to a dataset \(\mathcal{D}\), where
 each step, \(A_i\), is defined as a tuple:
 
 \begin{equation}
-A_{i} = \langle f_{i}, \pi_{i}, r_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
+A_{i} = \langle f_{i}, \pi_{i}, \rho_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i} \rangle.
 \end{equation}
 
 The components of \(A_i\) can be partitioned into two parts: a required
-triplet \((f_{i}, \pi_{i}, r_{i})\) and an optional triplet
+triplet \((f_{i}, \pi_{i}, \rho_{i})\) and an optional triplet
 \((\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})\). The first component
 of the triplet, \(f_{i} \in \mathcal{F}\) is the \emph{objective} of a
 step. The second component, \(\pi_{i} \in \Pi\), represents the specific
 \emph{decision} made to achieve the objective \(f_{i}\) and the term
-\(r_{i}\) is the \emph{justification} provided for choosing the decision
-\(\pi_{i}\). Structuring this information into a schema involves
-defining the three components described above for each step. While the
-decision (what has been done) and the justification (why it is done) are
-generally clear, the objective requires identifying what the step is
-trying to achieve. In other words, it represents the broader goal that
-could potentially be fulfilled through other alternative choices
-(formally introduced in Section~\ref{sec-alternative}). As an example,
-consider the description for calculating the Human Development Index
-(HDI) (United Nations Development Programme, 2025):
+\(\rho_{i}\) is the \emph{justification} provided for choosing the
+decision \(\pi_{i}\). Structuring this information into a schema
+involves defining the three components described above for each step.
+While the decision (what has been done) and the justification (why it is
+done) are generally clear, the objective requires identifying what the
+step is trying to achieve. In other words, it represents the broader
+goal that could potentially be fulfilled through other alternative
+choices (formally introduced in Section~\ref{sec-alternative}). As an
+example, consider the description for calculating the Human Development
+Index (HDI) (United Nations Development Programme, 2025):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
@@ -653,44 +653,47 @@ Team 1, 9, 15, 21, 23, and 27.}
 
 Figure~\ref{fig-res-updated} shows the comparison of the estimated
 effect size, in odd ratio, from our workflow (simulated) and those
-reported in Silberzahn et al. (2018) (published). Our workflow
-successfully recovers the odd ratio reported in most teams, although
-larger variation is observed in the following teams: Team 1, 9, 15, 21,
-23, and 27. We further investigate the reports and generated scripts for
-these teams and find that the discrepancy arises from a combination of
-ambiguities from the report and LLM's accuracy.
+reported in Silberzahn et al. (2018) (published). The odd ratio is well
+recovered for most teams, though six show a noticeably larger gap: Team
+1, 9, 15, 21, 23, and 27. Looking closely at each team's report and
+generated script, the causes split into two stages of our pipeline, plus
+one case that has nothing to do with the LLM at all.
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Team 27}: the difference comes from the ambiguity of the
-  method description, the authors state that ``In addition to the
-  independent variables specified in the initial approach, \ldots{} a
-  variable for player position was included, as well as a variable for
-  the league of the player.'' This description could be interpreted as a
-  shorthand for extending the model with the interaction of additional
-  covariates as how other covariates enters the model in the initial
-  approach, but the LLM adopts a literal interpretation with only the
-  main effect.
-\item
-  \textbf{Team 9}: the authors describe ``referee country'' in the text
-  as a covariate for the model, but the reported estimation table
-  suggests they use ``player country'' instead.
-\item
-  \textbf{Team 1 and 23}: the discrepancy comes from the LLM fails to
-  properly reshape the data from player-referee pair level to game
-  level, which requires disaggregating the win, loss, and draw count
-  into individual game records. The schema properly identifies this step
-  but the generated code doesn't execute this step properly and create a
-  silent error with the validator.
-\item
-  \textbf{Team 15}: the discrepancy comes from the default setting for
-  estimating factor variable in R (our simulation) and SPSS (original
-  script). In SPSS, the factor variables are estimated with effect
-  coding, where the coefficients are compared to the grand mean, rather
-  than to the reference group (dummy coding) in R. After changing the
-  \texttt{contrast} option in R, we obtain the reported odd ratio.
-\end{itemize}
+For Team 27, the report is genuinely ambiguous: the authors write that,
+``In addition to the independent variables specified in the initial
+approach, \ldots{} a variable for player position was included, as well
+as a variable for the league of the player.'' A statistician reading
+this might reasonably take it as shorthand for extending the model with
+interactions, consistent with how the other covariates entered the
+initial model, but the LLM read it literally and added only main
+effects. Team 9 fails for a similar reason at the same stage: the text
+names ``referee country'' as the covariate, yet the reported estimation
+table lists ``player country'' instead, and the LLM followed the text
+rather than reconciling it against the table. In both cases the schema
+itself is already wrong before any code is written, so we treat these as
+schema-extraction errors.
+
+Team 1 and Team 23, by contrast, get the schema right but the code
+wrong. Both require reshaping the data from player-referee pairs to
+individual games, disaggregating win/loss/draw counts into game-level
+records. The schema correctly specifies this step, but the generated
+code fails to execute it as intended, and the resulting error passes
+through validation silently rather than triggering a repair.
+
+Team 15's discrepancy is unrelated to either stage: it comes down to a
+difference in default contrast coding between R (our reproduction) and
+SPSS (the original analysis) --- SPSS's effect coding compares each
+level to the grand mean, while R's default dummy coding compares to a
+reference level. Setting the \texttt{contrast} option in R to match
+recovers the reported odd ratio exactly, so this reflects a software
+convention rather than a modeling or LLM error.
+
+That leaves Team 21, whose discrepancy we have not yet traced to a
+specific cause {[}TODO: resolve before submission{]}. With that
+exception, the pattern across the remaining five teams is that LLM error
+is split evenly between the schema-extraction and code-generation
+stages, while the sixth discrepancy is a reproduction artifact rather
+than a model failure.
 
 \subsection{Exploring alternatives}\label{exploring-alternatives}
 
@@ -730,7 +733,7 @@ tone. The random effect include
 \item
   a random intercept for referee,
   \(v_k \sim N(0, \sigma^2_{\text{ref}})\), in Model 1 and 3, an
-  additional random sloope for referee in Model 2, and
+  additional random slope for referee in Model 2, and
 \item
   a random intercept and slope for referee countries,
   \(\mathbf{w}_{m} \sim N\left(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}}\right)\),
@@ -784,7 +787,8 @@ alternatives:
 \caption{\label{tbl-random-effects}Summary of random effect estimates
 for Group 5. The three models (gm1, gm2, and gm3) represent different
 specifications of the random effects structure to account for the
-non-nested cross-classified data structure.}
+non-nested cross-classified data structure. Cells are NA where a given
+random effect is not part of that model's specification.}
 
 \tabularnewline
 
@@ -820,32 +824,43 @@ supporting the exploration of alternative analytical choices.
 To further examine how this workflow behaves in practice, we apply it to
 the many-analysts football study. This analysis allows us to identify
 errors in the original reports and to characterize failure modes of
-current LLMs to generate code for data science. In particular, we find
-that LLMs requires a fairly precise specification in order to generate
-the code correctly for the intended random effect structure. For an
-educated statistician, the phrase ``a random effect of referee number
-across average rating'' would typically imply both a random intercept
-and a random slope. However, we observe that LLMs interpret this
-specification literally as a random slope only. This suggests the gap
-between the latest models and human analysts in specialized statistical
-knowledge (Sun et al., 2026).
+current LLMs to generate code for data science. Decomposing the largest
+discrepancies between our reproduced and reported effect sizes reveals
+that LLM error arises from two distinct stages of the pipeline, in
+roughly equal measure: mis-extraction of the schema from an ambiguous
+report, and correct schema extraction followed by incorrect code
+generation. This distinction matters for where future effort should be
+directed --- schema-extraction errors call for better disambiguation
+strategies (e.g., using the confidence score \(\omega_i\) to prompt for
+clarification, as introduced in Section~\ref{sec-method}), whereas
+code-generation errors call for improvements to the validation stage
+itself.
 
-Across the validation process, the LLM successfully corrects a range of
-implementation issues, including errors caused by overflowing comments
-and other syntax issues. However, we also observe challenges in data
-reshaping tasks when the transformation requires changes in the unit of
-analysis. In the study, some teams decide to transform the data from the
-original aggregated player-referee dyad-level format to game-level
-format. This transformation requires disaggregating aggregated outcome
-counts (win, loss, and draw) into individual game records, changing the
-unit of analysis from dyads to matches. We also observe some
-difficulties in parsing birthdates. Since the LLM does not have access
-to the underlying raw data, due to privacy constraint, it must rely on
-trial and error when inferring the correct date formats
-(``DD-MM-YYYY.''). This suggests that certain types of data analysis
-tasks may not be fully automatable in settings where the model cannot
-directly inspect the data, even if the data is theoretically available
-for computation.
+For the schema-extraction errors specifically, we find that LLMs require
+a fairly precise specification in order to generate the code correctly
+for the intended random effect structure. For an educated statistician,
+the phrase ``a random effect of referee number across average rating''
+would typically imply both a random intercept and a random slope.
+However, we observe that LLMs interpret this specification literally as
+a random slope only. This suggests the gap between the latest models and
+human analysts in specialized statistical knowledge (Sun et al., 2026).
+
+For the code-generation errors, the LLM successfully corrects a range of
+implementation issues during validation, including errors caused by
+overflowing comments and other syntax issues. However, we also observe
+challenges in data reshaping tasks when the transformation requires
+changes in the unit of analysis. In the study, some teams decide to
+transform the data from the original aggregated player-referee
+dyad-level format to game-level format. This transformation requires
+disaggregating aggregated outcome counts (win, loss, and draw) into
+individual game records, changing the unit of analysis from dyads to
+matches. We also observe some difficulties in parsing birthdates. Since
+the LLM does not have access to the underlying raw data, due to privacy
+constraint, it must rely on trial and error when inferring the correct
+date formats (``DD-MM-YYYY.''). This suggests that certain types of data
+analysis tasks may not be fully automatable in settings where the model
+cannot directly inspect the data, even if the data is theoretically
+available for computation.
 
 The reproducibility-understandability issue considered in this work is
 still at an early stage, some software decision choices are worth
@@ -858,13 +873,13 @@ across different programming languages. In the current implementation,
 analytical decisions are recorded in a single YAML file. An alternative
 would be to record individual decisions in separate Markdown files.
 While YAML files provide an explicit structure for machine readability,
-markdown files offers greater flexibility for documenting decisions.
+markdown files offer greater flexibility for documenting decisions.
 Recording decisions in separate files would also allow files to be
 linked across time to understand how decisions evolve or change over the
 course of an analysis and can potentially support a broader
-research-management system iattributes decisions to individual
-researchers and maintains a record of the changes leading to the final
-analysis.
+research-management system if the decisions are properly attributed to
+individual researchers and maintains a record of the changes leading to
+the final analysis.
 
 \section{Acknowledgments}\label{acknowledgments}
 
