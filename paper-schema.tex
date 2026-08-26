@@ -218,19 +218,19 @@ replicate published results, but they do not necessarily make data
 analyses easier to understand. Audience seeking to comprehend an
 analysis need to piece together information scattered across manuscripts
 and code scripts to understand the sequence of analytical steps and the
-rationale behind them, with some details may not explicitly recorded in
+rationale behind them, with some details may not explicitly record in
 either source. Exploring alternative analytical choices is even more
 challenging, as it requires understanding and modifying code that may be
 unfamiliar and consider how it would impact upstream and downstream
 code. To address these challenges, we propose a schema that represents
-data analyses as a collectino of analytical decisions, together with
+data analyses as a collection of analytical decisions, together with
 their justification, inputs, and outputs. Coupled with large language
 models (LLMs), the schema can be inferred from natural language
 descriptions and translated into analysis scripts. The structured
 representation also enables exploration of alternative analytical
 choices, allowing multiple analytical workflows to be generated and
 compared. We demonstrate the proposed workflow using the many-analysts
-football study, where LLMs create the schema from the decision chocies
+football study, where LLMs create the schema from the decision choices
 in team reports, generate corresponding analysis scripts, and explore
 alternative random effect specifications. As an intermediate
 representation between the manuscript and code scripts, our schema makes
@@ -264,24 +264,24 @@ code required to reproduce the results are available to readers.
 Specifically, understandable implies that an independent researcher
 should be able to, without much difficulty, track the decisions made by
 the authors, understand the rationale behind those decisions, and
-confortably modify the code to explore alternative choices. As data
+comfortably modify the code to explore alternative choices. As data
 analysis grown in complexity in modern applied research, understanding a
 piece of analysis has become non-trivial. Decisions related to data
 preprocessing and exploratory data analysis are often reported only
 briefly in manuscripts and left as technical details for readers to
-infer from supplementary materials. Many decisions are not made in a
-linear fashion but emerge through an iterative process (Jun, Birchfield,
-et al., 2022; Jun, Seo, et al., 2022; Zhang \& Peng, 2025), and it is
-not entirely clear how this iterative nature of data analysis can be
-communicated. Making changes to an existing script can often be
-difficult because analytical decisions are intertwined with
-implementation details, project-specific abstractions, and dependencies
-across different parts of the workflow, requiring readers to consider
-how modifications propagate through upstream and downstream components.
-As a result, readers seeking to understand, modify, or extend an
-analysis must often spend a non-trivial amount of the time to piece
-together information scattered across manuscripts, code scripts, and
-supplementary materials to fully understand an analysis.
+infer from supplementary materials. Many decisions are not made linearly
+but emerge through an iterative process (Jun, Birchfield, et al., 2022;
+Jun, Seo, et al., 2022; Zhang \& Peng, 2025), and it is not entirely
+clear how this iterative nature of data analysis can be communicated.
+Making changes to an existing script can often be difficult because
+analytical decisions are intertwined with implementation details,
+project-specific abstractions, and dependencies across different parts
+of the workflow, requiring readers to consider how modifications
+propagate through upstream and downstream components. As a result,
+readers seeking to understand, modify, or extend an analysis must often
+spend a non-trivial amount of the time to piece together information
+scattered across manuscripts, code scripts, and supplementary materials
+to fully understand an analysis.
 
 Advances in Large Language Models (LLMs) have led to widespread use of
 these systems for code generation tasks, including code completion and
@@ -290,7 +290,7 @@ code-oriented LLMs demonstrated strong capabilities in translating
 natural language descriptions into executable programs, with models such
 as Codex achieving substantial improvements on benchmark programming
 tasks (Chen et al., 2021; Huang et al., 2022; Lai et al., 2023). These
-capabilities have led to broad adoption of coding assistants thorugh web
+capabilities have led to broad adoption of coding assistants through web
 interfaces, APIs and integrated development environments. In the R
 ecosystem, packages such as \texttt{ellmer} (Wickham et al., 2025),
 \texttt{chatLLM} (Owusu Boakye, 2026a), and \texttt{LLMAgentR} (Owusu
@@ -507,7 +507,7 @@ achieve perfect accuracy. The validation process runs the generated
 script in a sandbox environment and if an error occurs, a third LLM
 agent will be employed to diagnose the script. The validation agent
 receives the generated code together with the error message and the
-correponding line number produced during the execution, and returns a
+corresponding line number produced during the execution, and returns a
 newer version of the script. The revised script is then re-executed in
 the sandbox and this cycle continues until one of the three conditions
 is met: the code runs successfully, a maximum number of attempt is
@@ -515,7 +515,7 @@ reached, or the user terminates the process. As will be show in
 Section~\ref{sec-application}, this validation process resolves the
 majority of R syntax issues encountered during data wrangling and
 statistical modelling tasks. On top of supporting a single analytical
-specification, the workflow also allows users to agument a schema with
+specification, the workflow also allows users to argument a schema with
 an alternative YAML file. This expands the original schema into a
 multiverse of parallel schemas, each representing a different sequence
 of decision choices. The same code generation and validation workflow is
@@ -543,7 +543,7 @@ Returning to the HDI example, the proposed workflow allows both authors
 and readers to interact with a data analysis through natural language.
 The schema in Listing~\ref{lst-schema} is straightforward to construct
 from a template and can be included as supplementary material to
-docuemnt the analytical workflow. An author may use the ``code
+document the analytical workflow. An author may use the ``code
 generation and validation'' path in Figure~\ref{fig-workflow} to
 automatically generate the analysis script for computing HDI and
 validate its accuracy. A reader, on the other hand, may wish to explore
@@ -568,45 +568,45 @@ size by each team. During this process, we identify some errors in the
 original reports and highlight failure modes of current LLMs.
 
 Silberzahn et al. (2018) invites 29 research groups to conduct the same
-data analysis to answer the question whether soccer referees are more
-likely to give red cards to dark-skin-toned player than to
-light-skin-toned players. The provided dataset contains two raters' skin
-color rating to players' picture, the aggregated number of red card
-received by a player from a referee across all matches in that
-player-referee pair, and other relevant player, referee, and game
-characteristics: player birthday, height, weight, player position,
-league country, number of victories, ties, and defeats, and number of
-yellow and red cards received. In Silberzahn et al. (2018), each group
-first conducted an initial analysis separately, followed by a
-round-robin peer evaluation. Each group was then gave the opportunity to
-incorporate feedback from the discussion and submitted a final analysis
-as a report with a formal Method section. All the materials related to
-the study is publicly available on the Open Science Framework (OSF).
+data analysis to answer whether are more likely to give red cards to
+dark-skin-toned player than to light-skin-toned players. The provided
+dataset contains two raters' skin color rating to players' picture, the
+aggregated number of red card received by a player from a referee across
+all matches in that player-referee pair, and other relevant player,
+referee, and game characteristics: player birthday, height, weight,
+player position, league country, number of victories, ties, and defeats,
+and number of yellow and red cards received. In Silberzahn et al.
+(2018), each group first conducted an initial analysis separately,
+followed by a round-robin peer evaluation. Each group was then given the
+opportunity to incorporate feedback from the discussion and submitted a
+final analysis as a report with a formal Method section. All the
+materials related to the study is publicly available on the Open Science
+Framework (OSF).
 
 Based on the reports presented by each team, most participating groups
 adopted a modelling approach to estimate the effect of skin color rating
 on the likelihood of receiving a red card. As an illustrative example,
 Group 5 first transformed the data into player--game observations,
 resulting in a binary response variable for whether a player received a
-red card, and removed observations with missing values using listwise
+red card, and removed observations with missing values using list-wise
 deletion. The resulting data were modelled using a generalized linear
 mixed model (GLMM) with a binomial error distribution. The average skin
 color rating from two raters was used as the primary covariate, and its
-estimated coefficient was the main pa rameter of interest. To account
-for unobserved heterogeneity, the model included random effects for
-player and referee, as well as the average skin color rating across
-referee's country of origin. While Group 5's analysis illustrates one
-possible approach, other groups may adopt different data preprocessing
-decisions, distributional assumptions (e.g., linear, logistic, or
-Poisson models), specification of fixed and random effects, or conduct
-the analysis in a Bayesian framework.
+estimated coefficient was the main parameter of interest. To account for
+unobserved heterogeneity, the model included random effects for player
+and referee, as well as the average skin color rating across referee's
+country of origin. While Group 5's analysis illustrates one possible
+approach, other groups may adopt different data preprocessing decisions,
+distributional assumptions (e.g., linear, logistic, or Poisson models),
+specification of fixed and random effects, or conduct the analysis in a
+Bayesian framework.
 
 We use LLM to convert the methodology description into the schema we
 propose and generate the corresponding code script. We observe that most
 reports are structured to first describe the initial data analysis and
 then the changes made in the final analysis. To avoid testing LLMs'
 ability to reconstruct how analysis steps are modified, overturned, or
-carried over from the intial to the final analysis, we extract the
+carried over from the initial to the final analysis, we extract the
 descriptions relevant to the final analysis.
 
 We send the text description of each team for LLM to generate the schema
@@ -669,7 +669,7 @@ ambiguities from the report and LLM's accuracy.
   variable for player position was included, as well as a variable for
   the league of the player.'' This description could be interpreted as a
   shorthand for extending the model with the interaction of additional
-  covariates as how other covariates enters the mdoel in the initial
+  covariates as how other covariates enters the model in the initial
   approach, but the LLM adopts a literal interpretation with only the
   main effect.
 \item
@@ -677,15 +677,15 @@ ambiguities from the report and LLM's accuracy.
   as a covariate for the model, but the reported estimation table
   suggests they use ``player country'' instead.
 \item
-  \textbf{Team 1 and 23}: the discrepency comes from the LLM fails to
+  \textbf{Team 1 and 23}: the discrepancy comes from the LLM fails to
   properly reshape the data from player-referee pair level to game
-  level, which requires disaggregate the win, loss, and draw count into
-  individual game records. The schema properly identifies this step but
-  the generated code doesn't execute this step properly and create a
+  level, which requires disaggregating the win, loss, and draw count
+  into individual game records. The schema properly identifies this step
+  but the generated code doesn't execute this step properly and create a
   silent error with the validator.
 \item
-  \textbf{Team 15}: the discrpency comes from the default setting for
-  estimating factor variable in R (our similuation) and SPSS (original
+  \textbf{Team 15}: the discrepancy comes from the default setting for
+  estimating factor variable in R (our simulation) and SPSS (original
   script). In SPSS, the factor variables are estimated with effect
   coding, where the coefficients are compared to the grand mean, rather
   than to the reference group (dummy coding) in R. After changing the
@@ -740,9 +740,9 @@ tone. The random effect include
 These alternatives are specified in a separate YAML file described in
 Section~\ref{sec-alternative} as Listing~\ref{lst-yaml-alternative}.
 This file is then merged with the original schema to produce one
-separate schema for each alternative for code generation and validaiton.
+separate schema for each alternative for code generation and validation.
 The validated scripts are then executed to obtain the estimated random
-effects in Table~\ref{tbl-random-effects}. This results matches with the
+effects in Table~\ref{tbl-random-effects}. This result matches with the
 random effects reported in the team report, subject to rounding errors.
 Similarly, the model fitting statistics can be extracted from the
 estimation for selecting the best fit.
@@ -789,16 +789,16 @@ non-nested cross-classified data structure.}
 \tabularnewline
 
 \toprule\noalign{}
-group & term & gm1 & gm2 & gm3 \\
+Group & Term & gm1 & gm2 & gm3 \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-playerShort & var\_\_(Intercept) & 0.3737 & 0.3738 & 0.2899 \\
-refNum & var\_\_(Intercept) & 0.1528 & 0.1932 & 0.0748 \\
-refNum & var\_\_avgrate01 & NA & 0.0286 & NA \\
-refCountry & var\_\_(Intercept) & NA & NA & 0.3990 \\
-refCountry & var\_\_avgrate01 & NA & NA & 0.0870 \\
+Player & Intercept & 0.3737 & 0.3738 & 0.2899 \\
+Referee & Intercept & 0.1528 & 0.1932 & 0.0748 \\
+Referee & Referee rating & NA & 0.0286 & NA \\
+Referee's country & Intercept & NA & NA & 0.3990 \\
+Referee's country & Referee rating & NA & NA & 0.0870 \\
 
 \end{longtable}
 
@@ -826,7 +826,7 @@ the code correctly for the intended random effect structure. For an
 educated statistician, the phrase ``a random effect of referee number
 across average rating'' would typically imply both a random intercept
 and a random slope. However, we observe that LLMs interpret this
-speicification literally as a random slope only. This suggests the gap
+specification literally as a random slope only. This suggests the gap
 between the latest models and human analysts in specialized statistical
 knowledge (Sun et al., 2026).
 
@@ -839,7 +839,7 @@ original aggregated player-referee dyad-level format to game-level
 format. This transformation requires disaggregating aggregated outcome
 counts (win, loss, and draw) into individual game records, changing the
 unit of analysis from dyads to matches. We also observe some
-difficulties in parsing birth dates. Since the LLM does not have access
+difficulties in parsing birthdates. Since the LLM does not have access
 to the underlying raw data, due to privacy constraint, it must rely on
 trial and error when inferring the correct date formats
 (``DD-MM-YYYY.''). This suggests that certain types of data analysis
@@ -848,7 +848,7 @@ directly inspect the data, even if the data is theoretically available
 for computation.
 
 The reproducibility-understandability issue considered in this work is
-still at an early stage, several software decision choices are worth
+still at an early stage, some software decision choices are worth
 examining. We currently implement a prototype as an R package, although
 the understandability problem is broadly applicable to statistical
 analyses and is not associated to any particular programming language.
@@ -866,11 +866,25 @@ research-management system iattributes decisions to individual
 researchers and maintains a record of the changes leading to the final
 analysis.
 
+\section{Acknowledgments}\label{acknowledgments}
+
+The implementation of the schema is available as an R package,
+\texttt{tines}, available on CRAN. The source code for reproducing the
+work reported in this paper is available in the Supplementary Materials
+and can be found at:
+\url{https://github.com/huizezhang-sherry/paper-schema}. The article is
+created using Quarto (Allaire et al., 2026) in R (R Core Team, 2026).
+
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-Allaire_Quarto_2026}
+Allaire, J. J., Teague, C., Scheidegger, C., Xie, Y., Dervieux, C., \&
+Woodhull, G. (2026). \emph{{Quarto}} (Version 1.9) {[}Computer
+software{]}. \url{https://doi.org/10.5281/zenodo.5960048}
+
 \bibitem[\citeproctext]{ref-lme4}
 Bates, D., Mächler, M., Bolker, B., \& Walker, S. (2015). Fitting linear
 mixed-effects models using {lme4}. \emph{Journal of Statistical
@@ -982,6 +996,11 @@ in r for AI workflows and research}.
 Peng, R. D. (2011). Reproducible {Research} in {Computational}
 {Science}. \emph{Science}, \emph{334}(6060), 1226--1227.
 \url{https://doi.org/10.1126/science.1213847}
+
+\bibitem[\citeproctext]{ref-R}
+R Core Team. (2026). \emph{R: A language and environment for statistical
+computing}. R Foundation for Statistical Computing.
+\url{https://doi.org/10.32614/R.manuals}
 
 \bibitem[\citeproctext]{ref-shah_automating_2026}
 Shah, S. M. H., Hopfgartner, F., \& Bleier, A. (2026). \emph{Automating
