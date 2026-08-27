@@ -353,18 +353,19 @@ The components of \(A_i\) can be partitioned into two parts: a required
 triplet \((f_{i}, \pi_{i}, \rho_{i})\) and an optional triplet
 \((\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})\). The first component
 of the triplet, \(f_{i} \in \mathcal{F}\) is the \emph{objective} of a
-step. The second component, \(\pi_{i} \in \Pi\), represents the specific
-\emph{decision} made to achieve the objective \(f_{i}\) and the term
-\(\rho_{i}\) is the \emph{justification} provided for choosing the
-decision \(\pi_{i}\). Structuring this information into a schema
-involves defining the three components described above for each step.
-While the decision (what has been done) and the justification (why it is
-done) are generally clear, the objective requires identifying what the
-step is trying to achieve. In other words, it represents the broader
-goal that could potentially be fulfilled through other alternative
-choices (formally introduced in Section~\ref{sec-alternative}). As an
-example, consider the description for calculating the Human Development
-Index (HDI) (United Nations Development Programme, 2025):
+step, identifying the problem the step is trying to solve and thereby
+fixing the space of alternative decisions that could equally address it
+(formally introduced in Section~\ref{sec-alternative}). The second
+component, \(\pi_{i} \in \Pi\), is the \emph{decision} made to achieve
+\(f_i\): it is a narration, in natural language, of what a corresponding
+line of code would do, situated in the context of this specific
+analysis, rather than the code's syntax itself. The term \(\rho_{i}\) is
+the \emph{justification} provided for choosing the decision \(\pi_{i}\)
+over the other alternatives that could have fulfilled the same
+objective. Structuring this information into a schema involves defining
+the three components described above for each step. As an example,
+consider the description for calculating the Human Development Index
+(HDI) (United Nations Development Programme, 2025):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
@@ -420,22 +421,38 @@ nodes:
 
 \end{codelisting}%
 
-On the optional components of a data analysis step \(A_i\), the
-operational flow of the analysis is governed by the input and output
-spaces, \(\mathcal{I}_{i}\) and \(\mathcal{O}_{i}\) respectively, once a
-dataset is provided. While the output of a step can be a pseudo object
-that not currently exist in the dataset, the inputs for any given step
-must be within the existing data scope, comprising variables in the
-original dataset and all outputs from previous steps. Formally, we
-require:
+The required triplet \((f_i, \pi_i, \rho_i)\) is already sufficient on
+its own for a human reader to follow the analytical logic of a step,
+without needing access to the underlying dataset. The optional triplet
+\((\mathcal{I}_i, \mathcal{O}_i, \omega_i)\) adds a further layer on top
+of this: \(\mathcal{I}_i\) and \(\mathcal{O}_i\) bind the step to
+concrete variables in the dataset, resolving ahead of time the variable
+mapping that an LLM would otherwise have to infer at the point of code
+generation. Populating them requires a dataset to be available, which is
+why they remain optional rather than required. While the output of a
+step can be a pseudo object that does not yet exist in the dataset, the
+inputs for any given step must be within the existing data scope,
+comprising variables in the original dataset and all outputs from
+previous steps. Because the schema is meant to specify an analysis
+before the corresponding code is generated, an output name can refer to
+a variable that does not yet exist; this is inherent to using the schema
+as a specification rather than a post-hoc description of existing code.
+In practice, \(\mathcal{O}_i\) most often names a column added to the
+evolving dataset via non-standard evaluation, as in
+\texttt{tidyverse}-style pipelines; a small number of steps, such as
+model fitting, instead produce a distinct object that is not itself a
+column of \(\mathcal{D}\). Formally, we require:
 
 \[\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j < i} \mathcal{O}_{j} \right), \quad \forall i \in \{2, \dots, n\}.\]
 
 When the schema is extracted automatically by Large Language Models
 (LLMs) from text, the inputs and outputs will be inferred by the LLMs,
 if a dataset is provided. We also introduce a categorical confidence
-score, \(\omega_{i}\) (low, medium, high) that can be useful in case
-when the source text is ambiguous to guide the LLM to ask for
+score, \(\omega_{i}\) (low, medium, high), defined as the model's
+confidence that the recorded \((f_i, \pi_i, \rho_i)\) correctly reflects
+the source text; \(\omega_i\) is low precisely when one or more of these
+components could not be read off the text directly and had to be
+inferred by the LLM, and can be used to guide the LLM to ask for
 clarification to consolidate the schema extraction.
 
 \subsection{Describing alternatives}\label{sec-alternative}
@@ -876,6 +893,21 @@ date formats (``DD-MM-YYYY.''). This suggests that certain types of data
 analysis tasks may not be fully automatable in settings where the model
 cannot directly inspect the data, even if the data is theoretically
 available for computation.
+
+While the schema requires a justification \(\rho_i\) for each decision,
+nothing in the format itself can guarantee that this justification is
+substantive rather than perfunctory; an analyst can satisfy the schema
+with a low-effort entry in the same way that a required code comment or
+commit message can be filled with boilerplate. The schema makes
+recording a decision's rationale cheap and structured, but, as with any
+documentation requirement, cannot enforce that authors use it
+thoughtfully. It remains an open question whether resolving
+\(\mathcal{I}_i\) and \(\mathcal{O}_i\) to concrete dataset variables
+ahead of time, rather than leaving this mapping for the LLM to infer at
+the point of code generation, meaningfully improves the reliability of
+the resulting code. {[}maybe we want a controlled experiment to compare
+code generation with or without pre-resolved input and output
+variables{]}
 
 The reproducibility-understandability issue considered in this work is
 still at an early stage, some software decision choices are worth
