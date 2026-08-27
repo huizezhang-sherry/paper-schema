@@ -247,70 +247,60 @@ Many-analysts study
 \setstretch{1.15}
 \section{Introduction}\label{sec-intro}
 
-The reproducibility movement has been a major development in modern
-scientific research, motivated in part by concerns regarding the
-replication of published findings and the increasing reliance on
-computational methods across disciplines. In statistics, advocates of
-reproducible research argue that scientific claims should be accompanied
-by the data and code necessary to regenerate reported results (Peng,
-2011). These practices have greatly improved the reproducibility of
-published results across scientific domains (Kohler et al., 2026; Xu \&
-Yang, 2026) and have been incorporated into journal policies through
-data and code availability requirements (see the \emph{Journal of the
-American Statistical Association} editorial (Wrobel et al., 2024)).
+When we want to understand a published data analysis, beyond simply
+being able to re-run it, there is currently nothing we can use directly
+for this purpose. Code and data availability, now standard practice
+following a broader push for reproducible research (Peng, 2011; Wrobel
+et al., 2024), guarantee that a result can be regenerated, but they say
+nothing about whether a reader can track the decisions the authors made,
+understand the rationale behind them, or comfortably modify the code to
+explore alternative choices.
 
-An implicit assumption underlying current practices is that
-reproducibility implies understandability, given that the data and the
-code required to reproduce the results are available to readers.
-Specifically, understandable implies that an independent researcher
-should be able to, without much difficulty, track the decisions made by
-the authors, understand the rationale behind those decisions, and
-comfortably modify the code to explore alternative choices. As data
-analysis grows in complexity in modern applied research, understanding a
-piece of analysis has become non-trivial. Decisions related to data
-preprocessing and exploratory data analysis are often reported only
-briefly in manuscripts and left as technical details for readers to
-infer from supplementary materials. Many decisions are not made linearly
-but emerge through an iterative process (Jun, Birchfield, et al., 2022;
-Jun, Seo, et al., 2022; Zhang \& Peng, 2025), and it is not entirely
-clear how this iterative nature of data analysis can be communicated.
-Making changes to an existing script can often be difficult because
-analytical decisions are intertwined with implementation details,
-project-specific abstractions, and dependencies across different parts
-of the workflow, requiring readers to consider how modifications
-propagate through upstream and downstream components. As a result,
-readers seeking to understand, modify, or extend an analysis must often
-spend a non-trivial amount of the time to piece together information
-scattered across manuscripts, code scripts, and supplementary materials
-to fully understand an analysis.
+Part of the difficulty is that code and the applied researchers who
+write it operate at different levels: code specifies precisely what a
+computer should do, while a researcher reasons about what decision that
+computation represents in the context of their analysis, a gap also
+identified in prior work on authoring statistical models from conceptual
+relationships (Jun, Seo, et al., 2022; Jun, Birchfield, et al., 2022).
+Consider a line such as
+\texttt{dplyr::filter(df,\ x\ \textgreater{}\ 0)}, which has a precise,
+unambiguous meaning as code: keep rows where \texttt{x} is positive. As
+an analytical decision, however, that same line could represent
+restricting the analysis to a subpopulation for which
+\texttt{x\ \textgreater{}\ 0} is substantively meaningful, or excluding
+observations flagged as invalid by an encoding convention where
+\(x \leq 0\) denotes missingness; nothing in the \texttt{filter()}
+syntax gives any indication of which of these two decisions is being
+made. Tools such as \texttt{tidyverse} (Wickham et al., 2019) have
+worked to align code more closely with the action being performed,
+naming operations after what they do rather than how they are
+implemented. But knowing the action a line of code performs is not the
+same as knowing the decision it encodes: an analysis requires additional
+context that the action alone does not carry.
 
-Advances in Large Language Models (LLMs) have led to widespread use of
-these systems for code generation tasks, including code completion and
-program repair (Jiang et al., 2026; Shah et al., 2026). Early work on
-code-oriented LLMs demonstrated strong capabilities in translating
-natural language descriptions into executable programs, with models such
-as Codex achieving substantial improvements on benchmark programming
-tasks (Chen et al., 2021; Huang et al., 2022; Lai et al., 2023). These
-capabilities have led to broad adoption of coding assistants through web
-interfaces, APIs and integrated development environments. In the R
-ecosystem, packages such as \texttt{ellmer} (Wickham et al., 2025),
-\texttt{chatLLM} (Owusu Boakye, 2026a), and \texttt{LLMAgentR} (Owusu
-Boakye, 2026b) provide increasingly accessible interfaces for access to
-latest LLM models.
+This suggests that a more effective representation of an analysis would
+be one that describes the decisions made and their rationale, allowing
+readers to understand the analysis without needing to parse the code
+itself or reconstruct the rationale from the manuscript. Recent advances
+in Large Language Models (LLMs) for code generation make such a
+representation practical: LLMs are now widely used for code generation
+tasks, demonstrating strong capabilities in translating natural language
+descriptions into executable programs (Chen et al., 2021; Huang et al.,
+2022; Jiang et al., 2026; Lai et al., 2023; Shah et al., 2026). Once a
+decision is described in a schema, an LLM can generate and validate the
+corresponding code directly from it.
 
-Building on these advances, recent work explores fully automated systems
-that use multiple LLM agents to plan, generate, execute, and refine data
-analyses (Hu et al., 2024; Jansen et al., 2025). Our work relies on the
-same underlying capability of translating analytical specifications into
-code, but differs in its view of what should be automated. Data analysis
-is often underdetermined, with many plausible choices regarding data
-preprocessing, transformation, aggregation, and model specification
-(Bertran et al., 2026; Gao \& Xiao, 2026; Luo et al., 2025), by
-contrast, once these analytical decisions have been specified,
-translating them into executable code is often a comparatively
-straightforward task. This distinction motivates our focus on
-representing analytical decisions explicitly and using LLMs to translate
-those decisions into code.
+This same representation also makes extending an analysis easier. Data
+analysis is often underdetermined, with many plausible choices regarding
+data preprocessing, transformation, aggregation, and model specification
+(Bertran et al., 2026; Gao \& Xiao, 2026; Luo et al., 2025), and a
+reader may reasonably want to know whether a conclusion would still hold
+under one of these other choices, for example, ``What if we had included
+observations with \(x \leq 0\)?'' Because each decision is recorded
+explicitly rather than embedded in code, a reader can specify such an
+alternative directly and have it evaluated through the same schema and
+the same LLM-based translation into code, rather than modifying the
+original script by hand.
 
 In this paper, we present a schema designed to describe data analysis in
 a structured way that captures the decisions and their justifications,
@@ -458,8 +448,9 @@ We can define a selection vector \(r = (r_1, r_2, \dots, r_n)\), where
 \(r_i \in \{1, \dots, k_i\}\), to describe an analysis comprised of
 specific series of decisions:
 \(\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}\).
-A multiverse, used to describe the entire decision space, is defined as
-the Cartesian product of these sets:
+A multiverse, used to describe the entire decision space (Simonsohn et
+al., 2020; Steegen et al., 2016), is defined as the Cartesian product of
+these sets:
 \(\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}\).
 The cardinality of this space, \(|\mathcal{M}| = \prod_{i=1}^n k_i\),
 quantifies the total number of unique, fully-specified analysis.
@@ -825,6 +816,21 @@ representation enables the extraction of analytical structure from
 written reports and its translation into analysis scripts, and
 supporting the exploration of alternative analytical choices.
 
+Our approach differs in this respect from recent work that builds fully
+automated systems using multiple LLM agents to plan, generate, execute,
+and refine data analyses (Hu et al., 2024; Jansen et al., 2025). These
+systems rely on the same underlying capability of translating analytical
+specifications into code that our workflow uses, but they aim to
+automate the analytical decisions themselves, not just their translation
+into code. The failure modes we document in
+Section~\ref{sec-application} suggest this is premature: even the
+comparatively narrower task of translating an already-specified decision
+into working code is not yet fully reliable. We take this as support for
+our position that the harder and more consequential part of a data
+analysis is the sequence of decisions a researcher makes, not the code
+that implements them, and that this part should remain explicit and in
+the hands of the analyst rather than be automated away.
+
 To further examine how this workflow behaves in practice, we apply it to
 the many-analysts football study. This analysis allows us to identify
 errors in the original reports and to characterize failure modes of
@@ -978,12 +984,6 @@ statistical models via formal reasoning from conceptual and data
 relationships}. \emph{CHI '22}, 116.
 \url{https://doi.org/10.1145/3491102.3501888}
 
-\bibitem[\citeproctext]{ref-kohler_read_2026}
-Kohler, B., Zollikofer, D., Einsiedler, J., Hoyle, A., \& Ash, E.
-(2026). \emph{Read the {Paper}, {Write} the {Code}: {Agentic}
-{Reproduction} of {Social}-{Science} {Results}}. arXiv.
-\url{https://doi.org/10.48550/arXiv.2604.21965}
-
 \bibitem[\citeproctext]{ref-lai_ds1000_2023}
 Lai, Y., Li, C., Wang, Y., Zhang, T., Zhong, R., Zettlemoyer, L., Yih,
 W.-T., Fried, D., Wang, S., \& Yu, T. (2023). {DS}-1000: {A} {Natural}
@@ -1005,16 +1005,6 @@ McGillycuddy, M., Warton, D. I., Popovic, G., \& Bolker, B. M. (2025).
 Parsimoniously fitting large multivariate random effects in {glmmTMB}.
 \emph{Journal of Statistical Software}, \emph{112}(1), 1--19.
 \url{https://doi.org/10.18637/jss.v112.i01}
-
-\bibitem[\citeproctext]{ref-chatLLM}
-Owusu Boakye, K. D. N. (2026a). \emph{chatLLM: A flexible interface for
-'LLM' API interactions}.
-\url{https://doi.org/10.32614/CRAN.package.chatLLM}
-
-\bibitem[\citeproctext]{ref-LLMAgentR}
-Owusu Boakye, K. D. N. (2026b). \emph{LLMAgentR: Language model agents
-in r for AI workflows and research}.
-\url{https://doi.org/10.32614/CRAN.package.LLMAgentR}
 
 \bibitem[\citeproctext]{ref-peng_reproducible_2011}
 Peng, R. D. (2011). Reproducible {Research} in {Computational}
@@ -1042,6 +1032,17 @@ in Analytic Choices Affect Results. \emph{Advances in Methods and
 Practices in Psychological Science}, \emph{1}(3), 337--356.
 \url{https://doi.org/10.1177/2515245917747646}
 
+\bibitem[\citeproctext]{ref-simonsohn2020}
+Simonsohn, U., Simmons, J. P., \& Nelson, L. D. (2020). Specification
+curve analysis. \emph{Nature Human Behaviour}, \emph{4}(11), 1208--1214.
+\url{https://doi.org/10.1038/s41562-020-0912-z}
+
+\bibitem[\citeproctext]{ref-steegen2016}
+Steegen, S., Tuerlinckx, F., Gelman, A., \& Vanpaemel, W. (2016).
+Increasing transparency through a multiverse analysis.
+\emph{Perspectives on Psychological Science}, \emph{11}(5), 702--712.
+\url{https://doi.org/10.1177/1745691616658637}
+
 \bibitem[\citeproctext]{ref-sun_lambda_2026}
 Sun, M., Han, R., Jiang, B., Qi, H., Sun, D., Yuan, Y., \& Huang, J.
 (2026). {LAMBDA}: {A} {Large} {Model} {Based} {Data} {Agent}.
@@ -1053,10 +1054,13 @@ United Nations Development Programme. (2025). \emph{Human development
 report 2025}. United Nations Development Programme.
 \url{https://hdr.undp.org/}
 
-\bibitem[\citeproctext]{ref-ellmer}
-Wickham, H., Cheng, J., Jacobs, A., Aden-Buie, G., \& Schloerke, B.
-(2025). \emph{Ellmer: Chat with large language models}.
-\url{https://doi.org/10.32614/CRAN.package.ellmer}
+\bibitem[\citeproctext]{ref-wickham2019tidyverse}
+Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L. D.,
+François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M.,
+Pedersen, T. L., Miller, E., Bache, S. M., Müller, K., Ooms, J.,
+Robinson, D., Seidel, D. P., Spinu, V., \ldots{} Yutani, H. (2019).
+Welcome to the tidyverse. \emph{Journal of Open Source Software},
+\emph{4}(43), 1686. \url{https://doi.org/10.21105/joss.01686}
 
 \bibitem[\citeproctext]{ref-wrobel_partnering_2024}
 Wrobel, J., Hector, E. C., Crawford, L., McGowan, L. D., Silva, N. da,
@@ -1065,17 +1069,6 @@ J., Usher, T., \& Wolfson, J. (2024). Partnering {With} {Authors} to
 {Enhance} {Reproducibility} at {JASA}. \emph{Journal of the American
 Statistical Association}, \emph{119}(546), 795--797.
 \url{https://doi.org/10.1080/01621459.2024.2340557}
-
-\bibitem[\citeproctext]{ref-xu_scaling_2026}
-Xu, Y., \& Yang, L. Y. (2026). \emph{Scaling {Reproducibility}: {An}
-{AI}-{Assisted} {Workflow} for {Large}-{Scale} {Replication} and
-{Reanalysis}}. arXiv. \url{https://doi.org/10.48550/arXiv.2602.16733}
-
-\bibitem[\citeproctext]{ref-zhang_inside_2025}
-Zhang, H. S., \& Peng, R. D. (2025). Inside {Out}: {Externalizing}
-{Assumptions} in {Data} {Analysis} as {Validation} {Checks}.
-\emph{Journal of Data Science}, 1--18.
-\url{https://doi.org/10.6339/25-JDS1206}
 
 \end{CSLReferences}
 
