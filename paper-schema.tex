@@ -190,8 +190,8 @@
 \hypersetup{
   pdftitle={Code availability is not enough: A schema-based representation for comprehensible and extensible data analysis},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
-  pdfkeywords={Reproducibility, Large Language Models (LLMs), Data
-analysis},
+  pdfkeywords={Reproducibility, Large Language Models (LLMs), Analytical
+decisions, Many-analysts study},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -238,8 +238,9 @@ analyses more comprehensible and extendable from a reader's perspective.
 \end{abstract}
 \begin{keywords}
 \def\sep{;\ }
-Reproducibility\sep Large Language Models (LLMs)\sep 
-Data analysis
+Reproducibility\sep Large Language Models (LLMs)\sep Analytical
+decisions\sep 
+Many-analysts study
 \end{keywords}
 
 
@@ -320,8 +321,11 @@ alternative decision choices. We apply our schema to the many-analyst
 football study, where LLMs create the schema from the decision choices
 reported in the final reports of each team, and generate and validate
 the corresponding code scripts against the original published results.
-We further demonstrate how to the schema supports specification and
-exploration of alternatives random effect specification for Team 5.
+In the process, we also uncover an inconsistency in one team's published
+report between the covariate described in the text and the one implied
+by their results. We further demonstrate how to the schema supports
+specification and exploration of alternatives random effect
+specification for Team 5.
 
 The paper is organized as follows: In Section~\ref{sec-method}, we
 present our methodology, including the schema representation for
@@ -824,7 +828,12 @@ supporting the exploration of alternative analytical choices.
 To further examine how this workflow behaves in practice, we apply it to
 the many-analysts football study. This analysis allows us to identify
 errors in the original reports and to characterize failure modes of
-current LLMs to generate code for data science. Decomposing the largest
+current LLMs to generate code for data science. Beyond validating the
+workflow itself, the schema-driven reanalysis catches a real
+inconsistency in a published report (Team 9's text-table mismatch,
+discussed in Section~\ref{sec-application}), which without an explicit
+account of the underlying decisions, would not have caught through
+computational reproducibility alone. Decomposing the largest
 discrepancies between our reproduced and reported effect sizes reveals
 that LLM error arises from two distinct stages of the pipeline, in
 roughly equal measure: mis-extraction of the schema from an ambiguous
