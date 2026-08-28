@@ -1,0 +1,3 @@
+[submodule "sim-football"]
+	path = sim-football
+	url = https://github.com/huizezhang-sherry/sim-football
