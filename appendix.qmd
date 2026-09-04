@@ -3,6 +3,20 @@ title: "Appendix to Code availability is not enough: A schema-based representati
 format: pdf
 ---
 
+## Ablation study: schema-based vs direct-generation pipelines {#app-abl .unnumbered}
+
+@fig-res-compare shows the ratio of the reproduced to the reported odds ratio for each team, with (blue) and without (yellow) the schema step. A ratio of 1 (dashed line) indicates an exact match. Teams are ordered by the larger of the two pipelines' deviation from an exact match. The largest deviations occur for Team 21, 31, 9, 32, 28, and 8.
+
+```{r}
+#| echo: false
+#| label: fig-res-compare
+#| out.width: 90%
+#| out.height: 80%
+#| fig.cap: "Comparison of the schema-based (with schema) and direct-generation (without schema) pipelines, each expressed as the ratio of the reproduced to the reported odd ratio in @silberzahn2018; a ratio of 1 (dashed line) indicates an exact match. Teams are ordered by the larger of the two pipelines' deviation from an exact match, so a team appears near the top if either pipeline diverges substantially from the reported value. The largest deviations occur for Team 21, 31, 9, 32, 28, and 8."
+knitr::include_graphics(here::here("figures/res-compare.png"))
+```
+
+
 ## Built-in prompts {#app-prompt .unnumbered}
 
 :::{.callout-note}

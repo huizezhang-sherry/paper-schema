@@ -571,6 +571,35 @@ decisions, our workflow allows LLMs to automate much of this process,
 making it easier to understand the sequence of steps taken in the
 analysis and to explore alternatives.
 
+Several properties of this workflow follow directly from representing an
+analysis as an explicit schema rather than as code alone. First, the
+schema is \emph{inspectable}: because it is short and structured, an
+analyst can check it against the source manuscript far more readily than
+they could audit the generated script itself, which is what makes each
+of the following properties useful in practice rather than only
+theoretical. Second, the schema \emph{separates logic from
+implementation}: whether a decision was understood correctly (manuscript
+to schema) and whether it was implemented correctly (schema to code)
+become two distinct, independently checkable steps rather than a single
+opaque translation, a distinction Section~\ref{sec-application} relies
+on directly to localize where our workflow fails. Third, the schema is
+\emph{provenance-agnostic}: nothing in the workflow requires it to
+originate from an LLM, as Figure~\ref{fig-workflow} shows, a schema can
+equally be authored or corrected by hand from the template, and the
+validation loop treats a hand-written schema no differently from an
+extracted one, checking it by generating and repairing code the same
+way. This matters because, as Section~\ref{sec-application} shows,
+current LLMs do not always extract a schema from a manuscript with
+perfect fidelity; we do not treat this as a defect to be engineered away
+by further automation, but as the reason the schema is kept explicit and
+available for an analyst to correct, rather than folded silently into
+the code-generation step. Fourth, the schema is \emph{reusable}: because
+a decision is represented independently of any one downstream
+implementation, the same schema can be systematically varied, via the
+alternative specification described above, to generate and compare
+multiple analyses without hand-coordinating changes across an existing
+script.
+
 \section{Application: many-analysts football
 study}\label{sec-application}
 
@@ -626,17 +655,17 @@ and then generate the code script from the schema. The code script is
 run by a separate LLM to validate for potential syntax errors.
 
 To accelerate the evaluation of each script, we manually in-place
-replace the \texttt{glm()} command with \texttt{fixest::feglm()} (Bergé
-et al., 2026) for generalized linear model and the
-\texttt{lme4::glmer()} (Bates et al., 2015) function with
-\texttt{glmmTMB::glmmTMB()} (Brooks et al., 2017) for generalized
-mix-effect model after the scripts are generated but before the
-validation. These two functions are in-place replacements of the
-standard functions for estimating the relevant model with
+replace the \texttt{lm()}/\texttt{glm()} command with
+\texttt{fixest::feols()}/\texttt{fixest::feglm()} (Bergé et al., 2026)
+for generalized linear model and the \texttt{lme4::glmer()} (Bates et
+al., 2015) function with \texttt{glmmTMB::glmmTMB()} (Brooks et al.,
+2017) for generalized mix-effect model after the scripts are generated
+but before the validation. These two functions are in-place replacements
+of the standard functions for estimating the relevant model with
 multi-threading in C++ (Bergé et al., 2026) and Template Model Builder
 (TMB) (McGillycuddy et al., 2025) for better performance. This
 replacement should not affect the estimation of the effect size. All the
-LLM-related simulations are conducted with claude-opus-4.5.
+LLM-related simulations are conducted with Claude-Opus-4.5.
 
 Across the 25 teams we reproduce, all team scripts were successfully
 executed after the validation phase. Notably, two scripts run
@@ -648,28 +677,27 @@ involved resolving broken and overflow syntax in comments.
 
 \centering{
 
-\includegraphics[width=5in,height=\textheight,keepaspectratio]{figures/res-updated.png}
+\includegraphics[width=0.9\linewidth,height=0.8\textheight]{figures/res-schema.png}
 
 }
 
-\caption{\label{fig-res-updated}Comparison of the odd ratio of the
-effect skin color on receiving red cards in football games from our
-simulation with the schema (simulated) vs.~the reported estimated effect
-size in Silberzahn et al. (2018) (published). Teams are arranged by the
-difference in odd ratio of our simulation and the reported value. For
-most teams, the simulation successfully recovers the odd ratio reported
-by each analyst team, larger variations are seen in the following teams:
-Team 1, 9, 15, 21, 23, and 27.}
+\caption{\label{fig-res-schema}Comparison of the odd ratio of the effect
+of skin color on receiving red cards in football games from our
+schema-based reproduction (reproduced) vs.~the effect size reported in
+Silberzahn et al. (2018) (reported). Teams are ordered by the absolute
+difference between the reproduced and reported odd ratio. The
+reproduction recovers the reported odd ratio closely for most teams; the
+largest deviations occur for Team 1, 9, 15, 21, 23, and 27.}
 
 \end{figure}%
 
-Figure~\ref{fig-res-updated} shows the comparison of the estimated
-effect size, in odd ratio, from our workflow (simulated) and those
-reported in Silberzahn et al. (2018) (published). The odd ratio is well
-recovered for most teams, though six show a noticeably larger gap: Team
-1, 9, 15, 21, 23, and 27. Looking closely at each team's report and
-generated script, the causes split into two stages of our pipeline, plus
-one case that has nothing to do with the LLM at all.
+Figure~\ref{fig-res-schema} shows the comparison of the estimated effect
+size, in odd ratio, from our workflow (simulated) and those reported in
+Silberzahn et al. (2018) (published). The odd ratio is well recovered
+for most teams, though six show a noticeably larger gap: Team 1, 9, 15,
+21, 23, and 27. Looking closely at each team's report and generated
+script, the causes split into two stages of our pipeline, plus one case
+that has nothing to do with the LLM at all.
 
 For Team 27, the report is genuinely ambiguous: the authors write that,
 ``In addition to the independent variables specified in the initial
@@ -817,6 +845,18 @@ Referee's country & Intercept & NA & NA & 0.3990 \\
 Referee's country & Referee rating & NA & NA & 0.0870 \\
 
 \end{longtable}
+
+\subsection{Ablation: with and without an intermediate
+schema}\label{ablation-with-and-without-an-intermediate-schema}
+
+To assess whether the schema step itself improves the fidelity of the
+generated code, beyond what the underlying LLM can already achieve on
+its own, we conduct an ablation study comparing our schema-based
+pipeline against a direct pipeline that generates code straight from
+each team's methodology text. Both pipelines are applied to the same set
+of team descriptions, using the same underlying LLM (Claude-Opus-4.5)
+and the same script validation. The comparison of the two pipelines are
+shown in the Appendix. {[}TODO: main conclusion{]}
 
 \section{Discussion}\label{sec-discussion}
 
