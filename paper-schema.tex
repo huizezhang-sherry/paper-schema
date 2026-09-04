@@ -667,11 +667,18 @@ multi-threading in C++ (Bergé et al., 2026) and Template Model Builder
 replacement should not affect the estimation of the effect size. All the
 LLM-related simulations are conducted with Claude-Opus-4.5.
 
-Across the 25 teams we reproduce, all team scripts were successfully
-executed after the validation phase. Notably, two scripts run
-successfully without any validation whereas the vast majority reached
-completion after two or three iterations. The most frequent correction
-involved resolving broken and overflow syntax in comments.
+Of the 29 teams, we report results for 25. The remaining four (Teams 7,
+12, 17, and 18) specify analyses that are too computationally expensive
+to run inside an iterative validate-and-repair loop, regardless of
+whether the schema or generated code is correct --- MCMC-based
+hierarchical models with thousands of random effects, a nonparametric
+Bayesian clustering procedure, and a fixed-effects model with several
+thousand parameters. Across the 25 teams we reproduce, all team scripts
+were successfully executed after the validation phase. Notably, two
+scripts run successfully without any validation whereas the vast
+majority reached completion after two or three iterations. The most
+frequent correction involved resolving broken and overflow syntax in
+comments.
 
 \begin{figure}
 
@@ -916,6 +923,14 @@ would typically imply both a random intercept and a random slope.
 However, we observe that LLMs interpret this specification literally as
 a random slope only. This suggests the gap between the latest models and
 human analysts in specialized statistical knowledge (Sun et al., 2026).
+
+Our validate-and-repair loop assumes each candidate script can be
+executed and diagnosed within an interactive timeframe. This assumption
+does not hold for analyses that are too computationally expensive to run
+inside such a loop (Team 7, 12, 17, 18 in the football many-analyst
+studies). For future direction, this could be addressed by implementing
+a background job queue to allow for longer-running scripts to be
+executed asynchronously.
 
 For the code-generation errors, the LLM successfully corrects a range of
 implementation issues during validation, including errors caused by
