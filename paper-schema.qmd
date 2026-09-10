@@ -11,6 +11,20 @@ format:
       - text: |
           \usepackage{amsmath}
           \usepackage{amssymb}
+          \usepackage{fvextra}
+          \DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, fontsize=\small}
+          \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, fontsize=\small}
+          \makeatletter
+          \AtBeginDocument{%
+            \captionsetup[codelisting]{skip=-0.8em}%
+            \renewenvironment{codelisting}{%
+              \def\@captype{codelisting}%
+              \par\addvspace{0.5em}\noindent
+            }{%
+              \par\addvspace{0.5em}%
+            }%
+          }
+          \makeatother
           \AtBeginDocument{\floatplacement{codelisting}{H}}
     journal:
       blinded: false
@@ -124,7 +138,7 @@ The components of $A_i$ can be partitioned into two parts: a required triplet $(
 In Step 3, the objective is to combine the three dimensions. While a simple arithmetic mean could be an alternative decision to fulfill this goal, the geometric mean (the decision) is chosen because it penalizes uneven development among the three dimensions (the justification). The full schema for constructing HDI is presented in @lst-schema.
 
 :::{#lst-schema lst-cap="An example schema for calculating Human Development Index (HDI)"}
-````
+````yaml
 meta:
   type: schema
 nodes:
@@ -159,7 +173,7 @@ At each step, one decision choice is made by the researchers to address an objec
 Returning to the HDI example, in Step 3, instead of a geometric mean, an arithmetic mean is another possibility to combine the three dimensions into a single index. It may not be the best decision, but still a plausible one to derive a single index from the three dimensions, hence achieve the objective of this step. @lst-alternatives shows the structure of an alternative YAML file. The `meta` section identifies the file type (an alternative file rather than a schema file) and specifies the analysis step and the objective under consideration. Individual alternatives are defined as entries in the alternatives list, allowing multiple alternatives to be specified within a single file.
 
 :::{#lst-alternatives lst-cap="An example YAML file for specifying alternative for Step 3 in calculating Human Development Index (HDI)."}
-````
+````yaml
 meta:
   type: alternative
   step: step-combine
@@ -186,6 +200,29 @@ knitr::include_graphics(here::here("figures/workflow.png"))
 Returning to the HDI example, the proposed workflow allows both authors and readers to interact with a data analysis through natural language. The schema in @lst-schema is straightforward to construct from a template and can be included as supplementary material to document the analytical workflow. An author may use the "code generation and validation" path in @fig-workflow to automatically generate the analysis script for computing HDI and validate its accuracy. A reader, on the other hand, may wish to explore how the HDI values or country rankings change if the original arithmetic mean (instead of the geometry mean) is used. By combining the original schema in @lst-schema with the alternative specification @lst-alternatives, the "alternative generation" path produces a corresponding analysis script for each alternative with LLMs. In contrast, modifying an existing code script by hand typically requires manually coordinating changes across upstream and downstream code. By representing analyses as a sequence of structured analytical decisions, our workflow allows LLMs to automate much of this process, making it easier to understand the sequence of steps taken in the analysis and to explore alternatives.
 
 Several properties of this workflow follow directly from representing an analysis as an explicit schema rather than as code alone. First, the schema is *inspectable*: because it is short and structured, an analyst can check it against the source manuscript far more readily than they could audit the generated script itself, which is what makes each of the following properties useful in practice rather than only theoretical. Second, the schema *separates logic from implementation*: whether a decision was understood correctly (manuscript to schema) and whether it was implemented correctly (schema to code) become two distinct, independently checkable steps rather than a single opaque translation, a distinction @sec-application relies on directly to localize where our workflow fails. Third, the schema is *provenance-agnostic*: nothing in the workflow requires it to originate from an LLM, as @fig-workflow shows, a schema can equally be authored or corrected by hand from the template, and the validation loop treats a hand-written schema no differently from an extracted one, checking it by generating and repairing code the same way. This matters because, as @sec-application shows, current LLMs do not always extract a schema from a manuscript with perfect fidelity; we do not treat this as a defect to be engineered away by further automation, but as the reason the schema is kept explicit and available for an analyst to correct, rather than folded silently into the code-generation step. Fourth, the schema is *reusable*: because a decision is represented independently of any one downstream implementation, the same schema can be systematically varied, via the alternative specification described above, to generate and compare multiple analyses without hand-coordinating changes across an existing script.
+
+# Application {#sec-gaitd}
+
+:::{#lst-heaping lst-cap="A schema for the GAITD regression analysis of smoking initiation age in @yee2025heaping, constructed from the manuscript and intended to be provided alongside it as a self-contained account of the analysis."}
+```{r}
+#| echo: false
+#| output: asis
+cat("````yaml\n")
+cat(readLines(here::here("schemas/schema_draft.yaml")), sep = "\n")
+cat("````\n")
+```
+:::
+
+
+:::{#lst-ap1921 lst-cap="An alternative YAML file specifying a joint change to the mid-risk inflation, alteration, and covariate nodes in the GAITD schema, treating ages 19-21 as an alteration group rather than pooling them into the mid-risk inflated group."}
+```{r}
+#| echo: false
+#| output: asis
+cat("````yaml\n")
+cat(readLines(here::here("schemas/alt_ap1921.yaml")), sep = "\n")
+cat("````\n")
+```
+:::
 
 # Application: many-analysts football study {#sec-application}
 
@@ -252,7 +289,7 @@ where $p$ denotes the probability of a player receiving a red card, and $X$ repr
 These alternatives are specified in a separate YAML file described in @sec-alternative as @lst-yaml-alternative. This file is then merged with the original schema to produce one separate schema for each alternative for code generation and validation. The validated scripts are then executed to obtain the estimated random effects in @tbl-random-effects. This result matches with the random effects reported in the team report, subject to rounding errors. Similarly, the model fitting statistics can be extracted from the estimation for selecting the best fit. 
 
 :::{#lst-yaml-alternative lst-cap="Example of a YAML file specifying alternatives for the random effects structure in the many-analyst analysis of Group 5."}
-````
+````yaml
 meta:
   type: alternatives
   step: specify_random_effects_structure

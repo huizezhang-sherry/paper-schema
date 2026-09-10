@@ -65,6 +65,46 @@
 \fi
 \makeatother
 
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
@@ -141,6 +181,20 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, fontsize=\small}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, fontsize=\small}
+\makeatletter
+\AtBeginDocument{%
+  \captionsetup[codelisting]{skip=-0.8em}%
+  \renewenvironment{codelisting}{%
+    \def\@captype{codelisting}%
+    \par\addvspace{0.5em}\noindent
+  }{%
+    \par\addvspace{0.5em}%
+  }%
+}
+\makeatother
 \AtBeginDocument{\floatplacement{codelisting}{H}}
 \usepackage{orcidlink}
 \makeatletter
@@ -396,26 +450,28 @@ Development Index (HDI)}
 
 \centering{
 
-\begin{verbatim}
-meta:
-  type: schema
-nodes:
-- tag: step-scaling
-  objective: how to handle variables in different scales?
-  decision: apply min-max scaling to each variable 
-  rationale: to convert the variables to the same scale for future 
-    construction of a single index
-- tag: step-education
-  objective: how to combine the two education-related variables?
-  decision: take the average
-  rationale: the arithmetic mean allows perfect substitutability 
-    between the two variables
-- tag: step-combine
-  objective: how to combine the three dimensions into a single index?
-  decision: use the geometric mean
-  rationale: the geometric mean penalizes uneven development 
-    among the three core dimensions
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{meta}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ schema}
+\FunctionTok{nodes}\KeywordTok{:}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{tag}\KeywordTok{:}\AttributeTok{ step{-}scaling}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to handle variables in different scales?}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ apply min{-}max scaling to each variable }
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ to convert the variables to the same scale for future }
+\AttributeTok{    construction of a single index}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{tag}\KeywordTok{:}\AttributeTok{ step{-}education}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to combine the two education{-}related variables?}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ take the average}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ the arithmetic mean allows perfect substitutability }
+\AttributeTok{    between the two variables}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{tag}\KeywordTok{:}\AttributeTok{ step{-}combine}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to combine the three dimensions into a single index?}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use the geometric mean}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ the geometric mean penalizes uneven development }
+\AttributeTok{    among the three core dimensions}
+\end{Highlighting}
+\end{Shaded}
 
 }
 
@@ -490,16 +546,18 @@ alternative for Step 3 in calculating Human Development Index (HDI).}
 
 \centering{
 
-\begin{verbatim}
-meta:
-  type: alternative
-  step: step-combine
-  objective: how to combine the three dimensions into a single index?
-alternatives:
-  - id: arith-mean
-    decision: use an arithmetic mean
-    rationale: a simple average of the three dimensions
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{meta}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternative}
+\AttributeTok{  }\FunctionTok{step}\KeywordTok{:}\AttributeTok{ step{-}combine}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to combine the three dimensions into a single index?}
+\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ arith{-}mean}
+\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use an arithmetic mean}
+\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ a simple average of the three dimensions}
+\end{Highlighting}
+\end{Shaded}
 
 }
 
@@ -599,6 +657,131 @@ implementation, the same schema can be systematically varied, via the
 alternative specification described above, to generate and compare
 multiple analyses without hand-coordinating changes across an existing
 script.
+
+\section{Application}\label{sec-gaitd}
+
+\begin{codelisting}
+
+\caption{\label{lst-heaping}A schema for the GAITD regression analysis
+of smoking initiation age in Yee et al. (2025), constructed from the
+manuscript and intended to be provided alongside it as a self-contained
+account of the analysis.}
+
+\centering{
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{meta}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ schema}
+\FunctionTok{nodes}\KeywordTok{:}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ complete\_case\_filtering}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ handle missing data in selected variables}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ apply complete{-}case filtering to all columns except TC30, TCquit, and SCA which have NAs by design}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ TC30, TCquit, and SCA are exempted from the completeness check since they are interlaced with NAs by design (e.g., SCA being NA means the person has not yet quit, a valid state rather than missingness); every other selected column is required to be non{-}missing because most smoking studies adjust for age, marital status, education and race, and this analysis follows suit. }
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ age\_restriction}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ define the age range for analysis}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ restrict analysis to respondents aged less than 80 years (age \textless{} 80)}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ age was right{-}censored at 80}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ data\_quality\_correction}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ handle logically impossible self{-}reported values}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ set both SCA and SIA to NA where SCA {-} SIA \textless{} 0}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ quitting age before smoking initiation age is a logical impossibility and such values cannot be trusted}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ impute\_marital\_young}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ assign a defensible marital status for young respondents, regardless of what was recorded}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ recode marital status to "Never married" for everyone age \textless{} 20}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ this age group is effectively certain to have never been married, so the value is set by age rather than trusting the raw survey response}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ impute\_education\_young}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ assign a defensible education category for young respondents, regardless of what was recorded}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ recode education to "\textless{} 9th grade" for age \textless{} 14; "9{-}11th grade" for 14 \textless{}= age \textless{}= 16; "High school" for 17 \textless{}= age \textless{}= 19}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ for respondents still of school age, highest{-}grade{-}completed is essentially determined by age, so the value is set by age rather than trusting the raw survey response}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ define\_ever\_smokers\_sample}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ define the analytic sample of ever{-}smokers}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ include as valid observation if both conditions are met {-}{-} 1) SIA is not missing, and 2) either SCA and TCquit are both not missing, or SCA is missing and TC30 is not missing}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ SCA is missing by design for anyone who has not yet quit. the two{-}branch rule instead admits ex{-}smokers through the SCA/TCquit branch and current smokers through the TC30 branch}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ parent\_distribution\_choice}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ select appropriate probability distribution for count response variable}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ adopt negative binomial distribution as the parent distribution}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ the SIA distributions iboth unimodal and right{-}skewed, so a NBD parent is reasonable; more generally, there is evidence of overdispersion relative to a Poisson distribution.}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ special\_value\_mid\_risk}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ specify how to model inflation at ages surrounding peak teenage smoking uptake}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ treat ages 12, 13, 14, 19, 20, 21 as a parametrically{-}inflated group, with the extra probability mass there sharing the same distributional shape (mean and dispersion) as the main population }
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ this mid{-}risk subgroup represents early and later smokers surrounding the high{-}risk age subgroup; these ages showed a moderate, secondary elevation in repeated training/test spikeplots of the data}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ special\_value\_high\_risk}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ specify how to model inflation at peak teenage smoking uptake ages}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ treat ages 15, 16, 17, 18 as a nonparametrically{-}inflated group, with each age given its own freely{-}estimated extra probability }
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ this high{-}risk subgroup corresponds to frenetic teenage smoking uptake, the age range where the largest number of regular smokers start; these ages showed the largest, most persistent spikes across repeated training/test spikeplots of the data.}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ alteration\_operator\_decision}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ determine whether to apply alteration operators}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ do not use alteration operators (A.mix and A.mlm set to NULL)}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ not needed for this model specification}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ deflation\_operator\_decision}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ determine whether to apply deflation operators}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ do not use deflation operators (D.mix and D.mlm set to NULL)}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ not needed for this model specification}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ truncation\_decision}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ determine whether to specify a truncated region}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ do not use truncation (no truncated region specified for SIA)}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ truncation not appropriate for this response variable}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ covariate\_selection}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ select covariates for the linear predictor of parent distribution mean}
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ include race2, gender, marital, and educ as covariates}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ most smoking studies adjust for age, marital status, education and race}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ fit\_final\_model}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ fit the final GAITD regression model }
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ fit a single vglm that puts together the pieces above {-}{-} response, parent distribution, special{-}value structure (inflation, alteration, deflation, and truncation), and covariates. The covariates only shift the mean of the negative binomial; the dispersion and the mid{-}/high{-}risk inflation probabilities are held fixed across the sample}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ only the mean is modeled with covariates; the dispersion and inflation probabilities are kept intercept{-}only, since extending covariate effects to them would substantially increase the number of parameters to estimate and make the results harder to interpret}
+\end{Highlighting}
+\end{Shaded}
+
+}
+
+\end{codelisting}%
+
+\begin{codelisting}
+
+\caption{\label{lst-ap1921}An alternative YAML file specifying a joint
+change to the mid-risk inflation, alteration, and covariate nodes in the
+GAITD schema, treating ages 19-21 as an alteration group rather than
+pooling them into the mid-risk inflated group.}
+
+\centering{
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{meta}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternatives}
+\AttributeTok{  }\FunctionTok{step}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{special\_value\_mid\_risk}\KeywordTok{,}\AttributeTok{ alteration\_operator\_decision}\KeywordTok{,}\AttributeTok{ covariate\_selection}\KeywordTok{]}
+\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to treat ages 19{-}21 relative to the pooled mid{-}risk inflated group}
+\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\StringTok{"ap1921"}
+\AttributeTok{    }\FunctionTok{special\_value\_mid\_risk}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ treat ages 12, 13, 14 only as a parametrically{-}inflated group, with the extra probability mass there sharing the same distributional shape (mean and dispersion) as the main population; ages 19, 20, 21 are no longer pooled into this group (see the alteration operator decision instead)}
+\AttributeTok{      }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ ages 19{-}21 mark less frenetic, declining smoking uptake as respondents age out of the high{-}risk window, a qualitatively different pattern from the early uptake at ages 12{-}14, so they are moved out of this pooled inflated group}
+\AttributeTok{    }\FunctionTok{alteration\_operator\_decision}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use ages 19, 20, 21 as an alteration group (A.mix) instead of leaving alteration operators unused}
+\AttributeTok{      }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ ages 19{-}21 mark less frenetic, declining smoking uptake as respondents age out of the high{-}risk window, a qualitatively different pattern from the early uptake at ages 12{-}14, so they are represented as an alteration rather than folded into the same inflated group}
+\AttributeTok{    }\FunctionTok{covariate\_selection}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ do not include any covariates (intercept{-}only model)}
+\AttributeTok{      }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ this comparison is about which special{-}value structure fits better, so covariates are left out to compare the two structures on equal footing, the same way the special{-}value structure was first established on an intercept{-}only model before covariates were added}
+\end{Highlighting}
+\end{Shaded}
+
+}
+
+\end{codelisting}%
 
 \section{Application: many-analysts football
 study}\label{sec-application}
@@ -813,25 +996,27 @@ analysis of Group 5.}
 
 \centering{
 
-\begin{verbatim}
-meta:
-  type: alternatives
-  step: specify_random_effects_structure
-  fork: how to account for the non-nested cross-classified data structure
-alternatives:
-  - id: "gm1"
-    path: "a random effect of player and referee"
-    rationale: ""
-  - id: "gm2"
-    path: "a random effect of player and referee, and a random effect 
-      of skin-tone across referees"
-    rationale: ""
-  - id: "gm3"
-    path: "a random effect of player, referee, and referees' countries
-       of origin, and a random effect of skin tone across referees'
-      countries of origin"
-    rationale: ""
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{meta}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternatives}
+\AttributeTok{  }\FunctionTok{step}\KeywordTok{:}\AttributeTok{ specify\_random\_effects\_structure}
+\AttributeTok{  }\FunctionTok{fork}\KeywordTok{:}\AttributeTok{ how to account for the non{-}nested cross{-}classified data structure}
+\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\StringTok{"gm1"}
+\AttributeTok{    }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ }\StringTok{"a random effect of player and referee"}
+\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\StringTok{"gm2"}
+\AttributeTok{    }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ }\StringTok{"a random effect of player and referee, and a random effect }
+\StringTok{      of skin{-}tone across referees"}
+\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\StringTok{"gm3"}
+\AttributeTok{    }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ }\StringTok{"a random effect of player, referee, and referees\textquotesingle{} countries}
+\StringTok{       of origin, and a random effect of skin tone across referees\textquotesingle{}}
+\StringTok{      countries of origin"}
+\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
+\end{Highlighting}
+\end{Shaded}
 
 }
 
@@ -1164,6 +1349,12 @@ J., Usher, T., \& Wolfson, J. (2024). Partnering {With} {Authors} to
 {Enhance} {Reproducibility} at {JASA}. \emph{Journal of the American
 Statistical Association}, \emph{119}(546), 795--797.
 \url{https://doi.org/10.1080/01621459.2024.2340557}
+
+\bibitem[\citeproctext]{ref-yee2025heaping}
+Yee, T. W., Frigau, L., \& Ma, C. (2025). Heaping and seeping, GAITD
+regression and doubly constrained reduced-rank vector generalized linear
+models in smoking studies. \emph{The Annals of Applied Statistics},
+\emph{19}(4), 3045--3070.
 
 \end{CSLReferences}
 
