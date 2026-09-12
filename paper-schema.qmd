@@ -12,8 +12,8 @@ format:
           \usepackage{amsmath}
           \usepackage{amssymb}
           \usepackage{fvextra}
-          \DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, fontsize=\small}
-          \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, fontsize=\small}
+          \DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
+          \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
           \makeatletter
           \AtBeginDocument{%
             \captionsetup[codelisting]{skip=-0.8em}%
@@ -121,7 +121,7 @@ While these developments have improved the ability to reproduce computational re
 
 As traditional reproducibility practices can be insufficient for understanding complex modern data analyses, we have designed two complementary YAML schemas and the associated workflow to better support comprehension and extensibility in applied data analysis. Our workflow is designed to be 1) decision-centric: analyses are represented as a sequence of decisions with explicit rationale, and 2) reader-oriented exploration: readers can inspect, compare, and extend those decisions.
 
-## A schema for describing data analysis
+## A schema for describing data analysis {#sec-schema}
 
 We represent a data analysis, $\mathcal{S} = \{A_1, A_2, \cdots, A_n\}$, as a sequence of $n$ analytical step $A_i$, applied to a dataset $\mathcal{D}$, where each step, $A_i$, is defined as a tuple:
 
@@ -166,22 +166,79 @@ $$\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j < i} \mathcal{O}_
 
 When the schema is extracted automatically by Large Language Models (LLMs) from text, the inputs and outputs will be inferred by the LLMs, if a dataset is provided. We also introduce a categorical confidence score, $\omega_{i}$ (low, medium, high), defined as the model's confidence that the recorded $(f_i, \pi_i, \rho_i)$ correctly reflects the source text; $\omega_i$ is low precisely when one or more of these components could not be read off the text directly and had to be inferred by the LLM, and can be used to guide the LLM to ask for clarification to consolidate the schema extraction.
 
+Recording a step's decision $\pi_i$ does not mean it is the only one that could satisfy its objective $f_i$: a reader may want to revisit the decision made for some of these steps and consider alternatives that address the same objective, a possibility we formalize next.
+
 ## Describing alternatives {#sec-alternative}
 
-At each step, one decision choice is made by the researchers to address an objective, however the choice is often not the only possible one. For step $i$, there could be $k_i$ decision choices that fulfill the objective $f_i$: $\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}$. We can define a selection vector $r = (r_1, r_2, \dots, r_n)$, where $r_i \in \{1, \dots, k_i\}$, to describe an analysis comprised of specific series of decisions: $\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}$. A multiverse, used to describe the entire decision space [@steegen2016; @simonsohn2020], is defined as the Cartesian product of these sets: $\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}$. The cardinality of this space, $|\mathcal{M}| = \prod_{i=1}^n k_i$, quantifies the total number of unique, fully-specified analysis.
+Another analyst following the HDI schema in @lst-schema might wonder whether the reported index would look different under a different decision at some step. Formally, a step in the schema can have a candidate set of alternatives: step $i$ may admit $k_i$ decisions that all satisfy its objective $f_i$, $\{A_i^1, \dots, A_i^{k_i}\}$, of which the decision $\pi_i$ recorded in the schema is just one member, $A_i^1$. An alternative file specifies the remaining candidates, $A_i^2, \dots, A_i^{k_i}$, for a subset of steps $C \subseteq \{1, \dots, n\}$.
 
-Returning to the HDI example, in Step 3, instead of a geometric mean, an arithmetic mean is another possibility to combine the three dimensions into a single index. It may not be the best decision, but still a plausible one to derive a single index from the three dimensions, hence achieve the objective of this step. @lst-alternatives shows the structure of an alternative YAML file. The `meta` section identifies the file type (an alternative file rather than a schema file) and specifies the analysis step and the objective under consideration. Individual alternatives are defined as entries in the alternatives list, allowing multiple alternatives to be specified within a single file.
+The overall structure of an alternative file is shown in @lst-alternatives-skeleton. The `meta` field at the top identifies the file as an alternative specification (`type: alternatives`), and the file-level `branch` field, either `single` or `multi`, determines how the candidates at each step combine, described below. The file itself is organized as a list of nodes, one per step in $C$: each node names its step in the original schema and lists the alternative decisions for that step, together with their justifications.
 
-:::{#lst-alternatives lst-cap="An example YAML file for specifying alternative for Step 3 in calculating Human Development Index (HDI)."}
+:::{#lst-alternatives-skeleton lst-cap="The skeleton of an alternative YAML file, which consists of a `branch` mode and a list of nodes, where each node specifies a step in the original schema and a list of alternative decisions for that step."}
 ````yaml
 meta:
-  type: alternative
-  step: step-combine
-  objective: how to combine the three dimensions into a single index?
-alternatives:
-  - id: arith-mean
-    decision: use an arithmetic mean
-    rationale: a simple average of the three dimensions
+  type: alternatives
+  branch: single | multi
+nodes:
+  - overrides: <step id>
+    alternatives:
+      - id: <alternative id>
+        decision: <...>
+        rationale: <...>
+      - id: <alternative id>
+        ...
+  - overrides: <step id>
+    alternatives:
+      ...
+  ...
+````
+:::
+
+Under `branch: single`, every node is restricted to a single candidate decision. These alternatives and the unchanged steps in the original schema together form one new analysis. This is useful when an analyst wants to see what a different, internally consistent analysis touching several steps at once would look like. @lst-alternatives-single fills in the skeleton to construct such an alternative version of the HDI computation, using a harmonic mean to combine the two education variables in Step 2 and an arithmetic mean to combine the three dimensions in Step 3.
+
+:::{#lst-alternatives-single lst-cap="A sample alternative file that changes the decisions for Step 2 and Step 3 in calculating Human Development Index (HDI) to use a harmonic mean and an arithmetic mean, respectively."}
+````yaml
+meta:
+  type: alternatives
+  branch: single
+nodes:
+  - overrides: step-education
+    alternatives:
+      - id: harmonic-mean
+        decision: take the harmonic mean of the two education variables
+        rationale: penalizes disparity between the two schooling measures
+          rather than allowing one to compensate for the other
+  - overrides: step-combine
+    alternatives:
+      - id: arith-mean
+        decision: use an arithmetic mean
+        rationale: a simple average of the three dimensions
+````
+:::
+
+Sometimes a reader instead wants to test a range of alternatives for one or more steps independently. Under `branch: multi`, the candidates at each covered step, along with that step's original decision, are crossed to produce every combination. In @lst-alternatives-multi, one alternative is specified for the education step (the harmonic mean) and two for the combination step (an arithmetic mean and the minimum of the three dimensions). Together with the original schema, this produces $(1+1) \times (2+1) = 6$ analyses. More generally, with $k_i$ candidates at each step $i \in C$, crossing all candidates yields $\prod_{i \in C} k_i$ analyses.
+  
+:::{#lst-alternatives-multi lst-cap="A sample alternative file that explores one alternative decision for Step 2 and two for Step 3 in calculating Human Development Index (HDI). Combining these alternatives with the original schema produces a total of six (1+1) × (2+1) = 6 analyses."}
+````yaml
+meta:
+  type: alternatives
+  branch: multi
+nodes:
+  - overrides: step-education
+    alternatives:
+      - id: harmonic-mean
+        decision: take the harmonic mean of the two education variables
+        rationale: penalizes disparity between the two schooling measures
+          rather than allowing one to compensate for the other
+  - overrides: step-combine
+    alternatives:
+      - id: arith-mean
+        decision: use an arithmetic mean
+        rationale: a simple average of the three dimensions
+      - id: min-agg
+        decision: use the minimum of the three dimensions
+        rationale: a "weakest-link" aggregation that penalizes any single
+          lagging dimension more strongly than an average would
 ````
 :::
 
@@ -197,7 +254,7 @@ The overall workflow for schema-based data analysis is illustrated in @fig-workf
 knitr::include_graphics(here::here("figures/workflow.png"))
 ```
 
-Returning to the HDI example, the proposed workflow allows both authors and readers to interact with a data analysis through natural language. The schema in @lst-schema is straightforward to construct from a template and can be included as supplementary material to document the analytical workflow. An author may use the "code generation and validation" path in @fig-workflow to automatically generate the analysis script for computing HDI and validate its accuracy. A reader, on the other hand, may wish to explore how the HDI values or country rankings change if the original arithmetic mean (instead of the geometry mean) is used. By combining the original schema in @lst-schema with the alternative specification @lst-alternatives, the "alternative generation" path produces a corresponding analysis script for each alternative with LLMs. In contrast, modifying an existing code script by hand typically requires manually coordinating changes across upstream and downstream code. By representing analyses as a sequence of structured analytical decisions, our workflow allows LLMs to automate much of this process, making it easier to understand the sequence of steps taken in the analysis and to explore alternatives.
+Returning to the HDI example, the proposed workflow allows both authors and readers to interact with a data analysis through natural language. The schema in @lst-schema is straightforward to construct from a template and can be included as supplementary material to document the analytical workflow. An author may use the "code generation and validation" path in @fig-workflow to automatically generate the analysis script for computing HDI and validate its accuracy. A reader, on the other hand, may wish to explore how the HDI values or country rankings change if the original arithmetic mean (instead of the geometry mean) is used. By combining the original schema in @lst-schema with the alternative specification @lst-alternatives-multi, the "alternative generation" path produces a corresponding analysis script for each alternative with LLMs. In contrast, modifying an existing code script by hand typically requires manually coordinating changes across upstream and downstream code. By representing analyses as a sequence of structured analytical decisions, our workflow allows LLMs to automate much of this process, making it easier to understand the sequence of steps taken in the analysis and to explore alternatives.
 
 Several properties of this workflow follow directly from representing an analysis as an explicit schema rather than as code alone. First, the schema is *inspectable*: because it is short and structured, an analyst can check it against the source manuscript far more readily than they could audit the generated script itself, which is what makes each of the following properties useful in practice rather than only theoretical. Second, the schema *separates logic from implementation*: whether a decision was understood correctly (manuscript to schema) and whether it was implemented correctly (schema to code) become two distinct, independently checkable steps rather than a single opaque translation, a distinction @sec-application relies on directly to localize where our workflow fails. Third, the schema is *provenance-agnostic*: nothing in the workflow requires it to originate from an LLM, as @fig-workflow shows, a schema can equally be authored or corrected by hand from the template, and the validation loop treats a hand-written schema no differently from an extracted one, checking it by generating and repairing code the same way. This matters because, as @sec-application shows, current LLMs do not always extract a schema from a manuscript with perfect fidelity; we do not treat this as a defect to be engineered away by further automation, but as the reason the schema is kept explicit and available for an analyst to correct, rather than folded silently into the code-generation step. Fourth, the schema is *reusable*: because a decision is represented independently of any one downstream implementation, the same schema can be systematically varied, via the alternative specification described above, to generate and compare multiple analyses without hand-coordinating changes across an existing script.
 
@@ -218,7 +275,7 @@ cat("````\n")
 ```{r}
 #| echo: false
 #| output: asis
-cat("````yaml\n")
+cat("````yaml\n") 
 cat(readLines(here::here("schemas/alt_ap1921.yaml")), sep = "\n")
 cat("````\n")
 ```
@@ -288,27 +345,18 @@ where $p$ denotes the probability of a player receiving a red card, and $X$ repr
 
 These alternatives are specified in a separate YAML file described in @sec-alternative as @lst-yaml-alternative. This file is then merged with the original schema to produce one separate schema for each alternative for code generation and validation. The validated scripts are then executed to obtain the estimated random effects in @tbl-random-effects. This result matches with the random effects reported in the team report, subject to rounding errors. Similarly, the model fitting statistics can be extracted from the estimation for selecting the best fit. 
 
+
 :::{#lst-yaml-alternative lst-cap="Example of a YAML file specifying alternatives for the random effects structure in the many-analyst analysis of Group 5."}
-````yaml
-meta:
-  type: alternatives
-  step: specify_random_effects_structure
-  fork: how to account for the non-nested cross-classified data structure
-alternatives:
-  - id: "gm1"
-    path: "a random effect of player and referee"
-    rationale: ""
-  - id: "gm2"
-    path: "a random effect of player and referee, and a random effect 
-      of skin-tone across referees"
-    rationale: ""
-  - id: "gm3"
-    path: "a random effect of player, referee, and referees' countries
-       of origin, and a random effect of skin tone across referees'
-      countries of origin"
-    rationale: ""
-````
+```{r}
+#| echo: false
+#| output: asis
+cat("````yaml\n")
+cat(readLines(here::here("schemas/football-grp5-alt.yaml")), sep = "\n")
+cat("````\n")
+```
 :::
+
+
 ```{r}
 #| echo: false
 #| message: false

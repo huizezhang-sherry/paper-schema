@@ -182,8 +182,8 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{fvextra}
-\DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, fontsize=\small}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, fontsize=\small}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
 \makeatletter
 \AtBeginDocument{%
   \captionsetup[codelisting]{skip=-0.8em}%
@@ -391,8 +391,7 @@ is designed to be 1) decision-centric: analyses are represented as a
 sequence of decisions with explicit rationale, and 2) reader-oriented
 exploration: readers can inspect, compare, and extend those decisions.
 
-\subsection{A schema for describing data
-analysis}\label{a-schema-for-describing-data-analysis}
+\subsection{A schema for describing data analysis}\label{sec-schema}
 
 We represent a data analysis,
 \(\mathcal{S} = \{A_1, A_2, \cdots, A_n\}\), as a sequence of \(n\)
@@ -511,51 +510,152 @@ components could not be read off the text directly and had to be
 inferred by the LLM, and can be used to guide the LLM to ask for
 clarification to consolidate the schema extraction.
 
+Recording a step's decision \(\pi_i\) does not mean it is the only one
+that could satisfy its objective \(f_i\): a reader may want to revisit
+the decision made for some of these steps and consider alternatives that
+address the same objective, a possibility we formalize next.
+
 \subsection{Describing alternatives}\label{sec-alternative}
 
-At each step, one decision choice is made by the researchers to address
-an objective, however the choice is often not the only possible one. For
-step \(i\), there could be \(k_i\) decision choices that fulfill the
-objective \(f_i\): \(\{ A_{i}^{1}, A_{i}^{2}, \dots, A_{i}^{k_i} \}\).
-We can define a selection vector \(r = (r_1, r_2, \dots, r_n)\), where
-\(r_i \in \{1, \dots, k_i\}\), to describe an analysis comprised of
-specific series of decisions:
-\(\mathcal{S}^{r} = \{ A_{1}^{r_1}, A_{2}^{r_2}, \dots, A_{n}^{r_n} \}\).
-A multiverse, used to describe the entire decision space (Simonsohn et
-al., 2020; Steegen et al., 2016), is defined as the Cartesian product of
-these sets:
-\(\mathcal{M} = \{ \mathcal{S}^r \mid r_i \in {1, \dots, k_i}, \forall i \}\).
-The cardinality of this space, \(|\mathcal{M}| = \prod_{i=1}^n k_i\),
-quantifies the total number of unique, fully-specified analysis.
+Another analyst following the HDI schema in Listing~\ref{lst-schema}
+might wonder whether the reported index would look different under a
+different decision at some step. Formally, a step in the schema can have
+a candidate set of alternatives: step \(i\) may admit \(k_i\) decisions
+that all satisfy its objective \(f_i\), \(\{A_i^1, \dots, A_i^{k_i}\}\),
+of which the decision \(\pi_i\) recorded in the schema is just one
+member, \(A_i^1\). An alternative file specifies the remaining
+candidates, \(A_i^2, \dots, A_i^{k_i}\), for a subset of steps
+\(C \subseteq \{1, \dots, n\}\).
 
-Returning to the HDI example, in Step 3, instead of a geometric mean, an
-arithmetic mean is another possibility to combine the three dimensions
-into a single index. It may not be the best decision, but still a
-plausible one to derive a single index from the three dimensions, hence
-achieve the objective of this step. Listing~\ref{lst-alternatives} shows
-the structure of an alternative YAML file. The \texttt{meta} section
-identifies the file type (an alternative file rather than a schema file)
-and specifies the analysis step and the objective under consideration.
-Individual alternatives are defined as entries in the alternatives list,
-allowing multiple alternatives to be specified within a single file.
+The overall structure of an alternative file is shown in
+Listing~\ref{lst-alternatives-skeleton}. The \texttt{meta} field at the
+top identifies the file as an alternative specification
+(\texttt{type:\ alternatives}), and the file-level \texttt{branch}
+field, either \texttt{single} or \texttt{multi}, determines how the
+candidates at each step combine, described below. The file itself is
+organized as a list of nodes, one per step in \(C\): each node names its
+step in the original schema and lists the alternative decisions for that
+step, together with their justifications.
 
 \begin{codelisting}
 
-\caption{\label{lst-alternatives}An example YAML file for specifying
-alternative for Step 3 in calculating Human Development Index (HDI).}
+\caption{\label{lst-alternatives-skeleton}The skeleton of an alternative
+YAML file, which consists of a \texttt{branch} mode and a list of nodes,
+where each node specifies a step in the original schema and a list of
+alternative decisions for that step.}
 
 \centering{
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{meta}\KeywordTok{:}
-\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternative}
-\AttributeTok{  }\FunctionTok{step}\KeywordTok{:}\AttributeTok{ step{-}combine}
-\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to combine the three dimensions into a single index?}
-\FunctionTok{alternatives}\KeywordTok{:}
-\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ arith{-}mean}
-\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use an arithmetic mean}
-\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ a simple average of the three dimensions}
+\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternatives}
+\AttributeTok{  }\FunctionTok{branch}\KeywordTok{:}\AttributeTok{ single | multi}
+\FunctionTok{nodes}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ \textless{}step id\textgreater{}}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ \textless{}alternative id\textgreater{}}
+\FunctionTok{        decision}\KeywordTok{: }\AttributeTok{\textless{}...}\CharTok{\textgreater{}}
+\FunctionTok{        rationale}\KeywordTok{: }\AttributeTok{\textless{}...}\CharTok{\textgreater{}}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ \textless{}alternative id\textgreater{}}
+\AttributeTok{        ...}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ \textless{}step id\textgreater{}}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      ...}
+\AttributeTok{  ...}
+\end{Highlighting}
+\end{Shaded}
+
+}
+
+\end{codelisting}%
+
+Under \texttt{branch:\ single}, every node is restricted to a single
+candidate decision. These alternatives and the unchanged steps in the
+original schema together form one new analysis. This is useful when an
+analyst wants to see what a different, internally consistent analysis
+touching several steps at once would look like.
+Listing~\ref{lst-alternatives-single} fills in the skeleton to construct
+such an alternative version of the HDI computation, using a harmonic
+mean to combine the two education variables in Step 2 and an arithmetic
+mean to combine the three dimensions in Step 3.
+
+\begin{codelisting}
+
+\caption{\label{lst-alternatives-single}A sample alternative file that
+changes the decisions for Step 2 and Step 3 in calculating Human
+Development Index (HDI) to use a harmonic mean and an arithmetic mean,
+respectively.}
+
+\centering{
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{meta}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternatives}
+\AttributeTok{  }\FunctionTok{branch}\KeywordTok{:}\AttributeTok{ single}
+\FunctionTok{nodes}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ step{-}education}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ harmonic{-}mean}
+\AttributeTok{        }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ take the harmonic mean of the two education variables}
+\AttributeTok{        }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ penalizes disparity between the two schooling measures}
+\AttributeTok{          rather than allowing one to compensate for the other}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ step{-}combine}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ arith{-}mean}
+\AttributeTok{        }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use an arithmetic mean}
+\AttributeTok{        }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ a simple average of the three dimensions}
+\end{Highlighting}
+\end{Shaded}
+
+}
+
+\end{codelisting}%
+
+Sometimes a reader instead wants to test a range of alternatives for one
+or more steps independently. Under \texttt{branch:\ multi}, the
+candidates at each covered step, along with that step's original
+decision, are crossed to produce every combination. In
+Listing~\ref{lst-alternatives-multi}, one alternative is specified for
+the education step (the harmonic mean) and two for the combination step
+(an arithmetic mean and the minimum of the three dimensions). Together
+with the original schema, this produces \((1+1) \times (2+1) = 6\)
+analyses. More generally, with \(k_i\) candidates at each step
+\(i \in C\), crossing all candidates yields \(\prod_{i \in C} k_i\)
+analyses.
+
+\begin{codelisting}
+
+\caption{\label{lst-alternatives-multi}A sample alternative file that
+explores one alternative decision for Step 2 and two for Step 3 in
+calculating Human Development Index (HDI). Combining these alternatives
+with the original schema produces a total of six (1+1) × (2+1) = 6
+analyses.}
+
+\centering{
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{meta}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternatives}
+\AttributeTok{  }\FunctionTok{branch}\KeywordTok{:}\AttributeTok{ multi}
+\FunctionTok{nodes}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ step{-}education}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ harmonic{-}mean}
+\AttributeTok{        }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ take the harmonic mean of the two education variables}
+\AttributeTok{        }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ penalizes disparity between the two schooling measures}
+\AttributeTok{          rather than allowing one to compensate for the other}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ step{-}combine}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ arith{-}mean}
+\AttributeTok{        }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use an arithmetic mean}
+\AttributeTok{        }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ a simple average of the three dimensions}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ min{-}agg}
+\AttributeTok{        }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use the minimum of the three dimensions}
+\AttributeTok{        }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ a "weakest{-}link" aggregation that penalizes any single}
+\AttributeTok{          lagging dimension more strongly than an average would}
 \end{Highlighting}
 \end{Shaded}
 
@@ -620,9 +720,9 @@ validate its accuracy. A reader, on the other hand, may wish to explore
 how the HDI values or country rankings change if the original arithmetic
 mean (instead of the geometry mean) is used. By combining the original
 schema in Listing~\ref{lst-schema} with the alternative specification
-Listing~\ref{lst-alternatives}, the ``alternative generation'' path
-produces a corresponding analysis script for each alternative with LLMs.
-In contrast, modifying an existing code script by hand typically
+Listing~\ref{lst-alternatives-multi}, the ``alternative generation''
+path produces a corresponding analysis script for each alternative with
+LLMs. In contrast, modifying an existing code script by hand typically
 requires manually coordinating changes across upstream and downstream
 code. By representing analyses as a sequence of structured analytical
 decisions, our workflow allows LLMs to automate much of this process,
@@ -763,19 +863,23 @@ pooling them into the mid-risk inflated group.}
 \begin{Highlighting}[]
 \FunctionTok{meta}\KeywordTok{:}
 \AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternatives}
-\AttributeTok{  }\FunctionTok{step}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{special\_value\_mid\_risk}\KeywordTok{,}\AttributeTok{ alteration\_operator\_decision}\KeywordTok{,}\AttributeTok{ covariate\_selection}\KeywordTok{]}
-\AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to treat ages 19{-}21 relative to the pooled mid{-}risk inflated group}
-\FunctionTok{alternatives}\KeywordTok{:}
-\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\StringTok{"ap1921"}
-\AttributeTok{    }\FunctionTok{special\_value\_mid\_risk}\KeywordTok{:}
-\AttributeTok{      }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ treat ages 12, 13, 14 only as a parametrically{-}inflated group, with the extra probability mass there sharing the same distributional shape (mean and dispersion) as the main population; ages 19, 20, 21 are no longer pooled into this group (see the alteration operator decision instead)}
-\AttributeTok{      }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ ages 19{-}21 mark less frenetic, declining smoking uptake as respondents age out of the high{-}risk window, a qualitatively different pattern from the early uptake at ages 12{-}14, so they are moved out of this pooled inflated group}
-\AttributeTok{    }\FunctionTok{alteration\_operator\_decision}\KeywordTok{:}
-\AttributeTok{      }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use ages 19, 20, 21 as an alteration group (A.mix) instead of leaving alteration operators unused}
-\AttributeTok{      }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ ages 19{-}21 mark less frenetic, declining smoking uptake as respondents age out of the high{-}risk window, a qualitatively different pattern from the early uptake at ages 12{-}14, so they are represented as an alteration rather than folded into the same inflated group}
-\AttributeTok{    }\FunctionTok{covariate\_selection}\KeywordTok{:}
-\AttributeTok{      }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ do not include any covariates (intercept{-}only model)}
-\AttributeTok{      }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ this comparison is about which special{-}value structure fits better, so covariates are left out to compare the two structures on equal footing, the same way the special{-}value structure was first established on an intercept{-}only model before covariates were added}
+\AttributeTok{  }\FunctionTok{branch}\KeywordTok{:}\AttributeTok{ single}
+\FunctionTok{nodes}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ special\_value\_mid\_risk}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ ap1921{-}special{-}value}
+\AttributeTok{        }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ }\StringTok{"treat ages 12, 13, 14 only as a parametrically{-}inflated group, with the extra probability mass there sharing the same distributional shape (mean and dispersion) as the main population; ages 19, 20, 21 are no longer pooled into this group (see the alteration operator decision instead)"}
+\AttributeTok{        }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{"ages 19{-}21 mark less frenetic, declining smoking uptake as respondents age out of the high{-}risk window, a qualitatively different pattern from the early uptake at ages 12{-}14, so they are moved out of this pooled inflated group"}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ alteration\_operator\_decision}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ ap1921{-}alteration}
+\AttributeTok{        }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ }\StringTok{"use ages 19, 20, 21 as an alteration group (A.mix) instead of leaving alteration operators unused"}
+\AttributeTok{        }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{"ages 19{-}21 mark less frenetic, declining smoking uptake as respondents age out of the high{-}risk window, a qualitatively different pattern from the early uptake at ages 12{-}14, so they are represented as an alteration rather than folded into the same inflated group"}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ covariate\_selection}
+\AttributeTok{    }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ ap1921{-}covariates}
+\AttributeTok{        }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ }\StringTok{"do not include any covariates (intercept{-}only model)"}
+\AttributeTok{        }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{"this comparison is about which special{-}value structure fits better, so covariates are left out to compare the two structures on equal footing, the same way the special{-}value structure was first established on an intercept{-}only model before covariates were added"}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1000,21 +1104,21 @@ analysis of Group 5.}
 \begin{Highlighting}[]
 \FunctionTok{meta}\KeywordTok{:}
 \AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ alternatives}
-\AttributeTok{  }\FunctionTok{step}\KeywordTok{:}\AttributeTok{ specify\_random\_effects\_structure}
-\AttributeTok{  }\FunctionTok{fork}\KeywordTok{:}\AttributeTok{ how to account for the non{-}nested cross{-}classified data structure}
-\FunctionTok{alternatives}\KeywordTok{:}
-\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\StringTok{"gm1"}
-\AttributeTok{    }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ }\StringTok{"a random effect of player and referee"}
-\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
-\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\StringTok{"gm2"}
-\AttributeTok{    }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ }\StringTok{"a random effect of player and referee, and a random effect }
-\StringTok{      of skin{-}tone across referees"}
-\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
-\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\StringTok{"gm3"}
-\AttributeTok{    }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ }\StringTok{"a random effect of player, referee, and referees\textquotesingle{} countries}
-\StringTok{       of origin, and a random effect of skin tone across referees\textquotesingle{}}
-\StringTok{      countries of origin"}
-\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{""}
+\AttributeTok{  }\FunctionTok{branch}\KeywordTok{:}\AttributeTok{ multi}
+\FunctionTok{nodes}\KeywordTok{:}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{overrides}\KeywordTok{:}\AttributeTok{ specify\_random\_effects\_structure}
+\AttributeTok{  }\FunctionTok{alternatives}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ gm1}
+\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ a random effect of player and referee}
+\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}\textquotesingle{}}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ gm2}
+\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ a random effect of player and referee, and a random effect of skin{-}tone}
+\AttributeTok{      across referees}
+\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}\textquotesingle{}}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ gm3}
+\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ a random effect of player, referee, and referees\textquotesingle{} countries of origin,}
+\AttributeTok{      and a random effect of skin tone across referees\textquotesingle{} countries of origin}
+\AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}\textquotesingle{}}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1311,17 +1415,6 @@ Dam, L., Evans, M. H., Flores Cervantes, I., \ldots{} Nosek, B. A.
 in Analytic Choices Affect Results. \emph{Advances in Methods and
 Practices in Psychological Science}, \emph{1}(3), 337--356.
 \url{https://doi.org/10.1177/2515245917747646}
-
-\bibitem[\citeproctext]{ref-simonsohn2020}
-Simonsohn, U., Simmons, J. P., \& Nelson, L. D. (2020). Specification
-curve analysis. \emph{Nature Human Behaviour}, \emph{4}(11), 1208--1214.
-\url{https://doi.org/10.1038/s41562-020-0912-z}
-
-\bibitem[\citeproctext]{ref-steegen2016}
-Steegen, S., Tuerlinckx, F., Gelman, A., \& Vanpaemel, W. (2016).
-Increasing transparency through a multiverse analysis.
-\emph{Perspectives on Psychological Science}, \emph{11}(5), 702--712.
-\url{https://doi.org/10.1177/1745691616658637}
 
 \bibitem[\citeproctext]{ref-sun_lambda_2026}
 Sun, M., Han, R., Jiang, B., Qi, H., Sun, D., Yuan, Y., \& Huang, J.

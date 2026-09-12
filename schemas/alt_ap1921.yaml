@@ -1,15 +1,19 @@
 meta:
   type: alternatives
-  step: [special_value_mid_risk, alteration_operator_decision, covariate_selection]
-  objective: how to treat ages 19-21 relative to the pooled mid-risk inflated group
-alternatives:
-  - id: "ap1921"
-    special_value_mid_risk:
-      decision: treat ages 12, 13, 14 only as a parametrically-inflated group, with the extra probability mass there sharing the same distributional shape (mean and dispersion) as the main population; ages 19, 20, 21 are no longer pooled into this group (see the alteration operator decision instead)
-      rationale: ages 19-21 mark less frenetic, declining smoking uptake as respondents age out of the high-risk window, a qualitatively different pattern from the early uptake at ages 12-14, so they are moved out of this pooled inflated group
-    alteration_operator_decision:
-      decision: use ages 19, 20, 21 as an alteration group (A.mix) instead of leaving alteration operators unused
-      rationale: ages 19-21 mark less frenetic, declining smoking uptake as respondents age out of the high-risk window, a qualitatively different pattern from the early uptake at ages 12-14, so they are represented as an alteration rather than folded into the same inflated group
-    covariate_selection:
-      decision: do not include any covariates (intercept-only model)
-      rationale: this comparison is about which special-value structure fits better, so covariates are left out to compare the two structures on equal footing, the same way the special-value structure was first established on an intercept-only model before covariates were added
+  branch: single
+nodes:
+  - overrides: special_value_mid_risk
+    alternatives:
+      - id: ap1921-special-value
+        decision: "treat ages 12, 13, 14 only as a parametrically-inflated group, with the extra probability mass there sharing the same distributional shape (mean and dispersion) as the main population; ages 19, 20, 21 are no longer pooled into this group (see the alteration operator decision instead)"
+        rationale: "ages 19-21 mark less frenetic, declining smoking uptake as respondents age out of the high-risk window, a qualitatively different pattern from the early uptake at ages 12-14, so they are moved out of this pooled inflated group"
+  - overrides: alteration_operator_decision
+    alternatives:
+      - id: ap1921-alteration
+        decision: "use ages 19, 20, 21 as an alteration group (A.mix) instead of leaving alteration operators unused"
+        rationale: "ages 19-21 mark less frenetic, declining smoking uptake as respondents age out of the high-risk window, a qualitatively different pattern from the early uptake at ages 12-14, so they are represented as an alteration rather than folded into the same inflated group"
+  - overrides: covariate_selection
+    alternatives:
+      - id: ap1921-covariates
+        decision: "do not include any covariates (intercept-only model)"
+        rationale: "this comparison is about which special-value structure fits better, so covariates are left out to compare the two structures on equal footing, the same way the special-value structure was first established on an intercept-only model before covariates were added"

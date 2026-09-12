@@ -1,0 +1,15 @@
+meta:
+  type: alternatives
+  branch: multi
+nodes:
+- overrides: specify_random_effects_structure
+  alternatives:
+  - id: gm1
+    decision: a random effect of player and referee
+    rationale: ''
+  - id: gm2
+    decision: a random effect of player and referee, and a random effect of skin-tone across referees
+    rationale: ''
+  - id: gm3
+    decision: a random effect of player, referee, and referees' countries of origin, and a random effect of skin tone across referees' countries of origin
+    rationale: ''
