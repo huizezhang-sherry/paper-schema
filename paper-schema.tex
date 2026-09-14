@@ -533,16 +533,17 @@ top identifies the file as an alternative specification
 (\texttt{type:\ alternatives}), and the file-level \texttt{branch}
 field, either \texttt{single} or \texttt{multi}, determines how the
 candidates at each step combine, described below. The file itself is
-organized as a list of nodes, one per step in \(C\): each node names its
-step in the original schema and lists the alternative decisions for that
-step, together with their justifications.
+organized as a list, one entry per step in \(C\) (\texttt{nodes} in the
+YAML): each entry names its step in the original schema (via
+\texttt{overrides}) and lists the alternative decisions for that step,
+together with their justifications.
 
 \begin{codelisting}
 
 \caption{\label{lst-alternatives-skeleton}The skeleton of an alternative
-YAML file, which consists of a \texttt{branch} mode and a list of nodes,
-where each node specifies a step in the original schema and a list of
-alternative decisions for that step.}
+YAML file, which consists of a \texttt{branch} mode and a list of
+covered steps, each specifying a step in the original schema and its
+alternative decisions.}
 
 \centering{
 
@@ -570,7 +571,7 @@ alternative decisions for that step.}
 
 \end{codelisting}%
 
-Under \texttt{branch:\ single}, every node is restricted to a single
+Under \texttt{branch:\ single}, every step is restricted to a single
 candidate decision. These alternatives and the unchanged steps in the
 original schema together form one new analysis. This is useful when an
 analyst wants to see what a different, internally consistent analysis
@@ -729,34 +730,34 @@ decisions, our workflow allows LLMs to automate much of this process,
 making it easier to understand the sequence of steps taken in the
 analysis and to explore alternatives.
 
-Several properties of this workflow follow directly from representing an
-analysis as an explicit schema rather than as code alone. First, the
-schema is \emph{inspectable}: because it is short and structured, an
-analyst can check it against the source manuscript far more readily than
-they could audit the generated script itself, which is what makes each
-of the following properties useful in practice rather than only
-theoretical. Second, the schema \emph{separates logic from
-implementation}: whether a decision was understood correctly (manuscript
-to schema) and whether it was implemented correctly (schema to code)
-become two distinct, independently checkable steps rather than a single
-opaque translation, a distinction Section~\ref{sec-application} relies
-on directly to localize where our workflow fails. Third, the schema is
-\emph{provenance-agnostic}: nothing in the workflow requires it to
-originate from an LLM, as Figure~\ref{fig-workflow} shows, a schema can
-equally be authored or corrected by hand from the template, and the
-validation loop treats a hand-written schema no differently from an
-extracted one, checking it by generating and repairing code the same
-way. This matters because, as Section~\ref{sec-application} shows,
-current LLMs do not always extract a schema from a manuscript with
-perfect fidelity; we do not treat this as a defect to be engineered away
-by further automation, but as the reason the schema is kept explicit and
-available for an analyst to correct, rather than folded silently into
-the code-generation step. Fourth, the schema is \emph{reusable}: because
-a decision is represented independently of any one downstream
-implementation, the same schema can be systematically varied, via the
-alternative specification described above, to generate and compare
-multiple analyses without hand-coordinating changes across an existing
-script.
+We now analyze the uncertainty of the pipeline itself: for a step \(k\)
+extracted by a model \(M\) from a source text \(T\), we decompose the
+total uncertainty of the pipeline at that step into a specification term
+and an implementation term,
+
+\[V_k^{\text{total}}(M) = V_k^{\text{spec}}(M) + V_k^{\text{impl}}(M),\]
+
+where each component is defined as the expected pairwise divergence,
+\(d(\cdot, \cdot) \in [0, 1]\), between independent runs at the
+corresponding stage. Specifically, \(V_k^{\text{spec}}(M)\) measures
+variation across repeated schema extractions from \(T\) and
+\(V_k^{\text{impl}}(M)\) measures variation across repeated code
+generations from a single fixed schema. We can further decompose the
+specification term into an epistemic and an aleatoric component
+(Hüllermeier \& Waegeman, 2021; Kendall \& Gal, 2017):
+
+\[V_k^{\text{spec}}(M) = V_k^{\text{epistemic}}(M) + V_k^{\text{aleatoric}},\]
+
+The epistemic component, \(V_k^{\text{epistemic}}(M)\), reflects when
+the model fails to recover a decision that is unambiguously specified in
+\(T\). The aleatoric component, \(V_k^{\text{aleatoric}}\), captures the
+uncertainty in the source itself: the text \(T\) is unclear at step
+\(k\), independent of \(M\). This distinction has a direct diagnostic
+use in the quality of the data anlaysis. Persistent dispersion across
+increasingly capable models suggests that the observed variation
+reflects ambiguity in the source since a more capable model cannot
+recover the authors' intent that is not sufficiently expressed in the
+source text.
 
 \section{Application}\label{sec-gaitd}
 
@@ -853,7 +854,7 @@ account of the analysis.}
 \begin{codelisting}
 
 \caption{\label{lst-ap1921}An alternative YAML file specifying a joint
-change to the mid-risk inflation, alteration, and covariate nodes in the
+change to the mid-risk inflation, alteration, and covariate steps in the
 GAITD schema, treating ages 19-21 as an alteration group rather than
 pooling them into the mid-risk inflated group.}
 
@@ -1345,6 +1346,11 @@ Vucetic, \& S. Srivastava (Eds.), \emph{Proceedings of the {Fourth}
 {Advances})} (pp. 28--36). Association for Computational Linguistics.
 \url{https://doi.org/10.18653/v1/2022.dash-1.5}
 
+\bibitem[\citeproctext]{ref-hullermeier2021}
+Hüllermeier, E., \& Waegeman, W. (2021). Aleatoric and epistemic
+uncertainty in machine learning: An introduction to concepts and
+methods. \emph{Machine Learning}, \emph{110}(3), 457--506.
+
 \bibitem[\citeproctext]{ref-jansen2025}
 Jansen, J. A., Manukyan, A., Khoury, N. A., \& Akalin, A. (2025).
 Leveraging large language models for data analysis automation.
@@ -1367,6 +1373,11 @@ Jun, E., Seo, A., Heer, J., \& Just, R. (2022). \emph{Tisane: Authoring
 statistical models via formal reasoning from conceptual and data
 relationships}. \emph{CHI '22}, 116.
 \url{https://doi.org/10.1145/3491102.3501888}
+
+\bibitem[\citeproctext]{ref-kendall2017}
+Kendall, A., \& Gal, Y. (2017). What uncertainties do we need in
+bayesian deep learning for computer vision? \emph{Advances in Neural
+Information Processing Systems 30 (NeurIPS 2017)}, 5574--5584.
 
 \bibitem[\citeproctext]{ref-lai_ds1000_2023}
 Lai, Y., Li, C., Wang, Y., Zhang, T., Zhong, R., Zettlemoyer, L., Yih,
