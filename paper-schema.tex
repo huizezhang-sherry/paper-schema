@@ -761,6 +761,30 @@ source text.
 
 \section{Application}\label{sec-gaitd}
 
+In this section, we demonstrate the schema workflow from an author's
+perspective: what it looks like for an author to provide a schema
+alongside a manuscript, and what that then lets an audience do to
+question and explore the analysis with much less effort than the
+manuscript and its code alone would require. We use Yee et al. (2025)'s
+GAITD regression analysis of heaped smoking data, published in the
+Annals of Applied Statistics, as the example. Yee et al. (2025) report
+four separate smoking-related responses; for demonstration purposes we
+build the schema for only the first, smoking initiation age (P1, Section
+5.1 of their paper), and the same workflow extends to the other three.
+
+Listing~\ref{lst-heaping} contains fourteen entries; rather than list
+them all, we highlight one as representative of what each entry records.
+Every entry follows the \emph{objective}, \emph{decision}, and
+\emph{rationale} structure introduced in Section~\ref{sec-schema}.
+Consider \texttt{special\_value\_mid\_risk}: the decision is to treat
+ages 12-14 and 19-21 as one inflated group with extra probability mass,
+since these ages show a moderate, secondary elevation in the spikeplots,
+surrounding the sharper peak already attributed to the high-risk group
+(ages 15-18). Recording the rationale along with the decision allows a
+reader to agree or disagree with the authors' choice, and to question
+and explore the analysis, as we do later in this section. The remaining
+thirteen entries follow the same structure.
+
 \begin{codelisting}
 
 \caption{\label{lst-heaping}A schema for the GAITD regression analysis
@@ -851,6 +875,153 @@ account of the analysis.}
 
 \end{codelisting}%
 
+As a check that this schema is accurate, generating and validating code
+from it produces the R script in Listing~\ref{lst-script-sia}, which
+reproduces the coefficients Yee et al. (2025) report for smoking
+initiation age exactly, matching their Table 2. This check is useful
+beyond validating our own workflow: a schema that reproduces a published
+result could accompany the manuscript as reproducibility material in its
+own right, alongside code and data availability, and a reader can trust
+the schema in Listing~\ref{lst-heaping} to accurately describe the
+analysis it documents.
+
+\begin{codelisting}
+
+\caption{\label{lst-script-sia}The R script generated and validated from
+the schema in Listing~\ref{lst-heaping}, annotated with the \texttt{id}
+of the schema step each block implements.}
+
+\centering{
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(VGAMdata)}
+\FunctionTok{library}\NormalTok{(VGAM)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+
+\FunctionTok{data}\NormalTok{(}\StringTok{"smqP"}\NormalTok{, }\AttributeTok{package =} \StringTok{"VGAMdata"}\NormalTok{)}
+
+\NormalTok{cols }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}TC30\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}TCquit\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}SCA\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}educ\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}marital\textquotesingle{}}\NormalTok{,}
+          \StringTok{\textquotesingle{}SIA\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}SEQN\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}age\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}gender\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}race2\textquotesingle{}}\NormalTok{,}
+          \StringTok{"passiveSmoke\_job"}\NormalTok{, }\StringTok{"passiveSmoke\_rest"}\NormalTok{,}
+          \StringTok{"passiveSmoke\_bar"}\NormalTok{, }\StringTok{"passiveSmoke\_car"}\NormalTok{,}
+          \StringTok{"passiveSmoke\_home"}\NormalTok{, }\StringTok{"passiveSmoke\_other"}\NormalTok{,}
+          \StringTok{"passiveSmoke\_ecigarettes"}\NormalTok{)}
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ smqP }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(}\FunctionTok{all\_of}\NormalTok{(cols))}
+
+\CommentTok{\# Step 1: complete\_case\_filtering}
+\CommentTok{\# Apply complete{-}case filtering to all columns except TC30, TCquit, and SCA}
+\NormalTok{cols\_require\_complete }\OtherTok{\textless{}{-}} \FunctionTok{setdiff}\NormalTok{(cols, }\FunctionTok{c}\NormalTok{(}\StringTok{"TC30"}\NormalTok{, }\StringTok{"TCquit"}\NormalTok{, }\StringTok{"SCA"}\NormalTok{))}
+\NormalTok{df\_complete }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{filter}\NormalTok{(}\FunctionTok{complete.cases}\NormalTok{(}\FunctionTok{pick}\NormalTok{(}\FunctionTok{all\_of}\NormalTok{(cols\_require\_complete))))}
+
+\CommentTok{\# Step 2: age\_restriction}
+\CommentTok{\# Restrict analysis to respondents aged less than 80 years}
+\NormalTok{df\_age\_restricted }\OtherTok{\textless{}{-}}\NormalTok{ df\_complete }\SpecialCharTok{|\textgreater{}} \FunctionTok{filter}\NormalTok{(age }\SpecialCharTok{\textless{}} \DecValTok{80}\NormalTok{)}
+
+\CommentTok{\# Step 3: data\_quality\_correction}
+\CommentTok{\# Set both SCA and SIA to NA where SCA {-} SIA \textless{} 0}
+\NormalTok{df\_age\_restricted }\OtherTok{\textless{}{-}}\NormalTok{ df\_age\_restricted }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{SCA\_corrected =} \FunctionTok{if\_else}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(SCA) }\SpecialCharTok{\&} \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(SIA) }\SpecialCharTok{\&}\NormalTok{ (SCA }\SpecialCharTok{{-}}\NormalTok{ SIA }\SpecialCharTok{\textless{}} \DecValTok{0}\NormalTok{), }\ConstantTok{NA\_integer\_}\NormalTok{, SCA),}
+    \AttributeTok{SIA\_corrected =} \FunctionTok{if\_else}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(SCA) }\SpecialCharTok{\&} \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(SIA) }\SpecialCharTok{\&}\NormalTok{ (SCA }\SpecialCharTok{{-}}\NormalTok{ SIA }\SpecialCharTok{\textless{}} \DecValTok{0}\NormalTok{), }\ConstantTok{NA\_integer\_}\NormalTok{, SIA)}
+\NormalTok{  )}
+
+\CommentTok{\# Step 4: impute\_marital\_young}
+\CommentTok{\# Recode marital status to "Never married" for everyone age \textless{} 20}
+\NormalTok{df\_age\_restricted }\OtherTok{\textless{}{-}}\NormalTok{ df\_age\_restricted }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{marital\_imputed =} \FunctionTok{if\_else}\NormalTok{(age }\SpecialCharTok{\textless{}} \DecValTok{20}\NormalTok{, }\StringTok{"Never married"}\NormalTok{, }\FunctionTok{as.character}\NormalTok{(marital))}
+\NormalTok{  )}
+
+\CommentTok{\# Step 5: impute\_education\_young}
+\CommentTok{\# Recode education based on age for young respondents}
+\NormalTok{df\_age\_restricted }\OtherTok{\textless{}{-}}\NormalTok{ df\_age\_restricted }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{educ\_imputed =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      age }\SpecialCharTok{\textless{}} \DecValTok{14} \SpecialCharTok{\textasciitilde{}} \StringTok{"\textless{} 9th grade"}\NormalTok{,}
+\NormalTok{      age }\SpecialCharTok{\textgreater{}=} \DecValTok{14} \SpecialCharTok{\&}\NormalTok{ age }\SpecialCharTok{\textless{}=} \DecValTok{16} \SpecialCharTok{\textasciitilde{}} \StringTok{"9{-}11th grade"}\NormalTok{,}
+\NormalTok{      age }\SpecialCharTok{\textgreater{}=} \DecValTok{17} \SpecialCharTok{\&}\NormalTok{ age }\SpecialCharTok{\textless{}=} \DecValTok{19} \SpecialCharTok{\textasciitilde{}} \StringTok{"High school"}\NormalTok{,}
+      \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \FunctionTok{as.character}\NormalTok{(educ)}
+\NormalTok{    )}
+\NormalTok{  )}
+
+\CommentTok{\# Step 6: define\_ever\_smokers\_sample}
+\CommentTok{\# Include if: SIA not missing AND (both SCA and TCquit not missing OR SCA missing and TC30 not missing)}
+\NormalTok{df\_ever\_smokers }\OtherTok{\textless{}{-}}\NormalTok{ df\_age\_restricted }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{filter}\NormalTok{(}
+    \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(SIA\_corrected) }\SpecialCharTok{\&}
+\NormalTok{    ((}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(SCA\_corrected) }\SpecialCharTok{\&} \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(TCquit)) }\SpecialCharTok{|}\NormalTok{ (}\FunctionTok{is.na}\NormalTok{(SCA\_corrected) }\SpecialCharTok{\&} \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(TC30)))}
+\NormalTok{  )}
+
+\NormalTok{df\_ever\_smokers }\OtherTok{\textless{}{-}} \FunctionTok{droplevels}\NormalTok{(df\_ever\_smokers)}
+
+\CommentTok{\# Step 7: parent\_distribution\_choice}
+\CommentTok{\# Adopt negative binomial distribution as the parent distribution}
+\NormalTok{parent\_distribution }\OtherTok{\textless{}{-}}\NormalTok{ negbinomial}
+
+\CommentTok{\# Step 8: special\_value\_mid\_risk}
+\CommentTok{\# Ages 12, 13, 14, 19, 20, 21 as parametrically{-}inflated group (i.mix)}
+\NormalTok{i\_mix\_spec }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{12}\NormalTok{, }\DecValTok{13}\NormalTok{, }\DecValTok{14}\NormalTok{, }\DecValTok{19}\NormalTok{, }\DecValTok{20}\NormalTok{, }\DecValTok{21}\NormalTok{)}
+
+\CommentTok{\# Step 9: special\_value\_high\_risk}
+\CommentTok{\# Ages 15, 16, 17, 18 as nonparametrically{-}inflated group (i.mlm)}
+\NormalTok{i\_mlm\_spec }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{15}\NormalTok{, }\DecValTok{16}\NormalTok{, }\DecValTok{17}\NormalTok{, }\DecValTok{18}\NormalTok{)}
+
+\CommentTok{\# Step 10: alteration\_operator\_decision}
+\CommentTok{\# Do not use alteration operators}
+\NormalTok{a\_mix\_spec }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+\NormalTok{a\_mlm\_spec }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+
+\CommentTok{\# Step 11: deflation\_operator\_decision}
+\CommentTok{\# Do not use deflation operators}
+\NormalTok{d\_mix\_spec }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+\NormalTok{d\_mlm\_spec }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+
+\CommentTok{\# Step 12: truncation\_decision}
+\CommentTok{\# Do not use truncation}
+\NormalTok{truncation\_spec }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+
+\CommentTok{\# Step 13: covariate\_selection}
+\CommentTok{\# Include race2, gender, marital, and educ as covariates}
+\NormalTok{covariate\_formula }\OtherTok{\textless{}{-}}\NormalTok{ SIA\_corrected }\SpecialCharTok{\textasciitilde{}}\NormalTok{ race2 }\SpecialCharTok{+}\NormalTok{ gender }\SpecialCharTok{+}\NormalTok{ marital\_imputed }\SpecialCharTok{+}\NormalTok{ educ\_imputed}
+
+\CommentTok{\# Step 14: fit\_final\_model}
+\CommentTok{\# Fit a single vglm with response, parent distribution, special{-}value structure, and covariates}
+\NormalTok{fitted\_model }\OtherTok{\textless{}{-}} \FunctionTok{vglm}\NormalTok{(}
+\NormalTok{  covariate\_formula,}
+  \AttributeTok{family =} \FunctionTok{gaitdnbinomial}\NormalTok{(}
+    \AttributeTok{i.mix =}\NormalTok{ i\_mix\_spec, }\AttributeTok{i.mlm =}\NormalTok{ i\_mlm\_spec,}
+    \AttributeTok{a.mix =}\NormalTok{ a\_mix\_spec, }\AttributeTok{a.mlm =}\NormalTok{ a\_mlm\_spec,}
+    \AttributeTok{d.mix =}\NormalTok{ d\_mix\_spec, }\AttributeTok{d.mlm =}\NormalTok{ d\_mlm\_spec,}
+    \AttributeTok{truncate =}\NormalTok{ truncation\_spec}
+\NormalTok{  ),}
+  \AttributeTok{data =}\NormalTok{ df\_ever\_smokers}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+}
+
+\end{codelisting}%
+
+Beyond confirming the schema's accuracy, this workflow lets a reader
+write an alternative file directly against the schema and obtain
+generated, validated code, rather than going through the authors'
+original script and modifying it by hand. Yee et al. (2025)'s
+supplementary material reports exactly this kind of question from a
+reviewer, who suggested splitting the mid-risk group into two, keeping
+ages 12-14 as inflated but treating ages 19-21 as altered instead, since
+that older subgroup shows a qualitatively different, declining pattern
+of uptake. Listing~\ref{lst-ap1921} encodes the reviewer's suggestion as
+an alternative file, overriding three steps at once:
+\texttt{special\_value\_mid\_risk} narrows the inflated group to ages
+12-14, \texttt{alteration\_operator\_decision} turns on an alteration
+group for ages 19-21, and \texttt{covariate\_selection} drops to an
+intercept-only model, matching how the authors themselves computed AIC
+for this comparison; \texttt{branch:\ single} ties the three overrides
+into one refit, rather than crossing them into separate branches.
+
 \begin{codelisting}
 
 \caption{\label{lst-ap1921}An alternative YAML file specifying a joint
@@ -887,6 +1058,14 @@ pooling them into the mid-risk inflated group.}
 }
 
 \end{codelisting}%
+
+Generating and validating code from this alternative, without the reader
+needing to touch the original script by hand, reproduces the AIC and KLD
+values the reviewer's refit is reported to have achieved in the
+supplementary material (AIC = 19340.36, KLD = 0.380). What took the
+original authors a manual refit and a paragraph in the supplement is,
+for a reader equipped with this schema and its alternative file, a
+single generation-and-validation step.
 
 \section{Application: many-analysts football
 study}\label{sec-application}
@@ -1113,12 +1292,10 @@ analysis of Group 5.}
 \AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ a random effect of player and referee}
 \AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}\textquotesingle{}}
 \AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ gm2}
-\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ a random effect of player and referee, and a random effect of skin{-}tone}
-\AttributeTok{      across referees}
+\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ a random effect of player and referee, and a random effect of skin{-}tone across referees}
 \AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}\textquotesingle{}}
 \AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ gm3}
-\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ a random effect of player, referee, and referees\textquotesingle{} countries of origin,}
-\AttributeTok{      and a random effect of skin tone across referees\textquotesingle{} countries of origin}
+\AttributeTok{    }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ a random effect of player, referee, and referees\textquotesingle{} countries of origin, and a random effect of skin tone across referees\textquotesingle{} countries of origin}
 \AttributeTok{    }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}\textquotesingle{}}
 \end{Highlighting}
 \end{Shaded}

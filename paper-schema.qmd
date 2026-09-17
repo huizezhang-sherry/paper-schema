@@ -271,6 +271,10 @@ The epistemic component, $V_k^{\text{epistemic}}(M)$, reflects when the model fa
 
 # Application {#sec-gaitd}
 
+In this section, we demonstrate the schema workflow from an author's perspective: what it looks like for an author to provide a schema alongside a manuscript, and what that then lets an audience do to question and explore the analysis with much less effort than the manuscript and its code alone would require. We use @yee2025heaping's GAITD regression analysis of heaped smoking data, published in the Annals of Applied Statistics, as the example. @yee2025heaping report four separate smoking-related responses; for demonstration purposes we build the schema for only the first, smoking initiation age (P1, Section 5.1 of their paper), and the same workflow extends to the other three.
+
+@lst-heaping contains fourteen entries; rather than list them all, we highlight one as representative of what each entry records. Every entry follows the *objective*, *decision*, and *rationale* structure introduced in @sec-schema. Consider `special_value_mid_risk`: the decision is to treat ages 12-14 and 19-21 as one inflated group with extra probability mass, since these ages show a moderate, secondary elevation in the spikeplots, surrounding the sharper peak already attributed to the high-risk group (ages 15-18). Recording the rationale along with the decision allows a reader to agree or disagree with the authors' choice, and to question and explore the analysis, as we do later in this section. The remaining thirteen entries follow the same structure.
+
 :::{#lst-heaping lst-cap="A schema for the GAITD regression analysis of smoking initiation age in @yee2025heaping, constructed from the manuscript and intended to be provided alongside it as a self-contained account of the analysis."}
 ```{r}
 #| echo: false
@@ -281,16 +285,32 @@ cat("````\n")
 ```
 :::
 
+As a check that this schema is accurate, generating and validating code from it produces the R script in @lst-script-sia, which reproduces the coefficients @yee2025heaping report for smoking initiation age exactly, matching their Table 2. This check is useful beyond validating our own workflow: a schema that reproduces a published result could accompany the manuscript as reproducibility material in its own right, alongside code and data availability, and a reader can trust the schema in @lst-heaping to accurately describe the analysis it documents.
+
+:::{#lst-script-sia lst-cap="The R script generated and validated from the schema in @lst-heaping, annotated with the `id` of the schema step each block implements."}
+```{r}
+#| echo: false
+#| output: asis
+cat("````r\n")
+cat(readLines(here::here("schemas/script_iter1_annotated.R")), sep = "\n")
+cat("````\n")
+```
+:::
+
+Beyond confirming the schema's accuracy, this workflow lets a reader write an alternative file directly against the schema and obtain generated, validated code, rather than going through the authors' original script and modifying it by hand. @yee2025heaping's supplementary material reports exactly this kind of question from a reviewer, who suggested splitting the mid-risk group into two, keeping ages 12-14 as inflated but treating ages 19-21 as altered instead, since that older subgroup shows a qualitatively different, declining pattern of uptake. @lst-ap1921 encodes the reviewer's suggestion as an alternative file, overriding three steps at once: `special_value_mid_risk` narrows the inflated group to ages 12-14, `alteration_operator_decision` turns on an alteration group for ages 19-21, and `covariate_selection` drops to an intercept-only model, matching how the authors themselves computed AIC for this comparison; `branch: single` ties the three overrides into one refit, rather than crossing them into separate branches.
 
 :::{#lst-ap1921 lst-cap="An alternative YAML file specifying a joint change to the mid-risk inflation, alteration, and covariate steps in the GAITD schema, treating ages 19-21 as an alteration group rather than pooling them into the mid-risk inflated group."}
 ```{r}
 #| echo: false
 #| output: asis
-cat("````yaml\n") 
+cat("````yaml\n")
 cat(readLines(here::here("schemas/alt_ap1921.yaml")), sep = "\n")
 cat("````\n")
 ```
 :::
+
+Generating and validating code from this alternative, without the reader needing to touch the original script by hand, reproduces the AIC and KLD values the reviewer's refit is reported to have achieved in the supplementary material (AIC = 19340.36, KLD = 0.380). What took the original authors a manual refit and a paragraph in the supplement is, for a reader equipped with this schema and its alternative file, a single generation-and-validation step.
+
 
 # Application: many-analysts football study {#sec-application}
 
