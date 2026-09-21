@@ -1,0 +1,65 @@
+meta:
+  type: schema
+nodes:
+- id: create_skin_tone_variable
+  objective: how to operationalize player skin tone from multiple rater assessments
+  decision: average the two ratings of skin-tone and rescale to create avgrate01
+  rationale: to combine multiple rater assessments into a single composite measure
+  inputs: [rater1, rater2]
+  outputs: [avgrate01]
+  confidence: high
+  clarification_question: null
+
+- id: handle_missing_data
+  objective: how to handle cases with missing values on key variables
+  decision: apply listwise deletion excluding cases with missing values on skin-tone-rating, meanIAT, or meanExp
+  rationale: to perform all analyses including research question 2 on the same set of cases
+  inputs: [avgrate01, meanIAT, meanExp]
+  outputs: [df_complete]
+  confidence: high
+  clarification_question: null
+
+- id: disaggregate_response_variable
+  objective: how to handle the response variable given varying number of games per player-referee dyad
+  decision: disaggregate data to one game per row where redCards appear as 1s in the first n=redCards rows per player
+  rationale: the original response variable redCards is uninterpretable because the number of games a player has seen a given referee varies
+  inputs: [df_complete, redCards, games, playerShort, refNum]
+  outputs: [df_disaggregated, red_card_binary]
+  confidence: medium
+  clarification_question: Which column indicates the total number of games per player-referee combination for disaggregation?
+
+- id: select_error_distribution
+  objective: which error distribution to use for modeling the response variable
+  decision: use binomial error distribution
+  rationale: after disaggregation the response variable specifies the occurrence of an event in a single game coded 0 and 1
+  inputs: [red_card_binary]
+  outputs: [distribution_spec]
+  confidence: high
+  clarification_question: null
+
+- id: specify_random_effects_structure
+  objective: how to account for the non-nested cross-classified data structure
+  decision: add random effects of playerShort, refNum, and skin-tone across referees countries of origin
+  rationale: the crowdstorming data are cross-classified where players can have multiple games with multiple referees
+  inputs: [playerShort, refNum, avgrate01, refCountry]
+  outputs: [ranef_spec]
+  confidence: medium
+  clarification_question: Is refCountry the correct column representing referees countries of origin for the random slope specification?
+
+- id: select_covariates
+  objective: whether and which covariates to include in the model
+  decision: do not include any covariates
+  rationale: the data cannot be used for causal inference as noted in the project description
+  inputs: [df_disaggregated]
+  outputs: [covariate_spec]
+  confidence: high
+  clarification_question: null
+
+- id: fit_glmm
+  objective: which modeling framework to use for the analysis
+  decision: estimate generalized linear mixed models using glmer function from lme4 package
+  rationale: appropriate for binary outcome with cross-classified random effects structure
+  inputs: [df_disaggregated, red_card_binary, avgrate01, ranef_spec, distribution_spec, covariate_spec]
+  outputs: [glmm_model]
+  confidence: high
+  clarification_question: null

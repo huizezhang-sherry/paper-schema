@@ -242,10 +242,10 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Code availability is not enough: A schema-based representation for comprehensible and extensible data analysis},
+  pdftitle={Code availability is not enough: schemas for documenting and extending data analysis},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
-  pdfkeywords={Reproducibility, Large Language Models (LLMs), Analytical
-decisions, Many-analysts study},
+  pdfkeywords={Reproducibility, Large Language Models (LLMs), Data
+analysis decisions, Many-analysts study, Statistical workflow},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -254,8 +254,8 @@ decisions, Many-analysts study},
   pdfcreator={LaTeX via pandoc}}
 
 
-\title{Code availability is not enough: A schema-based representation
-for comprehensible and extensible data analysis}
+\title{Code availability is not enough: schemas for documenting and
+extending data analysis}
 \author{H. Sherry Zhang$\textsuperscript{1}$, Roger D.
 Peng$\textsuperscript{1}$}
 
@@ -269,32 +269,40 @@ Science, University of Texas at Austin, Texas, United States
 \begin{abstract}
 Current reproducibility practices have greatly improved our ability to
 replicate published results, but they do not necessarily make data
-analyses easier to understand. Audience seeking to comprehend an
-analysis need to piece together information scattered across manuscripts
-and code scripts to understand the sequence of analytical steps and the
-rationale behind them, with some details may not explicitly record in
-either source. Exploring alternative analytical choices is even more
-challenging, as it requires understanding and modifying code that may be
-unfamiliar and consider how it would impact upstream and downstream
-code. To address these challenges, we propose a schema that represents
-data analyses as a collection of analytical decisions, together with
-their justification, inputs, and outputs. Coupled with large language
-models (LLMs), the schema can be inferred from natural language
-descriptions and translated into analysis scripts. The structured
-representation also enables exploration of alternative analytical
-choices, allowing multiple analytical workflows to be generated and
-compared. We demonstrate the proposed workflow using the many-analysts
-football study, where LLMs create the schema from the decision choices
-in team reports, generate corresponding analysis scripts, and explore
-alternative random effect specifications. As an intermediate
-representation between the manuscript and code scripts, our schema makes
-analyses more comprehensible and extendable from a reader's perspective.
+analyses easier to understand. Readers seeking to comprehend an analysis
+need to piece together information scattered across manuscripts and code
+scripts to understand the sequence of analytical steps and the rationale
+behind them, with some details not explicitly recorded in either source.
+Exploring alternative analytical choices is even more challenging, as it
+requires understanding and modifying unfamiliar code, and considering
+how a change would propagate upstream and downstream. To address these
+challenges, we propose a schema that represents data analyses as a
+collection of analytical decisions, together with their rationale,
+inputs, and outputs. Coupled with large language models (LLMs), the
+schema can be inferred from natural language descriptions and translated
+into analysis scripts. The structured representation also enables
+exploration of alternative analytical choices, allowing multiple
+analytical workflows to be generated and compared. We demonstrate the
+proposed workflow in two applications. In the first, we construct a
+schema for a published regression analysis of heaped smoking data and
+show that it reproduces the reported estimates, and that a reviewer's
+suggested alternative, recorded in that paper's supplementary material,
+can be evaluated by a reader without modifying the original code. In the
+second, where no schema is supplied, the workflow becomes a
+reproducibility test: applied to the 29 team reports of the
+many-analysts football study, it extracts a schema from each report,
+generates and validates the corresponding code, and compares the result
+against the published estimate, separating reports that cannot be
+resolved to a single analysis from failures of the workflow itself. As
+an intermediate representation between the manuscript and code scripts,
+our schema gives a self-contained account of an analysis and makes it
+extensible from a reader's perspective.
 \end{abstract}
 \begin{keywords}
 \def\sep{;\ }
-Reproducibility\sep Large Language Models (LLMs)\sep Analytical
-decisions\sep 
-Many-analysts study
+Reproducibility\sep Large Language Models (LLMs)\sep Data analysis
+decisions\sep Many-analysts study\sep 
+Statistical workflow
 \end{keywords}
 
 
@@ -350,42 +358,57 @@ data preprocessing, transformation, aggregation, and model specification
 (Bertran et al., 2026; Gao \& Xiao, 2026; Luo et al., 2025), and a
 reader may reasonably want to know whether a conclusion would still hold
 under one of these other choices, for example, ``What if we had included
-observations with \(x \leq 0\)?'' Because each decision is recorded
-explicitly rather than embedded in code, a reader can specify such an
-alternative directly and have it evaluated through the same schema and
-the same LLM-based translation into code, rather than modifying the
-original script by hand.
+observations with \(x \leq 0\)?'' This question motivates multiverse
+analysis (Steegen et al., 2016) and specification curve analysis
+(Simonsohn et al., 2020), which report a result across the set of
+defensible analytical choices rather than a single path through it.
+Because each decision is recorded explicitly rather than embedded in
+code, a reader can specify such an alternative directly and have it
+evaluated through the same schema and the same LLM-based translation
+into code, rather than modifying the original script by hand.
 
 In this paper, we present a schema designed to describe data analysis in
-a structured way that captures the decisions and their justifications,
-as well as the inputs and outputs of each step. We also demonstrate how
+a structured way that captures the decisions and their rationale, as
+well as the inputs and outputs of each step. We also demonstrate how
 this schema, coupled with LLMs, can be used to generate code scripts
 from natural-language descriptions in manuscripts, and explore
-alternative decision choices. We apply our schema to the many-analysts
-football study, where LLMs create the schema from the decision choices
-reported in the final reports of each team, and generate and validate
-the corresponding code scripts against the original published results.
-In the process, we also uncover an inconsistency in one team's published
-report between the covariate described in the text and the one implied
-by their results. We further demonstrate how the schema supports
-specification and exploration of alternative random effect
-specifications for Team 5.
+alternative decision choices. We present two applications. The first
+takes the perspective of an author supplying a schema alongside a
+published manuscript, using the GAITD regression analysis of heaped
+smoking data in Yee et al. (2025): the schema reproduces the published
+estimates exactly, and a reviewer's suggestion recorded in that paper's
+supplementary material is then evaluated as an alternative file, without
+modifying the original analysis script. The second takes the opposite
+situation, where no schema is supplied and the workflow serves instead
+as a reproducibility test: applied to the many-analysts football study,
+it extracts a schema from each team's report, generates and validates
+the corresponding code, and compares the result against that team's
+published estimate. The comparison separates reports whose description
+cannot be resolved to a single analysis from failures of the workflow
+itself, and in the process uncovers an inconsistency in one team's
+published report between the covariate described in the text and the one
+implied by their results. We further demonstrate how the schema supports
+specification and exploration of alternative random effect structures
+for Team 5.
 
 The paper is organized as follows: In Section~\ref{sec-method}, we
 present our methodology, including the schema representation for
 describing data analysis and the workflow for generating and validating
-code from the schema by LLMs. In Section~\ref{sec-application}, we apply
-our methodology to the many-analysts football study and demonstrate that
-we can reproduce the results reported in the paper, identify errors in
-the original reports, and highlight failure modes of current LLMs.
-Finally, in Section~\ref{sec-discussion}, we discuss the implications of
-our work and potential future directions.
+code from the schema by LLMs. In Section~\ref{sec-gaitd}, we construct a
+schema for a published GAITD regression analysis and show how it allows
+a reader to evaluate an alternative specification directly. In
+Section~\ref{sec-application}, we apply the workflow as a
+reproducibility test to the many-analysts football study, recovering the
+reported results for most teams and using the discrepancies to separate
+inconsistencies in the original reports from failure modes of current
+LLMs. Finally, in Section~\ref{sec-discussion}, we discuss the
+implications of our work and potential future directions.
 
 \section{Methodology}\label{sec-method}
 
 As traditional reproducibility practices can be insufficient for
 understanding complex modern data analyses, we have designed two
-complementary YAML schemas and the associated workflow to better support
+complementary YAML formats and the associated workflow to better support
 comprehension and extensibility in applied data analysis. Our workflow
 is designed to be 1) decision-centric: analyses are represented as a
 sequence of decisions with explicit rationale, and 2) reader-oriented
@@ -395,7 +418,7 @@ exploration: readers can inspect, compare, and extend those decisions.
 
 We represent a data analysis,
 \(\mathcal{S} = \{A_1, A_2, \cdots, A_n\}\), as a sequence of \(n\)
-analytical step \(A_i\), applied to a dataset \(\mathcal{D}\), where
+analytical steps \(A_i\), applied to a dataset \(\mathcal{D}\), where
 each step, \(A_i\), is defined as a tuple:
 
 \begin{equation}
@@ -405,7 +428,7 @@ A_{i} = \langle f_{i}, \pi_{i}, \rho_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \ome
 The components of \(A_i\) can be partitioned into two parts: a required
 triplet \((f_{i}, \pi_{i}, \rho_{i})\) and an optional triplet
 \((\mathcal{I}_{i}, \mathcal{O}_{i}, \omega_{i})\). The first component
-of the triplet, \(f_{i} \in \mathcal{F}\) is the \emph{objective} of a
+of the triplet, \(f_{i} \in \mathcal{F}\), is the \emph{objective} of a
 step, identifying the problem the step is trying to solve and thereby
 fixing the space of alternative decisions that could equally address it
 (formally introduced in Section~\ref{sec-alternative}). The second
@@ -413,12 +436,13 @@ component, \(\pi_{i} \in \Pi\), is the \emph{decision} made to achieve
 \(f_i\): it is a narration, in natural language, of what a corresponding
 line of code would do, situated in the context of this specific
 analysis, rather than the code's syntax itself. The term \(\rho_{i}\) is
-the \emph{justification} provided for choosing the decision \(\pi_{i}\)
-over the other alternatives that could have fulfilled the same
-objective. Structuring this information into a schema involves defining
-the three components described above for each step. As an example,
-consider the description for calculating the Human Development Index
-(HDI) (United Nations Development Programme, 2025):
+the \emph{rationale} provided for choosing the decision \(\pi_{i}\) over
+the other alternatives that could have fulfilled the same objective; it
+is recorded in the \texttt{rationale} field of the schema. Structuring
+this information into a schema involves defining the three components
+described above for each step. As an example, consider the description
+for calculating the Human Development Index (HDI) (United Nations
+Development Programme, 2025):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
@@ -438,9 +462,8 @@ consider the description for calculating the Human Development Index
 In Step 3, the objective is to combine the three dimensions. While a
 simple arithmetic mean could be an alternative decision to fulfill this
 goal, the geometric mean (the decision) is chosen because it penalizes
-uneven development among the three dimensions (the justification). The
-full schema for constructing HDI is presented in
-Listing~\ref{lst-schema}.
+uneven development among the three dimensions (the rationale). The full
+schema for constructing HDI is presented in Listing~\ref{lst-schema}.
 
 \begin{codelisting}
 
@@ -454,17 +477,17 @@ Development Index (HDI)}
 \FunctionTok{meta}\KeywordTok{:}
 \AttributeTok{  }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ schema}
 \FunctionTok{nodes}\KeywordTok{:}
-\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{tag}\KeywordTok{:}\AttributeTok{ step{-}scaling}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ step{-}scaling}
 \AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to handle variables in different scales?}
-\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ apply min{-}max scaling to each variable }
-\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ to convert the variables to the same scale for future }
+\AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ apply min{-}max scaling to each variable}
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ to convert the variables to the same scale for future}
 \AttributeTok{    construction of a single index}
-\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{tag}\KeywordTok{:}\AttributeTok{ step{-}education}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ step{-}education}
 \AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to combine the two education{-}related variables?}
 \AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ take the average}
-\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ the arithmetic mean allows perfect substitutability }
+\AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ the arithmetic mean allows perfect substitutability}
 \AttributeTok{    between the two variables}
-\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{tag}\KeywordTok{:}\AttributeTok{ step{-}combine}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ step{-}combine}
 \AttributeTok{  }\FunctionTok{objective}\KeywordTok{:}\AttributeTok{ how to combine the three dimensions into a single index?}
 \AttributeTok{  }\FunctionTok{decision}\KeywordTok{:}\AttributeTok{ use the geometric mean}
 \AttributeTok{  }\FunctionTok{rationale}\KeywordTok{:}\AttributeTok{ the geometric mean penalizes uneven development }
@@ -484,14 +507,13 @@ of this: \(\mathcal{I}_i\) and \(\mathcal{O}_i\) bind the step to
 concrete variables in the dataset, resolving ahead of time the variable
 mapping that an LLM would otherwise have to infer at the point of code
 generation. Populating them requires a dataset to be available, which is
-why they remain optional rather than required. While the output of a
-step can be a pseudo object that does not yet exist in the dataset, the
-inputs for any given step must be within the existing data scope,
-comprising variables in the original dataset and all outputs from
-previous steps. Because the schema is meant to specify an analysis
-before the corresponding code is generated, an output name can refer to
-a variable that does not yet exist; this is inherent to using the schema
-as a specification rather than a post-hoc description of existing code.
+why they remain optional rather than required. Because the schema is
+meant to specify an analysis before the corresponding code is generated,
+the output of a step can name a variable that does not yet exist in the
+dataset; this is inherent to using the schema as a specification rather
+than a post-hoc description of existing code. The inputs for any given
+step, by contrast, must be within the existing data scope, comprising
+variables in the original dataset and all outputs from previous steps.
 In practice, \(\mathcal{O}_i\) most often names a column added to the
 evolving dataset via non-standard evaluation, as in
 \texttt{tidyverse}-style pipelines; a small number of steps, such as
@@ -507,8 +529,11 @@ score, \(\omega_{i}\) (low, medium, high), defined as the model's
 confidence that the recorded \((f_i, \pi_i, \rho_i)\) correctly reflects
 the source text; \(\omega_i\) is low precisely when one or more of these
 components could not be read off the text directly and had to be
-inferred by the LLM, and can be used to guide the LLM to ask for
-clarification to consolidate the schema extraction.
+inferred by the LLM. Unlike the other components, \(\omega_i\) is not
+part of the account of the analysis that a reader consumes; it is
+consumed by the implementation, which uses it to flag steps for the
+author to review or to prompt for clarification before the schema is
+treated as settled.
 
 Recording a step's decision \(\pi_i\) does not mean it is the only one
 that could satisfy its objective \(f_i\): a reader may want to revisit
@@ -519,8 +544,20 @@ address the same objective, a possibility we formalize next.
 
 Another analyst following the HDI schema in Listing~\ref{lst-schema}
 might wonder whether the reported index would look different under a
-different decision at some step. Formally, a step in the schema can have
-a candidate set of alternatives: step \(i\) may admit \(k_i\) decisions
+different decision at some step. Enumerating such choices is the premise
+of multiverse analysis, and tooling exists to support it: the
+\texttt{multiverse} package, for instance, lets an analyst declare
+alternative branches inside an R notebook and expands them into the full
+set of analyses (Sarma et al., 2023). What that tooling requires is code
+--- each branch is expressed in the language the analysis is written in,
+by someone able to write it. Our alternatives are specified at the level
+of decisions instead, in natural language, and the code for each is
+generated afterwards. The difference matters most for who can pose the
+question: a multiverse is normally built by the original analyst while
+exploring their own garden of forking paths, whereas an alternative file
+can be written by a reader after publication, against a schema the
+author has already supplied. Formally, a step in the schema can have a
+candidate set of alternatives: step \(i\) may admit \(k_i\) decisions
 that all satisfy its objective \(f_i\), \(\{A_i^1, \dots, A_i^{k_i}\}\),
 of which the decision \(\pi_i\) recorded in the schema is just one
 member, \(A_i^1\). An alternative file specifies the remaining
@@ -536,7 +573,7 @@ candidates at each step combine, described below. The file itself is
 organized as a list, one entry per step in \(C\) (\texttt{nodes} in the
 YAML): each entry names its step in the original schema (via
 \texttt{overrides}) and lists the alternative decisions for that step,
-together with their justifications.
+together with their rationale.
 
 \begin{codelisting}
 
@@ -671,27 +708,31 @@ Figure~\ref{fig-workflow}. A schema can be created either manually from
 the template or automatically by an LLM from a natural-language
 manuscript. Once created, the schema serves as a structured
 specification that guides a second LLM in generating the code for the
-analysis. To improve reliability, our design includes a third LLM agent
-which is responsible for code validation. While the latest LLMs can
-generate reasonable code based on prompt, they do not consistently
-achieve perfect accuracy. The validation process runs the generated
-script in a sandbox environment and if an error occurs, a third LLM
-agent will be employed to diagnose the script. The validation agent
-receives the generated code together with the error message and the
-corresponding line number produced during the execution, and returns a
-newer version of the script. The revised script is then re-executed in
-the sandbox and this cycle continues until one of the three conditions
-is met: the code runs successfully, a maximum number of attempt is
-reached, or the user terminates the process. As will be show in
-Section~\ref{sec-application}, this validation process resolves the
-majority of R syntax issues encountered during data wrangling and
-statistical modelling tasks. On top of supporting a single analytical
-specification, the workflow also allows users to argument a schema with
+analysis. While the latest LLMs can generate reasonable code from a
+prompt, they do not consistently achieve perfect accuracy. To improve
+reliability, our design includes a third LLM agent responsible for code
+validation. The validation process runs the generated script in a
+sandbox environment and, if an error occurs, this agent is employed to
+diagnose the script. The validation agent receives the generated code
+together with the error message and the corresponding line number
+produced during the execution, and returns a newer version of the
+script. The revised script is then re-executed in the sandbox and this
+cycle continues until one of the three conditions is met: the code runs
+successfully, a maximum number of attempts is reached, or the user
+terminates the process. Validation in this sense establishes that the
+script executes to completion without error; it does not establish that
+the code correctly implements the decisions recorded in the schema, and
+a script can therefore pass validation while still departing from the
+intended analysis. As shown in Section~\ref{sec-application}, this
+process resolves the majority of R syntax issues encountered during data
+wrangling and statistical modelling tasks, though we also encounter
+cases where it does not. On top of supporting a single analytical
+specification, the workflow also allows users to augment a schema with
 an alternative YAML file. This expands the original schema into a
 multiverse of parallel schemas, each representing a different sequence
 of decision choices. The same code generation and validation workflow is
 then applied independently to each schema, producing a corresponding set
-of validation scripts.
+of validated scripts.
 
 \begin{figure}
 
@@ -718,9 +759,9 @@ document the analytical workflow. An author may use the ``code
 generation and validation'' path in Figure~\ref{fig-workflow} to
 automatically generate the analysis script for computing HDI and
 validate its accuracy. A reader, on the other hand, may wish to explore
-how the HDI values or country rankings change if the original arithmetic
-mean (instead of the geometry mean) is used. By combining the original
-schema in Listing~\ref{lst-schema} with the alternative specification
+how the HDI values or country rankings change if an arithmetic mean is
+used instead of the original geometric mean. By combining the original
+schema in Listing~\ref{lst-schema} with the alternative specification in
 Listing~\ref{lst-alternatives-multi}, the ``alternative generation''
 path produces a corresponding analysis script for each alternative with
 LLMs. In contrast, modifying an existing code script by hand typically
@@ -730,36 +771,8 @@ decisions, our workflow allows LLMs to automate much of this process,
 making it easier to understand the sequence of steps taken in the
 analysis and to explore alternatives.
 
-We now analyze the uncertainty of the pipeline itself: for a step \(k\)
-extracted by a model \(M\) from a source text \(T\), we decompose the
-total uncertainty of the pipeline at that step into a specification term
-and an implementation term,
-
-\[V_k^{\text{total}}(M) = V_k^{\text{spec}}(M) + V_k^{\text{impl}}(M),\]
-
-where each component is defined as the expected pairwise divergence,
-\(d(\cdot, \cdot) \in [0, 1]\), between independent runs at the
-corresponding stage. Specifically, \(V_k^{\text{spec}}(M)\) measures
-variation across repeated schema extractions from \(T\) and
-\(V_k^{\text{impl}}(M)\) measures variation across repeated code
-generations from a single fixed schema. We can further decompose the
-specification term into an epistemic and an aleatoric component
-(Hüllermeier \& Waegeman, 2021; Kendall \& Gal, 2017):
-
-\[V_k^{\text{spec}}(M) = V_k^{\text{epistemic}}(M) + V_k^{\text{aleatoric}},\]
-
-The epistemic component, \(V_k^{\text{epistemic}}(M)\), reflects when
-the model fails to recover a decision that is unambiguously specified in
-\(T\). The aleatoric component, \(V_k^{\text{aleatoric}}\), captures the
-uncertainty in the source itself: the text \(T\) is unclear at step
-\(k\), independent of \(M\). This distinction has a direct diagnostic
-use in the quality of the data anlaysis. Persistent dispersion across
-increasingly capable models suggests that the observed variation
-reflects ambiguity in the source since a more capable model cannot
-recover the authors' intent that is not sufficiently expressed in the
-source text.
-
-\section{Application}\label{sec-gaitd}
+\section{Application: GAITD regression of heaped smoking
+data}\label{sec-gaitd}
 
 In this section, we demonstrate the schema workflow from an author's
 perspective: what it looks like for an author to provide a schema
@@ -782,7 +795,7 @@ since these ages show a moderate, secondary elevation in the spikeplots,
 surrounding the sharper peak already attributed to the high-risk group
 (ages 15-18). Recording the rationale along with the decision allows a
 reader to agree or disagree with the authors' choice, and to question
-and explore the analysis, as we do later in this section. The remaining
+and explore the analysis, as we do later in this section. The other
 thirteen entries follow the same structure.
 
 \begin{codelisting}
@@ -875,14 +888,46 @@ account of the analysis.}
 
 \end{codelisting}%
 
+Assembling the schema required no analysis the authors had not already
+done, but it did require collecting the decisions from two documents
+and, in places, from code alone. Five of the fourteen appear nowhere in
+the manuscript. The manuscript records that cases with missing values in
+the adjustment variables were deleted and that the sample was restricted
+to respondents under 80; it does not record that \texttt{TC30},
+\texttt{TCquit}, and \texttt{SCA} are exempt from that completeness
+check, that \texttt{SCA} and \texttt{SIA} are set to missing wherever
+\texttt{SCA\ -\ SIA\ \textless{}\ 0}, that marital status and education
+are overwritten by age for respondents under 20, or the two-branch rule
+that defines the ever-smoker sample. Each of these survives only as
+executable code in the supplementary material, and their stated
+rationale, where there is one, is a code comment: the completeness
+exemption is explained by the remarks that the variables are
+``interlaced with NAs'' and that a missing value ``means not yet quit,
+which is okay'', the ever-smoker rule by the comment ``Complex to handle
+NAs'', and the data-quality correction by the single word ``Bad''. The
+two recodings carry no comment at all; a reader must infer their purpose
+from a note several pages later, written for another purpose, observing
+that marital status, education, and smoking initiation age ``were not
+measured in those aged 19 or less''. Recovering these decisions is
+exactly the piecing-together the schema is meant to remove, and it is
+worth emphasising that Yee et al. (2025)'s supplementary material is
+unusually thorough by the standards of applied statistics: it walks
+through the analysis in a tutorial style, states general modelling
+guidelines upfront, and discusses competing options it rejected. Even
+so, five of the fourteen decisions needed to reproduce the published
+estimates exist only as code.
+
 As a check that this schema is accurate, generating and validating code
 from it produces the R script in Listing~\ref{lst-script-sia}, which
 reproduces the coefficients Yee et al. (2025) report for smoking
-initiation age exactly, matching their Table 2. This check is useful
-beyond validating our own workflow: a schema that reproduces a published
-result could accompany the manuscript as reproducibility material in its
-own right, alongside code and data availability, and a reader can trust
-the schema in Listing~\ref{lst-heaping} to accurately describe the
+initiation age exactly, matching their Table 2. The check establishes
+more than that our own workflow functions. Because the code was
+generated from the schema alone, with no access to the manuscript or the
+authors' script, reproducing the published estimates shows that the
+schema is \emph{sufficient}: nothing material to the analysis is missing
+from it. A schema that meets this standard could accompany a manuscript
+as reproducibility material in its own right, alongside code and data
+availability, and a reader can rely on it as an accurate account of the
 analysis it documents.
 
 \begin{codelisting}
@@ -1060,20 +1105,27 @@ pooling them into the mid-risk inflated group.}
 \end{codelisting}%
 
 Generating and validating code from this alternative, without the reader
-needing to touch the original script by hand, reproduces the AIC and KLD
-values the reviewer's refit is reported to have achieved in the
-supplementary material (AIC = 19340.36, KLD = 0.380). What took the
-original authors a manual refit and a paragraph in the supplement is,
-for a reader equipped with this schema and its alternative file, a
-single generation-and-validation step.
+needing to touch the original script by hand, reproduces the fit the
+reviewer's refit is reported to have achieved, recovering the AIC of
+19,340.4 that Yee et al. (2025) report for it. What took the original
+authors a manual refit and a paragraph in the supplement is, for a
+reader equipped with this schema and its alternative file, a single
+generation-and-validation step.
 
 \section{Application: many-analysts football
 study}\label{sec-application}
 
-In this section, we apply our methodology to the many-analysts football
-study by Silberzahn et al. (2018) to reproduce the reported estimated
-effect size by each team. During this process, we identify some errors
-in the original reports and highlight failure modes of current LLMs.
+Section~\ref{sec-gaitd} assumed an author willing to supply a schema.
+Most published analyses come with no such thing, so we now ask what the
+same workflow is worth when none exists. Applied to a manuscript alone,
+it becomes a reproducibility test: extract a schema from what the paper
+says, generate and validate code from it, and compare the result against
+what the paper reports. Agreement means the description was sufficient
+to regenerate the result. Disagreement means something is missing,
+ambiguous, or wrong, and is the more informative outcome. We apply this
+to the many-analysts football study of Silberzahn et al. (2018), which
+gives 29 independent descriptions of an analysis of one dataset, each
+with a reported effect size to test against.
 
 Silberzahn et al. (2018) invited 29 research groups to conduct the same
 data analysis, answering whether referees are more likely to give red
@@ -1094,7 +1146,7 @@ Open Science Framework (OSF).
 Based on the reports presented by each team, most participating groups
 adopted a modelling approach to estimate the effect of skin color rating
 on the likelihood of receiving a red card. As an illustrative example,
-Group 5 first transformed the data into player--game observations,
+Team 5 first transformed the data into player--game observations,
 resulting in a binary response variable for whether a player received a
 red card, and removed observations with missing values using list-wise
 deletion. The resulting data were modelled using a generalized linear
@@ -1103,8 +1155,8 @@ color rating from two raters was used as the primary covariate, and its
 estimated coefficient was the main parameter of interest. To account for
 unobserved heterogeneity, the model included random effects for player
 and referee, as well as the average skin color rating across referee's
-country of origin. While Group 5's analysis illustrates one possible
-approach, other groups may adopt different data preprocessing decisions,
+country of origin. While Team 5's analysis illustrates one possible
+approach, other teams may adopt different data preprocessing decisions,
 distributional assumptions (e.g., linear, logistic, or Poisson models),
 or specifications of fixed and random effects, or may conduct the
 analysis in a Bayesian framework.
@@ -1123,12 +1175,14 @@ unrelated research question is its own nontrivial comprehension problem,
 separate from the task of generating the schema and analysis code that
 we study here. We therefore pre-extract a simplified methodology text
 for each team and use this, rather than the original report, as the
-input for our simulation.
+input for our experiment. The Appendix follows one team through the
+whole pipeline, giving the pre-extracted text, the schema extracted from
+it, and the code generated from that schema, along with the prompts used
+at each stage.
 
-We send the text description of each team to an LLM to generate the
-schema, and then generate the code script from the schema. The code
-script is then run by a separate LLM to validate it for potential syntax
-errors.
+Each team's text is then passed through the workflow of
+Section~\ref{sec-method} unchanged: schema extraction, code generation,
+and validation.
 
 To accelerate the evaluation of each script, we manually replace, in
 place, the \texttt{lm()}/\texttt{glm()} command with
@@ -1141,20 +1195,20 @@ replacements of the standard functions for estimating the relevant
 models, with multi-threading in C++ (Bergé et al., 2026) and Template
 Model Builder (TMB) (McGillycuddy et al., 2025) for better performance.
 This replacement should not affect the estimation of the effect size.
-All the LLM-related simulations are conducted with Claude-Opus-4.5.
+All LLM-related runs are conducted with Claude Opus 4.5.
 
 Of the 29 teams, we report results for 25. The remaining four (Teams 7,
 12, 17, and 18) specify analyses that are too computationally expensive
 to run inside an iterative validate-and-repair loop, regardless of
-whether the schema or generated code is correct --- MCMC-based
-hierarchical models with thousands of random effects, a nonparametric
-Bayesian clustering procedure, and a fixed-effects model with several
-thousand parameters. Across the 25 teams we reproduce, all team scripts
-were successfully executed after the validation phase. Notably, two
-scripts ran successfully without any validation, whereas the vast
-majority reached completion after two or three iterations. The most
-frequent correction involved resolving broken and overflowing syntax in
-comments.
+whether the schema or generated code is correct: Teams 17 and 18 both
+specify MCMC-based hierarchical models with thousands of random effects,
+Team 7 a Dirichlet process profile regression, and Team 12 a
+zero-inflated Poisson regression with several thousand fixed-effect
+parameters. Across the 25 teams we reproduce, all team scripts were
+successfully executed after the validation phase. Notably, two scripts
+ran successfully without any validation, whereas the vast majority
+reached completion after two or three iterations. The most frequent
+correction involved resolving broken and overflowing syntax in comments.
 
 \begin{figure}
 
@@ -1175,33 +1229,50 @@ the largest deviations occur for Team 1, 9, 15, 21, 23, and 27.}
 \end{figure}%
 
 Figure~\ref{fig-res-schema} shows the comparison of the estimated effect
-sizes, in odds ratio, from our workflow (simulated) and those reported
-in Silberzahn et al. (2018) (published). The odds ratio is well
-recovered for most teams, though six show a noticeably larger gap: Team
-1, 9, 15, 21, 23, and 27. Looking closely at each team's report and
-generated script, the causes split into two stages of our pipeline, plus
-one case that has nothing to do with the LLM at all.
+sizes, in odds ratio, from our workflow (reproduced) and those reported
+in Silberzahn et al. (2018) (reported). The odds ratio is well recovered
+for most teams, though six show a noticeably larger gap: Team 1, 9, 15,
+21, 23, and 27. Each of these is worth examining, and the schema is what
+makes the examination possible: because the extracted decisions can be
+inspected before any code is written, a discrepancy can be attributed to
+the report, to the code generated from it, or to neither.
 
-For Team 27, the report is genuinely ambiguous: the authors write: ``In
-addition to the independent variables specified in the initial approach,
-\ldots{} a variable for player position was included, as well as a
-variable for the league of the player.'' A statistician reading this
-might reasonably take it as shorthand for extending the model with
-interactions, consistent with how the other covariates entered the
-initial model, but the LLM read it literally and added only main
-effects. Team 9 fails for a similar reason at the same stage: the text
-names ``referee country'' as the covariate, yet the reported estimation
-table lists ``player country'' instead, and the LLM followed the text
-rather than reconciling it against the table. In both cases the schema
-itself is already wrong before any code is written, so we treat these as
-schema-extraction errors.
+Two of the six are properties of the report rather than of our pipeline.
+Team 9 is the clearest: the text names ``referee country'' as the
+covariate, while the reported estimation table lists ``player country''.
+The report contradicts itself, and no reading of the manuscript can
+settle which model produced the published estimate. Team 27 is ambiguous
+rather than contradictory. The authors write: ``In addition to the
+independent variables specified in the initial approach, \ldots{} a
+variable for player position was included, as well as a variable for the
+league of the player.'' A statistician might reasonably read this as
+shorthand for extending the model with interactions, consistent with how
+the other covariates entered the initial model; read literally, it adds
+only main effects. The schema records what the text says in both cases,
+and the discrepancy that follows is the test's finding, not its failure:
+these are the two reports whose description of the analysis is not
+sufficient to regenerate the result.
 
-Team 1 and Team 23, by contrast, get the schema right but the code
-wrong. Both require reshaping the data from player-referee pairs to
-individual games, disaggregating win/loss/draw counts into game-level
-records. The schema correctly specifies this step, but the generated
-code fails to execute it as intended, and the resulting error passes
-through validation silently rather than triggering a repair.
+The confidence score \(\omega_i\) separates these two cases in a way
+worth noting. For Team 27, extraction returned
+\texttt{create\_interaction\_terms} with medium confidence, flagging the
+step whose reading is in doubt before any code was written. For Team 9,
+every step came back with high confidence, which is the correct response
+rather than an oversight: the report's text is unambiguous on its own
+terms, and the inconsistency appears only when that text is set against
+the estimation table. Since \(\omega_i\) records the model's confidence
+that the schema reflects the source text, it can surface a description
+that is ambiguous, but not one that is internally clear and contradicted
+elsewhere. Catching the latter requires comparing the schema against the
+reported results, which is what the test as a whole does.
+
+Teams 1 and 23 are failures of a different kind, and they are ours: the
+schema is right and the code is wrong. Both require reshaping the data
+from player-referee pairs to individual games, disaggregating
+win/loss/draw counts into game-level records. The schema correctly
+specifies this step, but the generated code fails to execute it as
+intended, and the resulting error passes through validation silently
+rather than triggering a repair.
 
 Team 15's discrepancy is unrelated to either stage: it comes down to a
 difference in default contrast coding between R (our reproduction) and
@@ -1211,12 +1282,16 @@ reference level. Setting the \texttt{contrast} option in R to match
 recovers the reported odds ratio exactly, so this reflects a software
 convention rather than a modeling or LLM error.
 
-That leaves Team 21, whose discrepancy we have not yet traced to a
-specific cause {[}TODO: resolve before submission{]}. With that
-exception, the pattern across the remaining five teams is that LLM error
-is split evenly between the schema-extraction and code-generation
-stages, while the sixth discrepancy is a reproduction artifact rather
-than a model failure.
+That leaves Team 21, whose discrepancy we have been unable to explain.
+Examining both the extracted schema and the generated code turned up
+nothing that accounts for the gap, and we report it as unresolved rather
+than assign it to a cause we cannot establish; the procedure localizes
+most discrepancies, but evidently not all of them. Setting Team 21
+aside, the five remaining discrepancies divide into two whose reports
+cannot be resolved to a single analysis, two where our code generation
+failed, and one that reflects a difference in software convention. Only
+the middle pair are errors in the workflow itself; the first two are
+what the test was built to surface.
 
 \subsection{Exploring alternatives}\label{exploring-alternatives}
 
@@ -1225,11 +1300,10 @@ alternative specifications, such as different covariate and random
 effects structures, before arriving at a final model. This can be seen
 as a set of alternative decisions within the same modelling step, which
 fits naturally into the schema workflow described in
-Section~\ref{sec-alternative}. As an example, we use Team 5 from the
-football study above to demonstrate this. Team 5 uses a binomial
-generalized linear mixed model (GLMM) to estimate the effect of skin
-tone rating on the number of red cards received using a logit link
-function, but tests different random effect structures:
+Section~\ref{sec-alternative}. As an example, we return to Team 5, whose
+analysis was described above. Having settled on a binomial GLMM with a
+logit link for the probability that a player receives a red card in a
+single game, Team 5 tests three random effect structures:
 
 \begin{align*}
 \textbf{Model 1 (gm1):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{k} \\
@@ -1263,22 +1337,21 @@ tone. The random effects include
   in Model 3.
 \end{itemize}
 
-These alternatives are specified in a separate YAML file, following the
-format described in Section~\ref{sec-alternative} and shown in
-Listing~\ref{lst-yaml-alternative}. This file is then merged with the
-original schema to produce a separate schema for each alternative for
-code generation and validation. The validated scripts are then executed
-to obtain the estimated random effects in
-Table~\ref{tbl-random-effects}. This result matches the random effects
-reported in the team report, subject to rounding errors. Similarly, the
-model fitting statistics can be extracted from the estimation for
-selecting the best fit.
+All three are specified in a single YAML file, following the format
+described in Section~\ref{sec-alternative} and shown in
+Listing~\ref{lst-yaml-alternative}. Merging it with Team 5's schema
+produces one schema per alternative, and each is passed through the same
+code generation and validation used for the original, yielding three
+validated scripts from one file and no hand-editing of the team's code.
+The estimated effect of skin tone is unchanged across this expansion,
+matching the value Team 5 report and shown for this team in
+Figure~\ref{fig-res-schema}.
 
 \begin{codelisting}
 
 \caption{\label{lst-yaml-alternative}Example of a YAML file specifying
 alternatives for the random effects structure in the many-analysts
-analysis of Group 5.}
+analysis of Team 5.}
 
 \centering{
 
@@ -1306,44 +1379,20 @@ analysis of Group 5.}
 
 \end{codelisting}%
 
-\begin{longtable}[]{@{}llrrr@{}}
-
-\caption{\label{tbl-random-effects}Summary of random effect estimates
-for Group 5. The three models (gm1, gm2, and gm3) represent different
-specifications of the random effects structure to account for the
-non-nested cross-classified data structure. Cells are NA where a given
-random effect is not part of that model's specification.}
-
-\tabularnewline
-
-\toprule\noalign{}
-Group & Term & gm1 & gm2 & gm3 \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Player & Intercept & 0.3737 & 0.3738 & 0.2899 \\
-Referee & Intercept & 0.1528 & 0.1932 & 0.0748 \\
-Referee & Referee rating & NA & 0.0286 & NA \\
-Referee's country & Intercept & NA & NA & 0.3990 \\
-Referee's country & Referee rating & NA & NA & 0.0870 \\
-
-\end{longtable}
-
 \section{Discussion}\label{sec-discussion}
 
 Our results highlight a persistent gap between computational
 reproducibility and analytical understandability in modern data analysis
-workflows. While current reproducibility practices ensure that published
-results can be regenerated from shared data and code, as analyses grow
-in complexity and involve iterative decision-making processes, they are
-less of an ideal for readers to understand. Our proposed schema
-addresses this gap by introducing an intermediate representation that
-explicitly encodes analytical decisions to bridge between narrative
+workflows. Current reproducibility practices ensure that published
+results can be regenerated from shared data and code, but as analyses
+grow in complexity and involve iterative decision-making, they fall well
+short of making those analyses understandable to readers. Our proposed
+schema addresses this gap by introducing an intermediate representation
+that explicitly encodes analytical decisions to bridge between narrative
 descriptions and implementation details. When coupled with LLMs, this
 representation enables the extraction of analytical structure from
-written reports and its translation into analysis scripts, and
-supporting the exploration of alternative analytical choices.
+written reports, its translation into analysis scripts, and the
+exploration of alternative analytical choices.
 
 Our approach differs in this respect from recent work that builds fully
 automated systems using multiple LLM agents to plan, generate, execute,
@@ -1360,62 +1409,68 @@ analysis is the sequence of decisions a researcher makes, not the code
 that implements them, and that this part should remain explicit and in
 the hands of the analyst rather than be automated away.
 
-To further examine how this workflow behaves in practice, we apply it to
-the many-analysts football study. This analysis allows us to identify
-errors in the original reports and to characterize failure modes of
-current LLMs to generate code for data science. Beyond validating the
-workflow itself, the schema-driven reanalysis catches a real
-inconsistency in a published report (Team 9's text-table mismatch,
-discussed in Section~\ref{sec-application}), which without an explicit
-account of the underlying decisions, would not have caught through
-computational reproducibility alone. Decomposing the largest
-discrepancies between our reproduced and reported effect sizes reveals
-that LLM error arises from two distinct stages of the pipeline, in
-roughly equal measure: mis-extraction of the schema from an ambiguous
-report, and correct schema extraction followed by incorrect code
-generation. This distinction matters for where future effort should be
-directed --- schema-extraction errors call for better disambiguation
-strategies (e.g., using the confidence score \(\omega_i\) to prompt for
-clarification, as introduced in Section~\ref{sec-method}), whereas
-code-generation errors call for improvements to the validation stage
+Where no schema is supplied, the same workflow serves as a
+reproducibility test, and we apply it in this form to the many-analysts
+football study. It surfaces inconsistencies and ambiguities in the
+original reports that computational reproducibility alone would not
+catch: Team 9's report names one covariate in its text and a different
+one in its estimation table, a contradiction that is invisible if one
+only re-runs the authors' code, and that only becomes apparent once the
+described analysis is written down as an explicit set of decisions and
+executed. Examining the largest discrepancies also separates defects in
+the reports from failures of our own pipeline --- two of each, with a
+fifth attributable to a difference in software convention. The
+separation is possible because the schema sits between the manuscript
+and the code and can be checked against the manuscript on its own, and
+it matters for where effort should be directed: an unresolvable report
+calls for disambiguation at the source, and the confidence score
+\(\omega_i\) is the natural hook for it, having flagged the disputed
+step in Team 27's report before any code was written, whereas a
+code-generation failure calls for improvements to the validation stage
 itself.
 
-For the schema-extraction errors specifically, we find that LLMs require
-a fairly precise specification in order to generate the code correctly
-for the intended random effect structure. For an educated statistician,
-the phrase ``a random effect of referee number across average rating''
-would typically imply both a random intercept and a random slope.
-However, we observe that LLMs interpret this specification literally as
-a random slope only. This suggests the gap between the latest models and
-human analysts in specialized statistical knowledge (Sun et al., 2026).
+A caveat applies to the failure modes we report: they describe the
+behaviour of one model at one point in time. Current models parse
+methodology text reliably for the most part, and where they slip is on
+statistical nuance that a trained reader supplies without thinking. The
+phrase ``a random effect of referee number across average rating'' would
+be read by most statisticians as implying both a random intercept and a
+random slope; read literally, as the model reads it, it specifies a
+random slope only. This points to a gap between current models and human
+analysts in specialized statistical knowledge (Sun et al., 2026), but
+given the pace at which these models are improving we expect this
+particular gap to narrow, and we do not regard it as a structural
+limitation of the workflow. What the workflow provides, independently of
+model capability, is somewhere to catch such a misreading: the schema is
+inspectable before any code is generated, so a misread decision is
+visible to the analyst as a sentence rather than buried in a script.
 
 Our validate-and-repair loop assumes each candidate script can be
 executed and diagnosed within an interactive timeframe. This assumption
 does not hold for analyses that are too computationally expensive to run
 inside such a loop (Teams 7, 12, 17, and 18 in the many-analysts
-football study). For future direction, this could be addressed by
-implementing a background job queue to allow for longer-running scripts
-to be executed asynchronously.
+football study). As a future direction, this could be addressed by
+implementing a background job queue to allow longer-running scripts to
+be executed asynchronously.
 
-For the code-generation errors, the LLM successfully corrects a range of
-implementation issues during validation, including errors caused by
-overflowing comments and other syntax issues. However, we also observe
-challenges in data reshaping tasks when the transformation requires
-changes in the unit of analysis. In the study, some teams decide to
-transform the data from the original aggregated player-referee
-dyad-level format to game-level format. This transformation requires
-disaggregating aggregated outcome counts (win, loss, and draw) into
-individual game records, changing the unit of analysis from dyads to
-matches. We also observe some difficulties in parsing birthdates. Since
-the LLM does not have access to the underlying raw data, due to privacy
-constraint, it must rely on trial and error when inferring the correct
-date formats (``DD-MM-YYYY.''). This suggests that certain types of data
+Turning to the other stage, the validation loop successfully corrects a
+range of implementation issues, including errors caused by overflowing
+comments and other syntax problems. What it does not catch are
+transformations that run without error but do not do what the schema
+asked, of which the reshaping failures behind Teams 1 and 23 are the
+clearest instance: changing the unit of analysis from player-referee
+dyads to individual games produces code that executes and returns an
+estimate regardless of whether the disaggregation was done correctly. We
+also observe some difficulties in parsing birthdates. Since the LLM does
+not have access to the underlying raw data, due to privacy constraints,
+it must rely on trial and error when inferring the correct date format,
+in this case ``DD-MM-YYYY''. This suggests that certain types of data
 analysis tasks may not be fully automatable in settings where the model
 cannot directly inspect the data, even if the data is theoretically
 available for computation.
 
-While the schema requires a justification \(\rho_i\) for each decision,
-nothing in the format itself can guarantee that this justification is
+While the schema requires a rationale \(\rho_i\) for each decision,
+nothing in the format itself can guarantee that this rationale is
 substantive rather than perfunctory; an analyst can satisfy the schema
 with a low-effort entry in the same way that a required code comment or
 commit message can be filled with boilerplate. The schema makes
@@ -1425,37 +1480,40 @@ thoughtfully. It remains an open question whether resolving
 \(\mathcal{I}_i\) and \(\mathcal{O}_i\) to concrete dataset variables
 ahead of time, rather than leaving this mapping for the LLM to infer at
 the point of code generation, meaningfully improves the reliability of
-the resulting code. {[}maybe we want a controlled experiment to compare
-code generation with or without pre-resolved input and output
-variables{]}
+the resulting code.
 
 The reproducibility-understandability issue considered in this work is
-still at an early stage, some software decision choices are worth
+still at an early stage, and some software design choices are worth
 examining. We currently implement a prototype as an R package, although
 the understandability problem is broadly applicable to statistical
-analyses and is not associated to any particular programming language.
+analyses and is not associated with any particular programming language.
 Hence, we envision the implementation eventually evolving into a general
 purpose tool, such as a command-line utility, that can support analyses
 across different programming languages. In the current implementation,
 analytical decisions are recorded in a single YAML file. An alternative
 would be to record individual decisions in separate Markdown files.
 While YAML files provide an explicit structure for machine readability,
-markdown files offer greater flexibility for documenting decisions.
-Recording decisions in separate files would also allow files to be
-linked across time to understand how decisions evolve or change over the
-course of an analysis and can potentially support a broader
-research-management system if the decisions are properly attributed to
-individual researchers and maintains a record of the changes leading to
-the final analysis.
+Markdown files offer greater flexibility for documenting decisions.
+Recording decisions in separate files would also allow them to be linked
+across time, showing how decisions evolve over the course of an
+analysis. This could in turn support a broader research-management
+system, provided that decisions are properly attributed to individual
+researchers and that a record of the changes leading to the final
+analysis is maintained.
 
 \section{Acknowledgments}\label{acknowledgments}
 
-The implementation of the schema is available as an R package,
-\texttt{tines}, available on CRAN. The source code for reproducing the
-work reported in this paper is available in the Supplementary Materials
-and can be found at:
-\url{https://github.com/huizezhang-sherry/paper-schema}. The article is
-created using Quarto (Allaire et al., 2026) in R (R Core Team, 2026).
+The implementation of the schema is available on CRAN as an R package,
+\texttt{tines}. The source code for reproducing the work reported in
+this paper is available in the Supplementary Materials and can be found
+at: \url{https://github.com/huizezhang-sherry/paper-schema}.
+
+All analyses were carried out in R (R Core Team, 2026), using the
+\texttt{tines}, \texttt{tidyverse} (Wickham et al., 2019), \texttt{VGAM}
+(Yee, 2025), \texttt{VGAMdata} (Yee \& Gray, 2025), \texttt{lme4} (Bates
+et al., 2015), \texttt{glmmTMB} (Brooks et al., 2017; McGillycuddy et
+al., 2025), and \texttt{fixest} (Bergé et al., 2026) packages. The
+article is created using Quarto (Allaire et al., 2026).
 
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
@@ -1513,11 +1571,6 @@ Vucetic, \& S. Srivastava (Eds.), \emph{Proceedings of the {Fourth}
 {Advances})} (pp. 28--36). Association for Computational Linguistics.
 \url{https://doi.org/10.18653/v1/2022.dash-1.5}
 
-\bibitem[\citeproctext]{ref-hullermeier2021}
-Hüllermeier, E., \& Waegeman, W. (2021). Aleatoric and epistemic
-uncertainty in machine learning: An introduction to concepts and
-methods. \emph{Machine Learning}, \emph{110}(3), 457--506.
-
 \bibitem[\citeproctext]{ref-jansen2025}
 Jansen, J. A., Manukyan, A., Khoury, N. A., \& Akalin, A. (2025).
 Leveraging large language models for data analysis automation.
@@ -1540,11 +1593,6 @@ Jun, E., Seo, A., Heer, J., \& Just, R. (2022). \emph{Tisane: Authoring
 statistical models via formal reasoning from conceptual and data
 relationships}. \emph{CHI '22}, 116.
 \url{https://doi.org/10.1145/3491102.3501888}
-
-\bibitem[\citeproctext]{ref-kendall2017}
-Kendall, A., \& Gal, Y. (2017). What uncertainties do we need in
-bayesian deep learning for computer vision? \emph{Advances in Neural
-Information Processing Systems 30 (NeurIPS 2017)}, 5574--5584.
 
 \bibitem[\citeproctext]{ref-lai_ds1000_2023}
 Lai, Y., Li, C., Wang, Y., Zhang, T., Zhong, R., Zettlemoyer, L., Yih,
@@ -1578,6 +1626,13 @@ R Core Team. (2026). \emph{R: A language and environment for statistical
 computing}. R Foundation for Statistical Computing.
 \url{https://doi.org/10.32614/R.manuals}
 
+\bibitem[\citeproctext]{ref-sarma2023}
+Sarma, A., Kale, A., Moon, M. J., Taback, N., Chevalier, F., Hullman,
+J., \& Kay, M. (2023). Multiverse: Multiplexing alternative data
+analyses in r notebooks. \emph{Proceedings of the 2023 CHI Conference on
+Human Factors in Computing Systems}.
+\url{https://doi.org/10.1145/3544548.3580726}
+
 \bibitem[\citeproctext]{ref-shah_automating_2026}
 Shah, S. M. H., Hopfgartner, F., \& Bleier, A. (2026). \emph{Automating
 {Computational} {Reproducibility} in {Social} {Science}: {Comparing}
@@ -1593,6 +1648,17 @@ Dam, L., Evans, M. H., Flores Cervantes, I., \ldots{} Nosek, B. A.
 in Analytic Choices Affect Results. \emph{Advances in Methods and
 Practices in Psychological Science}, \emph{1}(3), 337--356.
 \url{https://doi.org/10.1177/2515245917747646}
+
+\bibitem[\citeproctext]{ref-simonsohn2020}
+Simonsohn, U., Simmons, J. P., \& Nelson, L. D. (2020). Specification
+curve analysis. \emph{Nature Human Behaviour}, \emph{4}(11), 1208--1214.
+\url{https://doi.org/10.1038/s41562-020-0912-z}
+
+\bibitem[\citeproctext]{ref-steegen2016}
+Steegen, S., Tuerlinckx, F., Gelman, A., \& Vanpaemel, W. (2016).
+Increasing transparency through a multiverse analysis.
+\emph{Perspectives on Psychological Science}, \emph{11}(5), 702--712.
+\url{https://doi.org/10.1177/1745691616658637}
 
 \bibitem[\citeproctext]{ref-sun_lambda_2026}
 Sun, M., Han, R., Jiang, B., Qi, H., Sun, D., Yuan, Y., \& Huang, J.
@@ -1621,11 +1687,19 @@ J., Usher, T., \& Wolfson, J. (2024). Partnering {With} {Authors} to
 Statistical Association}, \emph{119}(546), 795--797.
 \url{https://doi.org/10.1080/01621459.2024.2340557}
 
+\bibitem[\citeproctext]{ref-VGAM}
+Yee, T. W. (2025). \emph{{VGAM}: Vector generalized linear and additive
+models}. \url{https://CRAN.R-project.org/package=VGAM}
+
 \bibitem[\citeproctext]{ref-yee2025heaping}
 Yee, T. W., Frigau, L., \& Ma, C. (2025). Heaping and seeping, GAITD
 regression and doubly constrained reduced-rank vector generalized linear
 models in smoking studies. \emph{The Annals of Applied Statistics},
 \emph{19}(4), 3045--3070.
+
+\bibitem[\citeproctext]{ref-VGAMdata}
+Yee, T. W., \& Gray, J. (2025). \emph{{VGAMdata}: Data supporting the
+{VGAM} package}. \url{https://CRAN.R-project.org/package=VGAMdata}
 
 \end{CSLReferences}
 

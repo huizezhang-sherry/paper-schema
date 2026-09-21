@@ -1,7 +1,72 @@
 ---
-title: "Appendix to Code availability is not enough: A schema-based representation for comprehensible and extensible data analysis"
-format: pdf
+title: "Appendix to Code availability is not enough: schemas for documenting and extending data analysis"
+format:
+  pdf:
+    include-in-header:
+      - text: |
+          \usepackage{fvextra}
+          \DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
+          \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
+          \makeatletter
+          \AtBeginDocument{%
+            \captionsetup[codelisting]{skip=-0.8em}%
+            \renewenvironment{codelisting}{%
+              \def\@captype{codelisting}%
+              \par\addvspace{0.5em}\noindent
+            }{%
+              \par\addvspace{0.5em}%
+            }%
+          }
+          \makeatother
+          \AtBeginDocument{\floatplacement{codelisting}{H}}
+csl: apa.csl
+bibliography: bibliography.bib
 ---
+
+## Schema extraction for Team 5 {#app-team5 .unnumbered}
+
+The many-analysts football study of @silberzahn2018, analysed in the main
+paper, uses a pre-extracted methodology text for each team, rather than the
+original report, as the input to schema extraction. The text used for Team 5 is quoted below, and
+@lst-team5-schema gives the schema extracted from it, as an illustration of
+both the input and the output of the extraction stage.
+
+```{r}
+#| echo: false
+#| output: asis
+txt <- readLines(here::here("schemas/team5.txt"))
+txt <- txt[!(seq_along(txt) > length(txt) - 3 & !nzchar(trimws(txt)))]
+cat(ifelse(nzchar(trimws(txt)), paste0("> ", txt), ">"), sep = "\n")
+cat("\n")
+```
+
+:::{#lst-team5-schema lst-cap="The schema extracted from the Team 5 methodology text quoted above. Two steps are returned with medium confidence, each carrying the clarification question the model would put to the analyst."}
+```{r}
+#| echo: false
+#| output: asis
+cat("````yaml\n")
+cat(readLines(here::here("schemas/schema-team5.yaml")), sep = "\n")
+cat("````\n")
+```
+:::
+
+@lst-team5-code gives the script generated and validated from that schema,
+completing the pipeline from methodology text to executable code for this
+team. As in the main paper, the generated script is annotated with the
+schema step each block implements.
+
+:::{#lst-team5-code lst-cap="The R script generated and validated from the schema in @lst-team5-schema."}
+```{r}
+#| echo: false
+#| output: asis
+cat("````r\n")
+cat(readLines(here::here("schemas/script-team5.R")), sep = "\n")
+cat("````\n")
+```
+:::
+
+<!-- Ablation commented out; see ISSUES.md. The corresponding paragraph in the
+main paper is commented out too, and the figure is figures/res-compare.png.
 
 ## Ablation study: schema-based vs direct-generation pipelines {#app-abl .unnumbered}
 
@@ -15,6 +80,8 @@ format: pdf
 #| fig.cap: "Comparison of the schema-based (with schema) and direct-generation (without schema) pipelines, each expressed as the ratio of the reproduced to the reported odd ratio in @silberzahn2018; a ratio of 1 (dashed line) indicates an exact match. Teams are ordered by the larger of the two pipelines' deviation from an exact match, so a team appears near the top if either pipeline diverges substantially from the reported value. The largest deviations occur for Team 21, 31, 9, 32, 28, and 8."
 knitr::include_graphics(here::here("figures/res-compare.png"))
 ```
+
+-->
 
 
 ## Built-in prompts {#app-prompt .unnumbered}
@@ -57,3 +124,6 @@ tines::prompt_alternatives(step = "[inset step number here]")
 ```
 
 :::
+
+
+# References

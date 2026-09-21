@@ -1,0 +1,12 @@
+The two ratings of skin-tone were averaged and rescaled. The new variable was called avgrate01.
+
+Cases were excluded if they had missing values on skin-tone-rating, meanIAT or meanExp (listwise deletion) because we wanted to perform all analyses (including research question 2) on the same set of cases.
+
+The original response variable redCards is uninterpretable because the number of games a player has seen a given referee varies. Therefore we disaggregated the data (one game per row, redCards appear as 1s in the first n=redCards rows per player). This was possible because it does not matter in which of, for example, 3 games a player who received 1 red card in 3 games received the red card. It is sufficient that this player has three observations (three rows) associated with him, one of them indicating a red card. We used the binomial error distribution because – after disaggregation – our response variable specifies the occurence of an event in a single game, coded 0 and 1.
+
+We estimated generalized linear mixed models (function glmer in R package lme4, Version 1.1-7; Bates, 2010; Bates, Maechler, Bolker, & Walker, 2014). The crowdstorming data are different from standard multilevel data (e.g., where employees are members of only one team), inasmuch as they are not nested but cross-classified – player A can have multiple games with the referee A, but player B can have multiple games with the same referee A. 
+
+Our model adds a random effect of playerShort, refNum, and skin-tone across referees’ countries of origin.
+
+We did not use any covariates, even though reviewers of our approach suggested that we should do so. As already noted in the project description by Silberzahn, Martin, Uhlmann, & Nosek, the data cannot be used for causal inference. 
+
