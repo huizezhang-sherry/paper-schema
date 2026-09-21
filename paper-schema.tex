@@ -361,25 +361,25 @@ a structured way that captures the decisions and their justifications,
 as well as the inputs and outputs of each step. We also demonstrate how
 this schema, coupled with LLMs, can be used to generate code scripts
 from natural-language descriptions in manuscripts, and explore
-alternative decision choices. We apply our schema to the many-analyst
+alternative decision choices. We apply our schema to the many-analysts
 football study, where LLMs create the schema from the decision choices
 reported in the final reports of each team, and generate and validate
 the corresponding code scripts against the original published results.
 In the process, we also uncover an inconsistency in one team's published
 report between the covariate described in the text and the one implied
-by their results. We further demonstrate how to the schema supports
-specification and exploration of alternatives random effect
-specification for Team 5.
+by their results. We further demonstrate how the schema supports
+specification and exploration of alternative random effect
+specifications for Team 5.
 
 The paper is organized as follows: In Section~\ref{sec-method}, we
 present our methodology, including the schema representation for
 describing data analysis and the workflow for generating and validating
 code from the schema by LLMs. In Section~\ref{sec-application}, we apply
-our methodology to the many-analyst football and demonstrate that we can
-reproduce the results reported in the paper, identify errors in the
-original reports, and highlight failure modes of current LLMs. Finally,
-in Section~\ref{sec-discussion}, we discuss the implications of our work
-and potential future directions.
+our methodology to the many-analysts football study and demonstrate that
+we can reproduce the results reported in the paper, identify errors in
+the original reports, and highlight failure modes of current LLMs.
+Finally, in Section~\ref{sec-discussion}, we discuss the implications of
+our work and potential future directions.
 
 \section{Methodology}\label{sec-method}
 
@@ -1070,26 +1070,26 @@ single generation-and-validation step.
 \section{Application: many-analysts football
 study}\label{sec-application}
 
-In this section, we apply our methodology to the many-analyst football
-by Silberzahn et al. (2018) to reproduce the reported estimated effect
-size by each team. During this process, we identify some errors in the
-original reports and highlight failure modes of current LLMs.
+In this section, we apply our methodology to the many-analysts football
+study by Silberzahn et al. (2018) to reproduce the reported estimated
+effect size by each team. During this process, we identify some errors
+in the original reports and highlight failure modes of current LLMs.
 
-Silberzahn et al. (2018) invites 29 research groups to conduct the same
-data analysis to answer whether are more likely to give red cards to
-dark-skin-toned player than to light-skin-toned players. The provided
-dataset contains two raters' skin color rating to players' picture, the
-aggregated number of red card received by a player from a referee across
-all matches in that player-referee pair, and other relevant player,
-referee, and game characteristics: player birthday, height, weight,
-player position, league country, number of victories, ties, and defeats,
-and number of yellow and red cards received. In Silberzahn et al.
-(2018), each group first conducted an initial analysis separately,
-followed by a round-robin peer evaluation. Each group was then given the
-opportunity to incorporate feedback from the discussion and submitted a
-final analysis as a report with a formal Method section. All the
-materials related to the study is publicly available on the Open Science
-Framework (OSF).
+Silberzahn et al. (2018) invited 29 research groups to conduct the same
+data analysis, answering whether referees are more likely to give red
+cards to dark-skin-toned players than to light-skin-toned players. The
+provided dataset contains two raters' skin color ratings of players'
+pictures, the aggregated number of red cards received by a player from a
+referee across all matches in that player-referee pair, and other
+relevant player, referee, and game characteristics: player birthday,
+height, weight, player position, league country, number of victories,
+ties, and defeats, and number of yellow and red cards received. In
+Silberzahn et al. (2018), each group first conducted an initial analysis
+separately, followed by a round-robin peer evaluation. Each group was
+then given the opportunity to incorporate feedback from the discussion
+and submitted a final analysis as a report with a formal Method section.
+All the materials related to the study are publicly available on the
+Open Science Framework (OSF).
 
 Based on the reports presented by each team, most participating groups
 adopted a modelling approach to estimate the effect of skin color rating
@@ -1106,8 +1106,8 @@ and referee, as well as the average skin color rating across referee's
 country of origin. While Group 5's analysis illustrates one possible
 approach, other groups may adopt different data preprocessing decisions,
 distributional assumptions (e.g., linear, logistic, or Poisson models),
-specification of fixed and random effects, or conduct the analysis in a
-Bayesian framework.
+or specifications of fixed and random effects, or may conduct the
+analysis in a Bayesian framework.
 
 Team reports are not straightforward to use as input directly. Beyond
 the analysis of interest, whether skin color rating predicts red cards,
@@ -1119,28 +1119,29 @@ teams write the final analysis as edits against the initial analysis,
 for example a covariate dropped, a variable rescaled, a different
 outcome, rather than as a self-contained methodology section. Recovering
 a single, self-contained methodology description while setting aside the
-unrelated research question, is its own nontrivial comprehension
-problem, separate from the task of generating the schema and analysis
-code that we study here. We therefore pre-extract a simplified
-methodology text for each team and use this, rather than the original
-report, as the input for our simulation.
+unrelated research question is its own nontrivial comprehension problem,
+separate from the task of generating the schema and analysis code that
+we study here. We therefore pre-extract a simplified methodology text
+for each team and use this, rather than the original report, as the
+input for our simulation.
 
-We send the text description of each team for LLM to generate the schema
-and then generate the code script from the schema. The code script is
-run by a separate LLM to validate for potential syntax errors.
+We send the text description of each team to an LLM to generate the
+schema, and then generate the code script from the schema. The code
+script is then run by a separate LLM to validate it for potential syntax
+errors.
 
-To accelerate the evaluation of each script, we manually in-place
-replace the \texttt{lm()}/\texttt{glm()} command with
+To accelerate the evaluation of each script, we manually replace, in
+place, the \texttt{lm()}/\texttt{glm()} command with
 \texttt{fixest::feols()}/\texttt{fixest::feglm()} (Bergé et al., 2026)
-for generalized linear model and the \texttt{lme4::glmer()} (Bates et
+for generalized linear models, and the \texttt{lme4::glmer()} (Bates et
 al., 2015) function with \texttt{glmmTMB::glmmTMB()} (Brooks et al.,
-2017) for generalized mix-effect model after the scripts are generated
-but before the validation. These two functions are in-place replacements
-of the standard functions for estimating the relevant model with
-multi-threading in C++ (Bergé et al., 2026) and Template Model Builder
-(TMB) (McGillycuddy et al., 2025) for better performance. This
-replacement should not affect the estimation of the effect size. All the
-LLM-related simulations are conducted with Claude-Opus-4.5.
+2017) for generalized mixed-effects models, after the scripts are
+generated but before validation. These two functions are in-place
+replacements of the standard functions for estimating the relevant
+models, with multi-threading in C++ (Bergé et al., 2026) and Template
+Model Builder (TMB) (McGillycuddy et al., 2025) for better performance.
+This replacement should not affect the estimation of the effect size.
+All the LLM-related simulations are conducted with Claude-Opus-4.5.
 
 Of the 29 teams, we report results for 25. The remaining four (Teams 7,
 12, 17, and 18) specify analyses that are too computationally expensive
@@ -1150,9 +1151,9 @@ hierarchical models with thousands of random effects, a nonparametric
 Bayesian clustering procedure, and a fixed-effects model with several
 thousand parameters. Across the 25 teams we reproduce, all team scripts
 were successfully executed after the validation phase. Notably, two
-scripts run successfully without any validation whereas the vast
+scripts ran successfully without any validation, whereas the vast
 majority reached completion after two or three iterations. The most
-frequent correction involved resolving broken and overflow syntax in
+frequent correction involved resolving broken and overflowing syntax in
 comments.
 
 \begin{figure}
@@ -1163,29 +1164,29 @@ comments.
 
 }
 
-\caption{\label{fig-res-schema}Comparison of the odd ratio of the effect
-of skin color on receiving red cards in football games from our
+\caption{\label{fig-res-schema}Comparison of the odds ratio of the
+effect of skin color on receiving red cards in football games from our
 schema-based reproduction (reproduced) vs.~the effect size reported in
 Silberzahn et al. (2018) (reported). Teams are ordered by the absolute
-difference between the reproduced and reported odd ratio. The
-reproduction recovers the reported odd ratio closely for most teams; the
-largest deviations occur for Team 1, 9, 15, 21, 23, and 27.}
+difference between the reproduced and reported odds ratio. The
+reproduction recovers the reported odds ratio closely for most teams;
+the largest deviations occur for Team 1, 9, 15, 21, 23, and 27.}
 
 \end{figure}%
 
 Figure~\ref{fig-res-schema} shows the comparison of the estimated effect
-size, in odd ratio, from our workflow (simulated) and those reported in
-Silberzahn et al. (2018) (published). The odd ratio is well recovered
-for most teams, though six show a noticeably larger gap: Team 1, 9, 15,
-21, 23, and 27. Looking closely at each team's report and generated
-script, the causes split into two stages of our pipeline, plus one case
-that has nothing to do with the LLM at all.
+sizes, in odds ratio, from our workflow (simulated) and those reported
+in Silberzahn et al. (2018) (published). The odds ratio is well
+recovered for most teams, though six show a noticeably larger gap: Team
+1, 9, 15, 21, 23, and 27. Looking closely at each team's report and
+generated script, the causes split into two stages of our pipeline, plus
+one case that has nothing to do with the LLM at all.
 
-For Team 27, the report is genuinely ambiguous: the authors write that,
-``In addition to the independent variables specified in the initial
-approach, \ldots{} a variable for player position was included, as well
-as a variable for the league of the player.'' A statistician reading
-this might reasonably take it as shorthand for extending the model with
+For Team 27, the report is genuinely ambiguous: the authors write: ``In
+addition to the independent variables specified in the initial approach,
+\ldots{} a variable for player position was included, as well as a
+variable for the league of the player.'' A statistician reading this
+might reasonably take it as shorthand for extending the model with
 interactions, consistent with how the other covariates entered the
 initial model, but the LLM read it literally and added only main
 effects. Team 9 fails for a similar reason at the same stage: the text
@@ -1207,7 +1208,7 @@ difference in default contrast coding between R (our reproduction) and
 SPSS (the original analysis) --- SPSS's effect coding compares each
 level to the grand mean, while R's default dummy coding compares to a
 reference level. Setting the \texttt{contrast} option in R to match
-recovers the reported odd ratio exactly, so this reflects a software
+recovers the reported odds ratio exactly, so this reflects a software
 convention rather than a modeling or LLM error.
 
 That leaves Team 21, whose discrepancy we have not yet traced to a
@@ -1224,8 +1225,8 @@ alternative specifications, such as different covariate and random
 effects structures, before arriving at a final model. This can be seen
 as a set of alternative decisions within the same modelling step, which
 fits naturally into the schema workflow described in
-Section~\ref{sec-alternative}. As an example, we use Team 5 for the
-above football study to demonstrate the use case. Team 5 uses a binomial
+Section~\ref{sec-alternative}. As an example, we use Team 5 from the
+football study above to demonstrate this. Team 5 uses a binomial
 generalized linear mixed model (GLMM) to estimate the effect of skin
 tone rating on the number of red cards received using a logit link
 function, but tests different random effect structures:
@@ -1245,37 +1246,38 @@ and \(X\) represents the player's skin tone rating. The subscripts
 referee, and the referee's home country, respectively. The parameter
 \(\beta_0\) represents the global baseline log-odds of receiving a red
 card, and \(\beta_1\) estimates the fixed effect of a player's skin
-tone. The random effect include
+tone. The random effects include
 
 \begin{itemize}
 \tightlist
 \item
   a random intercept for players,
-  \(u_j \sim N(0, \sigma^2_{\text{player}})\), in Model 1, 2, and 3,
+  \(u_j \sim N(0, \sigma^2_{\text{player}})\), in Models 1, 2, and 3,
 \item
-  a random intercept for referee,
-  \(v_k \sim N(0, \sigma^2_{\text{ref}})\), in Model 1 and 3, an
-  additional random slope for referee in Model 2, and
+  a random intercept for referees,
+  \(v_k \sim N(0, \sigma^2_{\text{ref}})\), in Models 1 and 3, plus an
+  additional random slope for referees in Model 2, and
 \item
   a random intercept and slope for referee countries,
   \(\mathbf{w}_{m} \sim N\left(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}}\right)\),
   in Model 3.
 \end{itemize}
 
-These alternatives are specified in a separate YAML file described in
-Section~\ref{sec-alternative} as Listing~\ref{lst-yaml-alternative}.
-This file is then merged with the original schema to produce one
-separate schema for each alternative for code generation and validation.
-The validated scripts are then executed to obtain the estimated random
-effects in Table~\ref{tbl-random-effects}. This result matches with the
-random effects reported in the team report, subject to rounding errors.
-Similarly, the model fitting statistics can be extracted from the
-estimation for selecting the best fit.
+These alternatives are specified in a separate YAML file, following the
+format described in Section~\ref{sec-alternative} and shown in
+Listing~\ref{lst-yaml-alternative}. This file is then merged with the
+original schema to produce a separate schema for each alternative for
+code generation and validation. The validated scripts are then executed
+to obtain the estimated random effects in
+Table~\ref{tbl-random-effects}. This result matches the random effects
+reported in the team report, subject to rounding errors. Similarly, the
+model fitting statistics can be extracted from the estimation for
+selecting the best fit.
 
 \begin{codelisting}
 
 \caption{\label{lst-yaml-alternative}Example of a YAML file specifying
-alternatives for the random effects structure in the many-analyst
+alternatives for the random effects structure in the many-analysts
 analysis of Group 5.}
 
 \centering{
@@ -1327,18 +1329,6 @@ Referee's country & Intercept & NA & NA & 0.3990 \\
 Referee's country & Referee rating & NA & NA & 0.0870 \\
 
 \end{longtable}
-
-\subsection{Ablation: with and without an intermediate
-schema}\label{sec-ablation}
-
-To assess whether the schema step itself improves the fidelity of the
-generated code, beyond what the underlying LLM can already achieve on
-its own, we conduct an ablation study comparing our schema-based
-pipeline against a direct pipeline that generates code straight from
-each team's methodology text. Both pipelines are applied to the same set
-of team descriptions, using the same underlying LLM (Claude-Opus-4.5)
-and the same script validation. The comparison of the two pipelines are
-shown in the Appendix. {[}TODO: main conclusion{]}
 
 \section{Discussion}\label{sec-discussion}
 
@@ -1402,10 +1392,10 @@ human analysts in specialized statistical knowledge (Sun et al., 2026).
 Our validate-and-repair loop assumes each candidate script can be
 executed and diagnosed within an interactive timeframe. This assumption
 does not hold for analyses that are too computationally expensive to run
-inside such a loop (Team 7, 12, 17, 18 in the football many-analyst
-studies). For future direction, this could be addressed by implementing
-a background job queue to allow for longer-running scripts to be
-executed asynchronously.
+inside such a loop (Teams 7, 12, 17, and 18 in the many-analysts
+football study). For future direction, this could be addressed by
+implementing a background job queue to allow for longer-running scripts
+to be executed asynchronously.
 
 For the code-generation errors, the LLM successfully corrects a range of
 implementation issues during validation, including errors caused by
