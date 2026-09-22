@@ -306,35 +306,34 @@ Statistical workflow
 \section{Introduction}\label{sec-intro}
 
 A data analysis is the product of a chain of decisions, from how the
-data are cleaned to how the model is specified. {[}This chain of
-decisions lets a reader comprehend the analysis, compare it against
-other analyses of similar questions, question how the result would
-change under an alternative decision.{]} Code and data availability, now
-standard reproducible practice (Peng, 2011; Wrobel et al., 2024),
-guarantee that the reported result can be reproduced, {[}but not the
-chain of decisions that produced it.{]}
+data are cleaned to how the model is specified. Those decisions are what
+a reader needs in order to comprehend an analysis, judge whether it is
+reasonable, and extend it by asking how the result would change under
+different choices. Standard practice in reproducible research (Peng,
+2011; Wrobel et al., 2024) asks for the code and the data to be made
+available, but does not extend to the decisions behind them.
 
-{[}Part of the reason is that{]} code and the decisions it implements
+The distinction arises because code and the decisions it implements
 operate at different levels: code specifies precisely what a computer
 should do, while a decision has a contextual interpretation that the
 code itself does not capture. Consider a line such as
 \texttt{dplyr::filter(df,\ x\ \textgreater{}\ 0)}, which has a precise
 meaning as code: keep rows where \texttt{x} is positive. Which decision
 this line encodes is not something the code can answer: it could
-represent restricting the analysis to a subpopulation for which \$x
-\textgreater{} 0 \$is substantively meaningful, or excluding
-observations flagged as invalid by anencoding convention where \(x
-\le 0\) denotes missingness, and nothing in the \texttt{filter()} syntax
-indicates which is intended. Nor does code generally carry the rationale
-behind a decision, unless the author has left detailed comments. A
-better place to state the decisions is in the manuscript, where
-decisions are described along with their rationale. But this information
-is scattered across the manuscript rather than collected in one place,
-with preprocessing and modelling decisions appearing in different
-sections of the manuscript. Authors may also simply leave out decisions
-they consider minor, on the assumption that the code provides all the
-detail a reader would need. Reconstructing the full sequence, therefore,
-means searching across the paper and the code for decisions and their
+represent restricting the analysis to a subpopulation for which
+\(x > 0\) is substantively meaningful, or excluding observations flagged
+as invalid by an encoding convention where \(x \le 0\) denotes
+missingness, and nothing in the \texttt{filter()} syntax indicates which
+is intended. Nor does code generally carry the rationale behind a
+decision, unless the author has left detailed comments. A better place
+to state the decisions is in the manuscript, where decisions are
+described along with their rationale. But this information is scattered
+across the manuscript rather than collected in one place, with
+preprocessing and modeling decisions appearing in different sections of
+the manuscript. Authors may also simply leave out decisions they
+consider minor, on the assumption that the code provides all the detail
+a reader would need. Reconstructing the full sequence, therefore, means
+searching across the paper and the code for decisions and their
 rationale before a reader can begin to comprehend the analysis. Ideally,
 this sequence of decisions and their rationale would live in a single
 file, so a reader can follow the analysis directly rather than piecing
@@ -342,27 +341,28 @@ it together from multiple sources. This file should also be extensible,
 so a reader can specify an alternative decision and easily evaluate it
 to see how the result would change.
 
-In this paper, we present a schema designed to describe data analysis
-{[}in a structured way that captures the decisions and their rationale,
-as well as the inputs and outputs of each step{]}. We also demonstrate
-how this schema, coupled with large language models (LLMs), can be used
-to generate code scripts from natural-language descriptions in
-manuscripts, and explore alternative decision choices. We present two
-applications. The first takes the perspective of an author supplying a
-schema alongside a published manuscript, using the GAITD regression
-analysis of heaped smoking data in Yee et al. (2025). A reader can then
-specify an alternative file, coupled with the original schema, to
-compare model performance under a different inflation-alteration
-specification. The second, the many-analysts football study, considers
-the opposite situation, where no schema is supplied and the workflow
-serves instead as a reproducibility test. It extracts a schema from a
-simplified version of each team's report, generates and validates the
-corresponding code, and compares the result against that team's
-published estimate. This comparison also uncovers an inconsistency in
-one team's published report between the covariate described in the text
-and the one implied by their results. We further demonstrate how the
-schema supports specification and exploration of three alternative
-random effect structures for Team 5.
+In this paper, we present a schema that records a data analysis as a
+sequence of decisions, each stated with the objective it addresses and
+the rationale for choosing it, together with the variables it consumes
+and produces. We also demonstrate how this schema, coupled with large
+language models (LLMs), can be used to generate code scripts from
+natural-language descriptions in manuscripts, and explore alternative
+decision choices. We present two applications. The first takes the
+perspective of an author supplying a schema alongside a published
+manuscript, using the GAITD regression analysis of heaped smoking data
+in Yee et al. (2025). A reader can then specify an alternative file,
+coupled with the original schema, to compare model performance under a
+different inflation-alteration specification. The second, the
+many-analysts football study, considers the opposite situation, where no
+schema is supplied and the workflow serves instead as a reproducibility
+test. It extracts a schema from a simplified version of each team's
+report, generates and validates the corresponding code, and compares the
+result against that team's published estimate. Of the six teams whose
+reported estimates we do not recover, three trace to reports that do not
+describe the analysis precisely enough to regenerate it, including one
+whose text names a different covariate from its own results table. We
+further demonstrate how the schema supports specification and
+exploration of three alternative random effect structures for Team 5.
 
 The paper is organized as follows: In Section~\ref{sec-method}, we
 present our methodology, including the schema representation for
@@ -392,12 +392,11 @@ A_{i} = \langle f_{i}, \pi_{i}, \rho_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \ome
 \(f_{i} \in \mathcal{F}\) is the \emph{objective} of a step, identifying
 the problem the \emph{decision}, \(\pi_{i} \in \Pi\), is trying to
 solve. \(\rho_{i}\) is the \emph{rationale} provided for choosing the
-decision \(\pi_{i}\). All of the three fields are written in short
-natural language sentences, and together they form a self-contained
-account of each decision in the analysis. As an example,
-Listing~\ref{lst-schema} presents the schema that describes the steps
-for calculating the Human Development Index (HDI) (United Nations
-Development Programme, 2025):
+decision \(\pi_{i}\). All three fields are written in short natural
+language sentences, and together they form a self-contained account of
+each decision in the analysis. As an example, Listing~\ref{lst-schema}
+presents the schema that describes the steps for calculating the Human
+Development Index (HDI) (United Nations Development Programme, 2025):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
@@ -452,21 +451,22 @@ In the file, the \texttt{meta} field at the top marks the document as a
 schema (\texttt{type:\ schema}), and \texttt{nodes} below it records the
 analysis as a list of steps. Each step carries an \texttt{id} that names
 it, together with the \texttt{objective}, \texttt{decision}, and
-\texttt{rationale} fields holding \(f_i\), \(\pi_i\), and \(\rho_i\). As
-an example, the objective of step 3 is to combine the three dimensions
+\texttt{rationale} fields holding \(f_i\), \(\pi_i\), and \(\rho_i\).
+For instance, the objective of step 3 is to combine the three dimensions
 to create a single index. The geometric mean (the decision) is chosen
-over a simple arithmetic mean (an alternative - introduced in
+over a simple arithmetic mean (an alternative, introduced in
 Section~\ref{sec-alternative}) because it penalizes uneven development
 among the three dimensions (the rationale).
 
-Where a dataset \(\mathcal{D}\) is available, \(\mathcal{I}_i\) and
-\(\mathcal{O}_i\) record this mapping as part of the schema, so that it
-is fixed in advance rather than inferred at the point of code
-generation. Because the schema specifies an analysis before its code
-exists, \(\mathcal{O}_i\) may name a variable that is not yet in the
-dataset. In contrast, \(\mathcal{I}_i\) must already be in scope,
-comprising variables in the original dataset together with the outputs
-of all previous steps:
+Generating code from the schema also requires each step to be tied to
+concrete variables in the data. Where a dataset \(\mathcal{D}\) is
+available, \(\mathcal{I}_i\) and \(\mathcal{O}_i\) record that mapping
+as part of the schema, so that it is fixed in advance rather than
+inferred at the point of code generation. Because the schema specifies
+an analysis before its code exists, \(\mathcal{O}_i\) may name a
+variable that is not yet in the dataset. In contrast, \(\mathcal{I}_i\)
+must already be in scope, comprising variables in the original dataset
+together with the outputs of all previous steps:
 
 \[\mathcal{I}_{i} \subseteq \left( \mathcal{D} \cup \bigcup_{j < i} \mathcal{O}_{j} \right), \quad \forall i \in \{2, \dots, n\}.\]
 
@@ -540,9 +540,9 @@ candidate decision. These alternatives, together with the rest of the
 original schema, form one new analysis. This is useful when an analyst
 already has a specific alternative analysis in mind and wants to
 evaluate it as a whole. Listing~\ref{lst-alternatives-single} fills in
-the skeleton to construct an alternative HDI pipeline construction,
-using a harmonic mean to combine the two education variables in Step 2
-and an arithmetic mean to combine the three dimensions in Step 3.
+the skeleton to construct an alternative HDI computation, using a
+harmonic mean to combine the two education variables in Step 2 and an
+arithmetic mean to combine the three dimensions in Step 3.
 
 \begin{codelisting}
 
@@ -576,23 +576,22 @@ Development Index (HDI).}
 
 \end{codelisting}%
 
-Sometimes a reader, instead, wants to test a range of alternatives for
-one or more steps independently. Under \texttt{branch:\ multi}, each
-covered step may take any of its alternatives or keep its original
-decision, and every such combination across steps becomes a separate
-analysis. In Listing~\ref{lst-alternatives-multi}, one alternative is
-specified for the education step and two for the combination step.
-Together with the original schema, this produces
-\((1+1) \times (2+1) = 6\) analyses. More generally, with \(k_i\)
-candidates at each step \(i \in C\), crossing all candidates yields
-\(\prod_{i \in C} k_i\) analyses.
+Sometimes a reader instead wants to test a range of alternatives for one
+or more steps independently. Under \texttt{branch:\ multi}, each covered
+step may take any of its alternatives or keep its original decision, and
+every such combination across steps becomes a separate analysis. In
+Listing~\ref{lst-alternatives-multi}, one alternative is specified for
+the education step and two for the combination step. Together with the
+original schema, this produces \((1+1) \times (2+1) = 6\) analyses. More
+generally, with \(k_i\) candidates at each step \(i \in C\), crossing
+all candidates yields \(\prod_{i \in C} k_i\) analyses.
 
 \begin{codelisting}
 
 \caption{\label{lst-alternatives-multi}A sample alternative file that
 explores one alternative decision for Step 2 and two for Step 3 in
 calculating Human Development Index (HDI). Combining these alternatives
-with the original schema produces a total of six (1+1) × (2+1) = 6
+with the original schema produces a total of (1+1) × (2+1) = 6
 analyses.}
 
 \centering{
@@ -655,7 +654,7 @@ script completes without error, a maximum number of attempts is reached,
 or the user terminates the process. Application to the many-analysts
 football study in Section~\ref{sec-application} shows that this
 procedure resolves most of the syntax errors that arise in data
-wrangling and statistical modelling.
+wrangling and statistical modeling.
 
 The same generation-validation procedure applies to multiple analyses.
 When a schema is augmented with an alternative file, the expansion
@@ -805,8 +804,8 @@ account of the analysis.}
 \end{codelisting}%
 
 Assembling the schema does not require additional analysis from the
-authors, but to collect the decisions and rationale existing in the
-manuscript and supplementary material.
+authors, only the collection of decisions and rationale already present
+in the manuscript and supplementary material.
 
 As a check that this schema is accurate, generating and validating code
 from it produces the R script in Listing~\ref{lst-script-sia}, which
@@ -997,12 +996,12 @@ pooling them into the mid-risk inflated group.}
 study}\label{sec-application}
 
 Section~\ref{sec-gaitd} assumed the authors supply a schema alongside
-the manuscript, however a schema doesn't need to come from the authors.
-Since it records decisions in natural language, the schema can be
-extracted from the manuscript itself by an LLM for readers to understand
-and explore the analysis. In this section, we demonstrate the workflow
-in the opposite situation, where no schema is supplied and the workflow
-serves as a reproducibility test using the many-analysts football study
+the manuscript, but a schema need not come from the authors. Since it
+records decisions in natural language, the schema can be extracted from
+the manuscript itself by an LLM for readers to understand and explore
+the analysis. In this section, we demonstrate the workflow in the
+opposite situation, where no schema is supplied and the workflow serves
+as a reproducibility test using the many-analysts football study
 (Silberzahn et al., 2018).
 
 Silberzahn et al. (2018) invited 29 research groups to conduct the same
@@ -1020,7 +1019,7 @@ as an illustration. They disaggregated the player-referee records into
 player--game observations, giving a binary response for whether a player
 received a red card, and removed incomplete cases by list-wise deletion.
 They then fitted a binomial generalized linear mixed model with a logit
-link, taking the average of the two raters' skin colour ratings as the
+link, taking the average of the two raters' skin color ratings as the
 covariate of interest, with random intercepts for players and referees
 and a random intercept and slope for the referee's country of origin.
 
@@ -1031,7 +1030,7 @@ effects, or worked in a Bayesian framework. Each team was required to
 document its analysis in a report with a publishable methodology
 section. All of these are available on the Open Science Framework.
 
-These reports are not directly usable as input since the many-analyst
+These reports are not directly usable as input since the many-analysts
 study also takes in a second research question and the construction of
 confidence intervals. Some teams write their final analysis as a set of
 edits to the initial one rather than as a self-contained methodology
@@ -1045,7 +1044,7 @@ follows Team 5 through the pipeline to show the input text, the schema,
 and the generated script.
 
 To accelerate the evaluation of each script, we manually replace the
-standard modelling functions with faster counterparts after the scripts
+standard modeling functions with faster counterparts after the scripts
 are generated but before validation: \texttt{lm()}/\texttt{glm()} with
 \texttt{fixest::feols()}/\texttt{fixest::feglm()} (Bergé et al., 2026),
 and \texttt{lme4::glmer()} (Bates et al., 2015) with
@@ -1054,18 +1053,18 @@ models by faster means, using multi-threaded C++ and Template Model
 Builder (TMB) respectively, so the substitution changes how the
 coefficients are computed, not the coefficients themselves.
 
-Of the 29 teams, the analysis of four teams (Teams 7, 12, 17, and 18)
+Of the 29 teams, the analyses of four teams (Teams 7, 12, 17, and 18)
 are too computationally expensive to run inside an iterative
 validate-and-repair loop, regardless of whether the schema or generated
-code is correct: Team 7 a Dirichlet process profile regression, and Team
-12 a zero-inflated Poisson regression while Teams 17 and 18 both specify
-MCMC-based hierarchical models. Hence we exclude these four teams from
-the evaluation, leaving 25 teams whose analyses we attempt to reproduce.
-Across the 25 teams we reproduce, all team scripts were successfully
-executed after the validation phase. Notably, two scripts ran
-successfully without any validation, whereas the vast majority reached
-completion after two or three iterations. The most frequent correction
-involved resolving broken and overflowing syntax in comments.
+code is correct: Team 7 specifies a Dirichlet process profile
+regression, Team 12 a zero-inflated Poisson regression, and Teams 17 and
+18 MCMC-based hierarchical models. Hence we exclude these four teams
+from the evaluation, leaving 25 teams whose analyses we attempt to
+reproduce. Across the 25 teams we reproduce, all team scripts were
+successfully executed after the validation phase. Notably, two scripts
+ran successfully without any validation, whereas the vast majority
+reached completion after two or three iterations. The most frequent
+correction involved resolving broken and overflowing syntax in comments.
 
 \begin{figure}
 
@@ -1088,7 +1087,7 @@ the largest deviations occur for Team 1, 9, 15, 21, 23, and 27.}
 Figure~\ref{fig-res-schema} shows the comparison of the estimated effect
 sizes, in odds ratio, from our schema workflow (reproduced) and those
 reported in Silberzahn et al. (2018) (reported). The odds ratio is well
-recovered for most teams, though six show a noticeably larger gap: Team
+recovered for most teams, though six show a noticeably larger gap: Teams
 1, 9, 15, 21, 23, and 27.
 
 For Teams 1 and 23 the discrepancy originates in our code generation.
@@ -1109,7 +1108,7 @@ player'', which read literally adds only main effects but might equally
 be shorthand for interactions, consistent with how the other covariates
 entered their initial model. Team 15 is subtler: their log-linear model
 includes a skin-tone by league interaction, so the coefficient of
-interest is defined relative to a parameterisation the report does not
+interest is defined relative to a parameterization the report does not
 state, with SPSS's effect coding averaging it across leagues and R's
 default dummy coding fixing it at a reference league. Setting
 \texttt{contrasts} in R to match recovers the reported value exactly.
@@ -1128,10 +1127,10 @@ issue we identified is a good ending point, and this section is a bit of
 a tangent. This section is not proofed.{]}
 
 Team 5 arrives at its final model by comparing three random effect
-structures, a set of alternative decisions within a single modelling
-step of the kind described in Section~\ref{sec-alternative}. Write
+structures, a set of alternative decisions within a single modeling step
+of the kind described in Section~\ref{sec-alternative}. Write
 \(y_{ijm}\) for whether player \(i\) received a red card from referee
-\(j\) in game \(m\), \(x_i\) for player \(i\)'s skin colour rating
+\(j\) in game \(m\), \(x_i\) for player \(i\)'s skin color rating
 averaged over the two raters and rescaled to \([0, 1]\), and \(c(j)\)
 for the country of origin of referee \(j\). In each model
 \(y_{ijm} \sim \mathrm{Bernoulli}(p_{ijm})\), and the three differ only
@@ -1151,7 +1150,7 @@ with \(u_i \sim N(0, \sigma^2_{\text{player}})\) throughout,
 in gm2, and
 \((w_{0c}, w_{1c})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}})\)
 in gm3. Model gm1 lets the baseline log-odds vary across players and
-referees, gm2 additionally lets the effect of skin colour vary across
+referees, gm2 additionally lets the effect of skin color vary across
 referees, and gm3, the model Team 5 report, instead lets both the
 baseline and that effect vary across referees' countries of origin.
 
@@ -1199,21 +1198,22 @@ analysis of Team 5.}
 
 \section{Discussion}\label{sec-discussion}
 
-Existing reproducible practices focus on published results being able to
-reproduced from the code and data, but not the chain of decisions that
-produced it. We propose a schema that records those decisions along with
-rationale for choosing them in natural language as an intermediate
-representation between the manuscript and the code. A schema can be
-written by an author or extracted from the manuscript by an LLM. It can
-then be turned into an executable script, or expanded into a multiverse
-of alternative analyses. For a published GAITD regression, where the
-schema was assembled from the manuscript and its supplement, the
-resulting script reproduced the reported estimates and brought a
-reviewer's alternative specification within reach of any reader. For the
-many-analysts football study, where no schema was supplied, extraction
-and generation recovered most teams' reported effects and identified the
-few where the methodology could have been described more precisely,
-inconsistencies that re-running the authors' own code would not reveal.
+Existing reproducible practices focus on whether published results can
+be reproduced from the code and data, not on the chain of decisions that
+produced them. We propose a schema that records those decisions along
+with the rationale for choosing them in natural language as an
+intermediate representation between the manuscript and the code. A
+schema can be written by an author or extracted from the manuscript by
+an LLM. It can then be turned into an executable script, or expanded
+into a multiverse of alternative analyses. For a published GAITD
+regression, where the schema was assembled from the manuscript and its
+supplement, the resulting script reproduced the reported estimates and
+brought a reviewer's alternative specification within reach of any
+reader. For the many-analysts football study, where no schema was
+supplied, extraction and generation recovered most teams' reported
+effects and identified the few where the methodology could have been
+described more precisely, inconsistencies that re-running the authors'
+own code would not reveal.
 
 A data analysis question admits more than one defensible answer, and the
 schema records which one was taken. Arriving at those decisions is a
@@ -1242,14 +1242,14 @@ fails to recover it. In Team 5's report, the phrase ``a random effect of
 skin tone across referees' countries'' is read by most statisticians as
 implying both a random intercept and a slope, while read literally it
 specifies only a slope, and the extraction took the literal reading
-rather than the conventional one. Both uncertainty are epistemic
-(Hüllermeier \& Waegeman, 2021; Kendall \& Gal, 2017) and we would
-expect them to diminish as models continue to improve, rather than
-persist as structural limitations of the workflow. The third is
-aleatoric and belongs to the source text rather than the pipeline: where
-a report is ambiguous or self-contradictory, as in Teams 9, 27, and 15,
-no model can recover an intent the text does not express. As extraction
-and generation improve, what remains is increasingly uncertainty of this
+rather than the conventional one. Both are epistemic (Hüllermeier \&
+Waegeman, 2021; Kendall \& Gal, 2017) and we would expect them to
+diminish as models continue to improve, rather than persist as
+structural limitations of the workflow. The third is aleatoric and
+belongs to the source text rather than the pipeline: where a report is
+ambiguous or self-contradictory, as in Teams 9, 27, and 15, no model can
+recover an intent the text does not express. As extraction and
+generation improve, what remains is increasingly uncertainty of this
 third kind, which the schema is designed to make visible.
 
 The validate-and-repair loop assumes that each candidate script can be
@@ -1266,9 +1266,9 @@ in the football data, used to derive player age, are a case in point:
 the script for Team 21 parsed them as \texttt{\%Y-\%m-\%d} and was
 corrected to \texttt{\%d.\%m.\%Y} only after one parse failure, while
 the repair for Team 1 supplied four candidate formats for R to try in
-turn. In both case, our birthday format is recovered by trial and error,
-however, when the trials and errors fail, the pipeline can fail or carry
-over the failure silently into the analysis.
+turn. In both cases the date format was recovered by trial and error.
+When the trials fail, the pipeline can fail outright or carry the
+failure silently into the analysis.
 
 The implementation reported here is an R package, but nothing about the
 problem is specific to R, and a general-purpose tool such as a
