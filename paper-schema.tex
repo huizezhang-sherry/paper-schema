@@ -1199,124 +1199,88 @@ analysis of Team 5.}
 
 \section{Discussion}\label{sec-discussion}
 
-Our results highlight a persistent gap between computational
-reproducibility and analytical understandability in modern data analysis
-workflows. Current reproducibility practices ensure that published
-results can be regenerated from shared data and code, but as analyses
-grow in complexity and involve iterative decision-making, they fall well
-short of making those analyses understandable to readers. Our proposed
-schema addresses this gap by introducing an intermediate representation
-that explicitly encodes analytical decisions to bridge between narrative
-descriptions and implementation details. When coupled with LLMs, this
-representation enables the extraction of analytical structure from
-written reports, its translation into analysis scripts, and the
-exploration of alternative analytical choices.
+Existing reproducible practices focus on published results being able to
+reproduced from the code and data, but not the chain of decisions that
+produced it. We propose a schema that records those decisions along with
+rationale for choosing them in natural language as an intermediate
+representation between the manuscript and the code. A schema can be
+written by an author or extracted from the manuscript by an LLM. It can
+then be turned into an executable script, or expanded into a multiverse
+of alternative analyses. For a published GAITD regression, where the
+schema was assembled from the manuscript and its supplement, the
+resulting script reproduced the reported estimates and brought a
+reviewer's alternative specification within reach of any reader. For the
+many-analysts football study, where no schema was supplied, extraction
+and generation recovered most teams' reported effects and identified the
+few where the methodology could have been described more precisely,
+inconsistencies that re-running the authors' own code would not reveal.
 
-Our approach differs in this respect from recent work that builds fully
-automated systems using multiple LLM agents to plan, generate, execute,
-and refine data analyses (Hu et al., 2024; Jansen et al., 2025). These
-systems rely on the same underlying capability of translating analytical
-specifications into code that our workflow uses, but they aim to
-automate the analytical decisions themselves, not just their translation
-into code. The failure modes we document in
-Section~\ref{sec-application} suggest this is premature: even the
-comparatively narrower task of translating an already-specified decision
-into working code is not yet fully reliable. We take this as support for
-our position that the harder and more consequential part of a data
-analysis is the sequence of decisions a researcher makes, not the code
-that implements them, and that this part should remain explicit and in
-the hands of the analyst rather than be automated away.
+A data analysis question admits more than one defensible answer, and the
+schema records which one was taken. Arriving at those decisions is a
+matter of human judgement, whether the analyst writes the schema
+directly or it is extracted from a manuscript in which the decisions
+were already made. Once they are determined, generating the code is a
+comparatively mechanical translation, which current LLMs perform with
+reasonable reliability inside a generation-and-validation loop. Our
+approach therefore contrasts with fully automated systems that use
+multiple LLM agents to plan, generate, and execute analyses (Hu et al.,
+2024; Jansen et al., 2025; Sun et al., 2026), which aim to automate the
+decisions themselves. Donoho (2026) describes the risk in such systems
+as one of premature autonomy, where the model projects an intent onto
+the user rather than responding to what was asked. We do not attempt to
+automate the human judgement that goes into making those decisions, but
+instead provide a structured way to record them and a workflow to turn
+them into code.
 
-Where no schema is supplied, the same workflow serves as a
-reproducibility test, and we apply it in this form to the many-analysts
-football study. It surfaces inconsistencies and ambiguities in the
-original reports that computational reproducibility alone would not
-catch: Team 9's report names one covariate in its text and a different
-one in its estimation table, a contradiction that is invisible if one
-only re-runs the authors' code, and that only becomes apparent once the
-described analysis is written down as an explicit set of decisions and
-executed. Examining the largest discrepancies also separates defects in
-the reports from failures of our own pipeline --- three of the former,
-two of the latter, and one we could not attribute. The separation is
-possible because the schema sits between the manuscript and the code and
-can be checked against the manuscript on its own, and it matters for
-where effort should be directed: an unresolvable report calls for
-disambiguation at the source, and the confidence score \(\omega_i\) is
-the natural hook for it, having flagged the disputed step in Team 27's
-report before any code was written, whereas a code-generation failure
-calls for improvements to the validation stage itself.
+Three sources of uncertainty enter this pipeline, and they behave
+differently as models improve. The first is implementation, where the
+schema states a decision unambiguously and the generated code fails to
+carry it out: the scripts for Teams 1 and 23 ran and returned estimates
+after reshaping the data incorrectly. The second is extraction, where
+the text states a decision clearly to a trained reader and the model
+fails to recover it. In Team 5's report, the phrase ``a random effect of
+skin tone across referees' countries'' is read by most statisticians as
+implying both a random intercept and a slope, while read literally it
+specifies only a slope, and the extraction took the literal reading
+rather than the conventional one. Both uncertainty are epistemic
+(Hüllermeier \& Waegeman, 2021; Kendall \& Gal, 2017) and we would
+expect them to diminish as models continue to improve, rather than
+persist as structural limitations of the workflow. The third is
+aleatoric and belongs to the source text rather than the pipeline: where
+a report is ambiguous or self-contradictory, as in Teams 9, 27, and 15,
+no model can recover an intent the text does not express. As extraction
+and generation improve, what remains is increasingly uncertainty of this
+third kind, which the schema is designed to make visible.
 
-A caveat applies to the failure modes we report: they describe the
-behaviour of one model at one point in time. Current models parse
-methodology text reliably for the most part, and where they slip is on
-statistical nuance that a trained reader supplies without thinking. The
-phrase ``a random effect of referee number across average rating'' would
-be read by most statisticians as implying both a random intercept and a
-random slope; read literally, as the model reads it, it specifies a
-random slope only. This points to a gap between current models and human
-analysts in specialized statistical knowledge (Sun et al., 2026), but
-given the pace at which these models are improving we expect this
-particular gap to narrow, and we do not regard it as a structural
-limitation of the workflow. What the workflow provides, independently of
-model capability, is somewhere to catch such a misreading: the schema is
-inspectable before any code is generated, so a misread decision is
-visible to the analyst as a sentence rather than buried in a script.
+The validate-and-repair loop assumes that each candidate script can be
+executed and diagnosed within an interactive timeframe, which rules out
+analyses too expensive to run repeatedly, and Teams 7, 12, 17, and 18
+were excluded on these grounds. Executing such scripts asynchronously
+through a background job queue would lift the restriction without
+changing the rest of the workflow.
 
-Our validate-and-repair loop assumes each candidate script can be
-executed and diagnosed within an interactive timeframe. This assumption
-does not hold for analyses that are too computationally expensive to run
-inside such a loop (Teams 7, 12, 17, and 18 in the many-analysts
-football study). As a future direction, this could be addressed by
-implementing a background job queue to allow longer-running scripts to
-be executed asynchronously.
+In our pipeline the model sees the column names but never the values
+themselves, for privacy reasons. Formats that the schema does not record
+must therefore be learned through the validation loop. The birth dates
+in the football data, used to derive player age, are a case in point:
+the script for Team 21 parsed them as \texttt{\%Y-\%m-\%d} and was
+corrected to \texttt{\%d.\%m.\%Y} only after one parse failure, while
+the repair for Team 1 supplied four candidate formats for R to try in
+turn. In both case, our birthday format is recovered by trial and error,
+however, when the trials and errors fail, the pipeline can fail or carry
+over the failure silently into the analysis.
 
-Turning to the other stage, the validation loop successfully corrects a
-range of implementation issues, including errors caused by overflowing
-comments and other syntax problems. What it does not catch are
-transformations that run without error but do not do what the schema
-asked, of which the reshaping failures behind Teams 1 and 23 are the
-clearest instance: changing the unit of analysis from player-referee
-dyads to individual games produces code that executes and returns an
-estimate regardless of whether the disaggregation was done correctly. We
-also observe some difficulties in parsing birthdates. Since the LLM does
-not have access to the underlying raw data, due to privacy constraints,
-it must rely on trial and error when inferring the correct date format,
-in this case ``DD-MM-YYYY''. This suggests that certain types of data
-analysis tasks may not be fully automatable in settings where the model
-cannot directly inspect the data, even if the data is theoretically
-available for computation.
-
-While the schema requires a rationale \(\rho_i\) for each decision,
-nothing in the format itself can guarantee that this rationale is
-substantive rather than perfunctory; an analyst can satisfy the schema
-with a low-effort entry in the same way that a required code comment or
-commit message can be filled with boilerplate. The schema makes
-recording a decision's rationale cheap and structured, but, as with any
-documentation requirement, cannot enforce that authors use it
-thoughtfully. It remains an open question whether resolving
-\(\mathcal{I}_i\) and \(\mathcal{O}_i\) to concrete dataset variables
-ahead of time, rather than leaving this mapping for the LLM to infer at
-the point of code generation, meaningfully improves the reliability of
-the resulting code.
-
-The reproducibility-understandability issue considered in this work is
-still at an early stage, and some software design choices are worth
-examining. We currently implement a prototype as an R package, although
-the understandability problem is broadly applicable to statistical
-analyses and is not associated with any particular programming language.
-Hence, we envision the implementation eventually evolving into a general
-purpose tool, such as a command-line utility, that can support analyses
-across different programming languages. In the current implementation,
-analytical decisions are recorded in a single YAML file. An alternative
-would be to record individual decisions in separate Markdown files.
-While YAML files provide an explicit structure for machine readability,
-Markdown files offer greater flexibility for documenting decisions.
-Recording decisions in separate files would also allow them to be linked
-across time, showing how decisions evolve over the course of an
-analysis. This could in turn support a broader research-management
-system, provided that decisions are properly attributed to individual
-researchers and that a record of the changes leading to the final
-analysis is maintained.
+The implementation reported here is an R package, but nothing about the
+problem is specific to R, and a general-purpose tool such as a
+command-line utility would support analyses written in any language. Our
+implementation records the schema as a single YAML file, which gives the
+decisions an explicit structure that machines can read. An alternative
+is to record each decision in its own Markdown file to trade some of
+that structure for flexibility in how a decision is described. Separate
+files would further allow decisions to be linked over time, showing how
+an analysis developed rather than only where it arrived, and with
+attribution to individual researchers such a history could support a
+broader research-management system.
 
 \section{Acknowledgments}\label{acknowledgments}
 
@@ -1360,16 +1324,32 @@ C. W., Nielsen, A., Skaug, H. J., Maechler, M., \& Bolker, B. M. (2017).
 zero-inflated generalized linear mixed modeling. \emph{The R Journal},
 \emph{9}(2), 378--400. \url{https://doi.org/10.32614/RJ-2017-066}
 
+\bibitem[\citeproctext]{ref-donoho2026}
+Donoho, D. (2026). Discussion of {``}LAMBDA: A large model based data
+agent{''}. \emph{Journal of the American Statistical Association},
+\emph{121}(553), 14--16.
+\url{https://doi.org/10.1080/01621459.2025.2574396}
+
 \bibitem[\citeproctext]{ref-hu_automated_2024}
 Hu, S., Lu, C., \& Clune, J. (2024, October). \emph{Automated {Design}
 of {Agentic} {Systems}}.
 \url{https://openreview.net/forum?id=t9U3LW7JVX}
+
+\bibitem[\citeproctext]{ref-hullermeier2021}
+Hüllermeier, E., \& Waegeman, W. (2021). Aleatoric and epistemic
+uncertainty in machine learning: An introduction to concepts and
+methods. \emph{Machine Learning}, \emph{110}(3), 457--506.
 
 \bibitem[\citeproctext]{ref-jansen2025}
 Jansen, J. A., Manukyan, A., Khoury, N. A., \& Akalin, A. (2025).
 Leveraging large language models for data analysis automation.
 \emph{PLOS ONE}, \emph{20}(2), e0317084.
 \url{https://doi.org/10.1371/journal.pone.0317084}
+
+\bibitem[\citeproctext]{ref-kendall2017}
+Kendall, A., \& Gal, Y. (2017). What uncertainties do we need in
+bayesian deep learning for computer vision? \emph{Advances in Neural
+Information Processing Systems 30 (NeurIPS 2017)}, 5574--5584.
 
 \bibitem[\citeproctext]{ref-glmmTMB-2}
 McGillycuddy, M., Warton, D. I., Popovic, G., \& Bolker, B. M. (2025).
