@@ -996,17 +996,14 @@ pooling them into the mid-risk inflated group.}
 \section{Application: many-analysts football
 study}\label{sec-application}
 
-Section~\ref{sec-gaitd} assumed an author willing to supply a schema.
-Most published analyses come with no such thing, so we now ask what the
-same workflow is worth when none exists. Applied to a manuscript alone,
-it becomes a reproducibility test: extract a schema from what the paper
-says, generate and validate code from it, and compare the result against
-what the paper reports. Agreement means the description was sufficient
-to regenerate the result. Disagreement means something is missing,
-ambiguous, or wrong, and is the more informative outcome. We apply this
-to the many-analysts football study of Silberzahn et al. (2018), which
-gives 29 independent descriptions of an analysis of one dataset, each
-with a reported effect size to test against.
+Section~\ref{sec-gaitd} assumed the authors supply a schema alongside
+the manuscript, however a schema doesn't need to come from the authors.
+Since it records decisions in natural language, the schema can be
+extracted from the manuscript itself by an LLM for readers to understand
+and explore the analysis. In this section, we demonstrate the workflow
+in the opposite situation, where no schema is supplied and the workflow
+serves as a reproducibility test using the many-analysts football study
+(Silberzahn et al., 2018).
 
 Silberzahn et al. (2018) invited 29 research groups to conduct the same
 data analysis, answering whether referees are more likely to give red
@@ -1016,80 +1013,59 @@ pictures, the aggregated number of red cards received by a player from a
 referee across all matches in that player-referee pair, and other
 relevant player, referee, and game characteristics: player birthday,
 height, weight, player position, league country, number of victories,
-ties, and defeats, and number of yellow and red cards received. In
-Silberzahn et al. (2018), each group first conducted an initial analysis
-separately, followed by a round-robin peer evaluation. Each group was
-then given the opportunity to incorporate feedback from the discussion
-and submitted a final analysis as a report with a formal Method section.
-All the materials related to the study are publicly available on the
-Open Science Framework (OSF).
+ties, and defeats.
 
-Based on the reports presented by each team, most participating groups
-adopted a modelling approach to estimate the effect of skin color rating
-on the likelihood of receiving a red card. As an illustrative example,
-Team 5 first transformed the data into player--game observations,
-resulting in a binary response variable for whether a player received a
-red card, and removed observations with missing values using list-wise
-deletion. The resulting data were modelled using a generalized linear
-mixed model (GLMM) with a binomial error distribution. The average skin
-color rating from two raters was used as the primary covariate, and its
-estimated coefficient was the main parameter of interest. To account for
-unobserved heterogeneity, the model included random effects for player
-and referee, as well as the average skin color rating across referee's
-country of origin. While Team 5's analysis illustrates one possible
-approach, other teams may adopt different data preprocessing decisions,
-distributional assumptions (e.g., linear, logistic, or Poisson models),
-or specifications of fixed and random effects, or may conduct the
-analysis in a Bayesian framework.
+Each team was free to choose their own analysis approach; we take Team 5
+as an illustration. They disaggregated the player-referee records into
+player--game observations, giving a binary response for whether a player
+received a red card, and removed incomplete cases by list-wise deletion.
+They then fitted a binomial generalized linear mixed model with a logit
+link, taking the average of the two raters' skin colour ratings as the
+covariate of interest, with random intercepts for players and referees
+and a random intercept and slope for the referee's country of origin.
 
-Team reports are not straightforward to use as input directly. Beyond
-the analysis of interest, whether skin color rating predicts red cards,
-the many-analysts study also includes a second research question and
-report confidence interval calculations for the estimated effect,
-neither of which is relevant to the schema extraction or code generation
-we study here. The report structure adds a further complication: some
-teams write the final analysis as edits against the initial analysis,
-for example a covariate dropped, a variable rescaled, a different
-outcome, rather than as a self-contained methodology section. Recovering
-a single, self-contained methodology description while setting aside the
-unrelated research question is its own nontrivial comprehension problem,
-separate from the task of generating the schema and analysis code that
-we study here. We therefore pre-extract a simplified methodology text
-for each team and use this, rather than the original report, as the
-input for our experiment. The Appendix follows one team through the
-whole pipeline, giving the pre-extracted text, the schema extracted from
-it, and the code generated from that schema, along with the prompts used
-at each stage.
+Team 5's analysis is only one of the approaches taken: other teams made
+different preprocessing decisions, assumed different distributions
+(linear, logistic, or Poisson), specified different fixed and random
+effects, or worked in a Bayesian framework. Each team was required to
+document its analysis in a report with a publishable methodology
+section. All of these are available on the Open Science Framework.
+
+These reports are not directly usable as input since the many-analyst
+study also takes in a second research question and the construction of
+confidence intervals. Some teams write their final analysis as a set of
+edits to the initial one rather than as a self-contained methodology
+section. We therefore pre-extract a simplified methodology text for each
+team and use it in place of the report.
 
 Each team's text is then passed through the workflow of
-Section~\ref{sec-method} unchanged: schema extraction, code generation,
-and validation.
+Section~\ref{sec-method} to extract the schema and then generate and
+validate the corresponding code with Claude Opus 4.5. The Appendix
+follows Team 5 through the pipeline to show the input text, the schema,
+and the generated script.
 
-To accelerate the evaluation of each script, we manually replace, in
-place, the \texttt{lm()}/\texttt{glm()} command with
-\texttt{fixest::feols()}/\texttt{fixest::feglm()} (Bergé et al., 2026)
-for generalized linear models, and the \texttt{lme4::glmer()} (Bates et
-al., 2015) function with \texttt{glmmTMB::glmmTMB()} (Brooks et al.,
-2017) for generalized mixed-effects models, after the scripts are
-generated but before validation. These two functions are in-place
-replacements of the standard functions for estimating the relevant
-models, with multi-threading in C++ (Bergé et al., 2026) and Template
-Model Builder (TMB) (McGillycuddy et al., 2025) for better performance.
-This replacement should not affect the estimation of the effect size.
-All LLM-related runs are conducted with Claude Opus 4.5.
+To accelerate the evaluation of each script, we manually replace the
+standard modelling functions with faster counterparts after the scripts
+are generated but before validation: \texttt{lm()}/\texttt{glm()} with
+\texttt{fixest::feols()}/\texttt{fixest::feglm()} (Bergé et al., 2026),
+and \texttt{lme4::glmer()} (Bates et al., 2015) with
+\texttt{glmmTMB::glmmTMB()} (Brooks et al., 2017). These fit the same
+models by faster means, using multi-threaded C++ and Template Model
+Builder (TMB) respectively, so the substitution changes how the
+coefficients are computed, not the coefficients themselves.
 
-Of the 29 teams, we report results for 25. The remaining four (Teams 7,
-12, 17, and 18) specify analyses that are too computationally expensive
-to run inside an iterative validate-and-repair loop, regardless of
-whether the schema or generated code is correct: Teams 17 and 18 both
-specify MCMC-based hierarchical models with thousands of random effects,
-Team 7 a Dirichlet process profile regression, and Team 12 a
-zero-inflated Poisson regression with several thousand fixed-effect
-parameters. Across the 25 teams we reproduce, all team scripts were
-successfully executed after the validation phase. Notably, two scripts
-ran successfully without any validation, whereas the vast majority
-reached completion after two or three iterations. The most frequent
-correction involved resolving broken and overflowing syntax in comments.
+Of the 29 teams, the analysis of four teams (Teams 7, 12, 17, and 18)
+are too computationally expensive to run inside an iterative
+validate-and-repair loop, regardless of whether the schema or generated
+code is correct: Team 7 a Dirichlet process profile regression, and Team
+12 a zero-inflated Poisson regression while Teams 17 and 18 both specify
+MCMC-based hierarchical models. Hence we exclude these four teams from
+the evaluation, leaving 25 teams whose analyses we attempt to reproduce.
+Across the 25 teams we reproduce, all team scripts were successfully
+executed after the validation phase. Notably, two scripts ran
+successfully without any validation, whereas the vast majority reached
+completion after two or three iterations. The most frequent correction
+involved resolving broken and overflowing syntax in comments.
 
 \begin{figure}
 
@@ -1110,113 +1086,74 @@ the largest deviations occur for Team 1, 9, 15, 21, 23, and 27.}
 \end{figure}%
 
 Figure~\ref{fig-res-schema} shows the comparison of the estimated effect
-sizes, in odds ratio, from our workflow (reproduced) and those reported
-in Silberzahn et al. (2018) (reported). The odds ratio is well recovered
-for most teams, though six show a noticeably larger gap: Team 1, 9, 15,
-21, 23, and 27. Each of these is worth examining, and the schema is what
-makes the examination possible: because the extracted decisions can be
-inspected before any code is written, a discrepancy can be attributed to
-the report, to the code generated from it, or to neither.
+sizes, in odds ratio, from our schema workflow (reproduced) and those
+reported in Silberzahn et al. (2018) (reported). The odds ratio is well
+recovered for most teams, though six show a noticeably larger gap: Team
+1, 9, 15, 21, 23, and 27.
 
-Two of the six are properties of the report rather than of our pipeline.
-Team 9 is the clearest: the text names ``referee country'' as the
-covariate, while the reported estimation table lists ``player country''.
-The report contradicts itself, and no reading of the manuscript can
-settle which model produced the published estimate. Team 27 is ambiguous
-rather than contradictory. The authors write: ``In addition to the
-independent variables specified in the initial approach, \ldots{} a
-variable for player position was included, as well as a variable for the
-league of the player.'' A statistician might reasonably read this as
-shorthand for extending the model with interactions, consistent with how
-the other covariates entered the initial model; read literally, it adds
-only main effects. The schema records what the text says in both cases,
-and the discrepancy that follows is the test's finding, not its failure:
-these are the two reports whose description of the analysis is not
-sufficient to regenerate the result.
+For Teams 1 and 23 the discrepancy originates in our code generation.
+When reshaping the data from the player-referee level to the game level,
+the schema correctly specifies this step, but the generated code fails
+to execute it as intended, and the resulting error passes through
+validation silently rather than triggering a repair.
 
-The confidence score \(\omega_i\) separates these two cases in a way
-worth noting. For Team 27, extraction returned
-\texttt{create\_interaction\_terms} with medium confidence, flagging the
-step whose reading is in doubt before any code was written. For Team 9,
-every step came back with high confidence, which is the correct response
-rather than an oversight: the report's text is unambiguous on its own
-terms, and the inconsistency appears only when that text is set against
-the estimation table. Since \(\omega_i\) records the model's confidence
-that the schema reflects the source text, it can surface a description
-that is ambiguous, but not one that is internally clear and contradicted
-elsewhere. Catching the latter requires comparing the schema against the
-reported results, which is what the test as a whole does.
+For the remaining four the reported result could not be regenerated from
+the report, though one of them resists diagnosis: for Team 21, examining
+both the extracted schema and the generated code turned up nothing that
+accounts for the gap. The other three reveal reproducibility issues in
+the reports themselves. Team 9's text names ``referee country'' as the
+covariate while the full report shows ``player country'' is used
+instead. For Team 27, the authors write that ``a variable for player
+position was included, as well as a variable for the league of the
+player'', which read literally adds only main effects but might equally
+be shorthand for interactions, consistent with how the other covariates
+entered their initial model. Team 15 is subtler: their log-linear model
+includes a skin-tone by league interaction, so the coefficient of
+interest is defined relative to a parameterisation the report does not
+state, with SPSS's effect coding averaging it across leagues and R's
+default dummy coding fixing it at a reference league. Setting
+\texttt{contrasts} in R to match recovers the reported value exactly.
+Neither coding is wrong, but the reported number cannot be regenerated
+without knowing which one produced it. In all three cases the schema
+faithfully records what's in the text, and the discrepancy that follows
+points to a report whose description of the analysis is not precise
+enough to regenerate the result.
 
-Teams 1 and 23 are failures of a different kind, and they are ours: the
-schema is right and the code is wrong. Both require reshaping the data
-from player-referee pairs to individual games, disaggregating
-win/loss/draw counts into game-level records. The schema correctly
-specifies this step, but the generated code fails to execute it as
-intended, and the resulting error passes through validation silently
-rather than triggering a repair.
+\subsection{Exploring alternatives}\label{sec-explore}
 
-Team 15's discrepancy is unrelated to either stage: it comes down to a
-difference in default contrast coding between R (our reproduction) and
-SPSS (the original analysis) --- SPSS's effect coding compares each
-level to the grand mean, while R's default dummy coding compares to a
-reference level. Setting the \texttt{contrast} option in R to match
-recovers the reported odds ratio exactly, so this reflects a software
-convention rather than a modeling or LLM error.
+{[}Im not convinced entirely that this section is necessary - the main
+gist is to show an exmaple of a branch: multi alternative example. Also
+I feel leaving the many-analysts football study with the reproducibility
+issue we identified is a good ending point, and this section is a bit of
+a tangent. This section is not proofed.{]}
 
-That leaves Team 21, whose discrepancy we have been unable to explain.
-Examining both the extracted schema and the generated code turned up
-nothing that accounts for the gap, and we report it as unresolved rather
-than assign it to a cause we cannot establish; the procedure localizes
-most discrepancies, but evidently not all of them. Setting Team 21
-aside, the five remaining discrepancies divide into two whose reports
-cannot be resolved to a single analysis, two where our code generation
-failed, and one that reflects a difference in software convention. Only
-the middle pair are errors in the workflow itself; the first two are
-what the test was built to surface.
+Team 5 arrives at its final model by comparing three random effect
+structures, a set of alternative decisions within a single modelling
+step of the kind described in Section~\ref{sec-alternative}. Write
+\(y_{ijm}\) for whether player \(i\) received a red card from referee
+\(j\) in game \(m\), \(x_i\) for player \(i\)'s skin colour rating
+averaged over the two raters and rescaled to \([0, 1]\), and \(c(j)\)
+for the country of origin of referee \(j\). In each model
+\(y_{ijm} \sim \mathrm{Bernoulli}(p_{ijm})\), and the three differ only
+in their random effects:
 
-\subsection{Exploring alternatives}\label{exploring-alternatives}
+\[
+\begin{aligned}
+\textbf{gm1:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j, \\
+\textbf{gm2:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_{0j} + v_{1j}\, x_i, \\
+\textbf{gm3:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j + w_{0,c(j)} + w_{1,c(j)}\, x_i,
+\end{aligned}
+\]
 
-During the modelling process, researchers may consider a range of
-alternative specifications, such as different covariate and random
-effects structures, before arriving at a final model. This can be seen
-as a set of alternative decisions within the same modelling step, which
-fits naturally into the schema workflow described in
-Section~\ref{sec-alternative}. As an example, we return to Team 5, whose
-analysis was described above. Having settled on a binomial GLMM with a
-logit link for the probability that a player receives a red card in a
-single game, Team 5 tests three random effect structures:
-
-\begin{align*}
-\textbf{Model 1 (gm1):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{k} \\
-u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}) \\[1.5em]
-\textbf{Model 2 (gm2):} \quad \text{logit}(p_{ijk}) &= \beta_0 + \beta_1 X_{ijk} + u_{j} + v_{0k} + v_{1k} X_{ijk} \\
-u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad \mathbf{v}_{k} \sim N\left(\mathbf{0}, \boldsymbol{\Sigma}_{\text{ref}}\right) \\[1.5em]
-\textbf{Model 3 (gm3):} \quad \text{logit}(p_{ijkm}) &= \beta_0 + \beta_1 X_{ijkm} + u_{j} + v_{k} + w_{0m} + w_{1m} X_{ijkm} \\
-u_{j} &\sim N(0, \sigma^2_{\text{player}}), \quad v_{k} \sim N(0, \sigma^2_{\text{ref}}), \quad \mathbf{w}_{m} \sim N\left(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}}\right)
-\end{align*}
-
-where \(p\) denotes the probability of a player receiving a red card,
-and \(X\) represents the player's skin tone rating. The subscripts
-\(i, j, k,\) and \(m\) index the individual observation, player,
-referee, and the referee's home country, respectively. The parameter
-\(\beta_0\) represents the global baseline log-odds of receiving a red
-card, and \(\beta_1\) estimates the fixed effect of a player's skin
-tone. The random effects include
-
-\begin{itemize}
-\tightlist
-\item
-  a random intercept for players,
-  \(u_j \sim N(0, \sigma^2_{\text{player}})\), in Models 1, 2, and 3,
-\item
-  a random intercept for referees,
-  \(v_k \sim N(0, \sigma^2_{\text{ref}})\), in Models 1 and 3, plus an
-  additional random slope for referees in Model 2, and
-\item
-  a random intercept and slope for referee countries,
-  \(\mathbf{w}_{m} \sim N\left(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}}\right)\),
-  in Model 3.
-\end{itemize}
+with \(u_i \sim N(0, \sigma^2_{\text{player}})\) throughout,
+\(v_j \sim N(0, \sigma^2_{\text{ref}})\) in gm1 and gm3,
+\((v_{0j}, v_{1j})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{ref}})\)
+in gm2, and
+\((w_{0c}, w_{1c})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}})\)
+in gm3. Model gm1 lets the baseline log-odds vary across players and
+referees, gm2 additionally lets the effect of skin colour vary across
+referees, and gm3, the model Team 5 report, instead lets both the
+baseline and that effect vary across referees' countries of origin.
 
 All three are specified in a single YAML file, following the format
 described in Section~\ref{sec-alternative} and shown in
@@ -1299,16 +1236,15 @@ one in its estimation table, a contradiction that is invisible if one
 only re-runs the authors' code, and that only becomes apparent once the
 described analysis is written down as an explicit set of decisions and
 executed. Examining the largest discrepancies also separates defects in
-the reports from failures of our own pipeline --- two of each, with a
-fifth attributable to a difference in software convention. The
-separation is possible because the schema sits between the manuscript
-and the code and can be checked against the manuscript on its own, and
-it matters for where effort should be directed: an unresolvable report
-calls for disambiguation at the source, and the confidence score
-\(\omega_i\) is the natural hook for it, having flagged the disputed
-step in Team 27's report before any code was written, whereas a
-code-generation failure calls for improvements to the validation stage
-itself.
+the reports from failures of our own pipeline --- three of the former,
+two of the latter, and one we could not attribute. The separation is
+possible because the schema sits between the manuscript and the code and
+can be checked against the manuscript on its own, and it matters for
+where effort should be directed: an unresolvable report calls for
+disambiguation at the source, and the confidence score \(\omega_i\) is
+the natural hook for it, having flagged the disputed step in Team 27's
+report before any code was written, whereas a code-generation failure
+calls for improvements to the validation stage itself.
 
 A caveat applies to the failure modes we report: they describe the
 behaviour of one model at one point in time. Current models parse
