@@ -663,6 +663,15 @@ described in Section~\ref{sec-alternative} produces one schema for each
 combination of decisions, and each resulting schema is passed through
 the same generation and validation procedure independently.
 
+Figure~\ref{fig-workflow} gives an overview of the workflow, which
+provides two paths for using a schema. Passing a schema through the code
+generation and validation stages produces a script whose execution
+yields the estimates of the analysis, which can be compared with the
+estimates originally reported, serving as a reproducibility check. A
+schema can also be augmented with an alternative file, expanding it into
+a multiverse of parallel analyses, so that the author and subsequent
+readers can explore the reported result under different decisions.
+
 \begin{figure}
 
 \centering{
@@ -680,41 +689,30 @@ schema into a multiverse of parallel analyses.}
 
 \end{figure}%
 
-Figure~\ref{fig-workflow} gives an overview of the workflow, which
-provides two paths for using a schema. Passing a schema through the code
-generation and validation stages produces a script whose execution
-yields the estimates of the analysis, which can be compared with the
-estimates originally reported, serving as a reproducibility check. A
-schema can also be augmented with an alternative file, expanding it into
-a multiverse of parallel analyses, so that the author and subsequent
-readers can explore the reported result under different decisions.
-
 \section{Application: GAITD regression of heaped smoking
 data}\label{sec-gaitd}
 
-In this section, we demonstrate the schema workflow from an author's
-perspective: what it looks like for an author to provide a schema
-alongside a manuscript, and what that then lets an audience do to
-question and explore the analysis with much less effort than the
-manuscript and its code alone would require. We use Yee et al. (2025)'s
+In this section we demonstrate the workflow in the case where an author
+provides a faithful schema alongside a published manuscript, which a
+reader can then use to question and explore the analysis, following the
+second path in Figure~\ref{fig-workflow}. We use Yee et al. (2025)'s
 GAITD regression analysis of heaped smoking data, published in the
 Annals of Applied Statistics, as the example. Yee et al. (2025) report
-four separate smoking-related responses; for demonstration purposes we
-build the schema for only the first, smoking initiation age (P1, Section
-5.1 of their paper), and the same workflow extends to the other three.
+four separate smoking-related responses, and for demonstration purposes,
+we build the schema for only the first response, smoking initiation age
+(P1, Section 5.1 of their paper). The same workflow extends to the other
+three cases.
 
-Listing~\ref{lst-heaping} contains fourteen entries; rather than list
-them all, we highlight one as representative of what each entry records.
-Every entry follows the \emph{objective}, \emph{decision}, and
-\emph{rationale} structure introduced in Section~\ref{sec-schema}.
-Consider \texttt{special\_value\_mid\_risk}: the decision is to treat
-ages 12-14 and 19-21 as one inflated group with extra probability mass,
-since these ages show a moderate, secondary elevation in the spikeplots,
-surrounding the sharper peak already attributed to the high-risk group
-(ages 15-18). Recording the rationale along with the decision allows a
-reader to agree or disagree with the authors' choice, and to question
-and explore the analysis, as we do later in this section. The other
-thirteen entries follow the same structure.
+The schema in Listing~\ref{lst-heaping} comprises fourteen entries, each
+recording an \emph{objective}, a \emph{decision}, and a \emph{rationale}
+in the structure introduced in Section~\ref{sec-schema}. Consider
+\texttt{special\_value\_mid\_risk}: the decision is to treat ages 12-14
+and 19-21 as one inflated group with extra probability mass, since these
+ages show a moderate, secondary peak in the spikeplots with the
+high-risk group (ages 15-18) showing the most prominent peak. Recording
+the rationale along with the decision allows a reader to agree or
+disagree with the authors' choice, and to question and explore the
+analysis, as we do later in this section.
 
 \begin{codelisting}
 
@@ -806,47 +804,19 @@ account of the analysis.}
 
 \end{codelisting}%
 
-Assembling the schema required no analysis the authors had not already
-done, but it did require collecting the decisions from two documents
-and, in places, from code alone. Five of the fourteen appear nowhere in
-the manuscript. The manuscript records that cases with missing values in
-the adjustment variables were deleted and that the sample was restricted
-to respondents under 80; it does not record that \texttt{TC30},
-\texttt{TCquit}, and \texttt{SCA} are exempt from that completeness
-check, that \texttt{SCA} and \texttt{SIA} are set to missing wherever
-\texttt{SCA\ -\ SIA\ \textless{}\ 0}, that marital status and education
-are overwritten by age for respondents under 20, or the two-branch rule
-that defines the ever-smoker sample. Each of these survives only as
-executable code in the supplementary material, and their stated
-rationale, where there is one, is a code comment: the completeness
-exemption is explained by the remarks that the variables are
-``interlaced with NAs'' and that a missing value ``means not yet quit,
-which is okay'', the ever-smoker rule by the comment ``Complex to handle
-NAs'', and the data-quality correction by the single word ``Bad''. The
-two recodings carry no comment at all; a reader must infer their purpose
-from a note several pages later, written for another purpose, observing
-that marital status, education, and smoking initiation age ``were not
-measured in those aged 19 or less''. Recovering these decisions is
-exactly the piecing-together the schema is meant to remove, and it is
-worth emphasising that Yee et al. (2025)'s supplementary material is
-unusually thorough by the standards of applied statistics: it walks
-through the analysis in a tutorial style, states general modelling
-guidelines upfront, and discusses competing options it rejected. Even
-so, five of the fourteen decisions needed to reproduce the published
-estimates exist only as code.
+Assembling the schema does not require additional analysis from the
+authors, but to collect the decisions and rationale existing in the
+manuscript and supplementary material.
 
 As a check that this schema is accurate, generating and validating code
 from it produces the R script in Listing~\ref{lst-script-sia}, which
-reproduces the coefficients Yee et al. (2025) report for smoking
-initiation age exactly, matching their Table 2. The check establishes
-more than that our own workflow functions. Because the code was
-generated from the schema alone, with no access to the manuscript or the
-authors' script, reproducing the published estimates shows that the
-schema is \emph{sufficient}: nothing material to the analysis is missing
-from it. A schema that meets this standard could accompany a manuscript
-as reproducibility material in its own right, alongside code and data
-availability, and a reader can rely on it as an accurate account of the
-analysis it documents.
+reproduces the coefficients reported in Table 2 of Yee et al. (2025).
+Since the code was generated without access to the manuscript or the
+authors' script, the match shows that the schema records everything
+needed to reproduce the analysis. A schema of this kind could therefore
+accompany a manuscript as reproducibility material in its own right,
+alongside code and data, and a reader can rely on it as an accurate
+account of the analysis it documents.
 
 \begin{codelisting}
 
@@ -968,12 +938,8 @@ of the schema step each block implements.}
 
 \end{codelisting}%
 
-Beyond confirming the schema's accuracy, this workflow lets a reader
-write an alternative file directly against the schema and obtain
-generated, validated code, rather than going through the authors'
-original script and modifying it by hand. Yee et al. (2025)'s
-supplementary material reports exactly this kind of question from a
-reviewer, who suggested splitting the mid-risk group into two, keeping
+Yee et al. (2025)'s supplementary material reports an investigation from
+a reviewer, who suggested splitting the mid-risk group into two, keeping
 ages 12-14 as inflated but treating ages 19-21 as altered instead, since
 that older subgroup shows a qualitatively different, declining pattern
 of uptake. Listing~\ref{lst-ap1921} encodes the reviewer's suggestion as
@@ -984,6 +950,11 @@ group for ages 19-21, and \texttt{covariate\_selection} drops to an
 intercept-only model, matching how the authors themselves computed AIC
 for this comparison; \texttt{branch:\ single} ties the three overrides
 into one refit, rather than crossing them into separate branches.
+Generating and validating code from this alternative file reproduces the
+AIC of 19,340.4 that Yee et al. (2025) reports. Here the question was
+answered because the authors chose to report the refit in their
+supplement; with the schema available, any reader who raises such a
+question can answer it directly.
 
 \begin{codelisting}
 
@@ -1021,14 +992,6 @@ pooling them into the mid-risk inflated group.}
 }
 
 \end{codelisting}%
-
-Generating and validating code from this alternative, without the reader
-needing to touch the original script by hand, reproduces the fit the
-reviewer's refit is reported to have achieved, recovering the AIC of
-19,340.4 that Yee et al. (2025) report for it. What took the original
-authors a manual refit and a paragraph in the supplement is, for a
-reader equipped with this schema and its alternative file, a single
-generation-and-validation step.
 
 \section{Application: many-analysts football
 study}\label{sec-application}
