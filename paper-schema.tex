@@ -357,12 +357,7 @@ many-analysts football study, considers the opposite situation, where no
 schema is supplied and the workflow serves instead as a reproducibility
 test. It extracts a schema from a simplified version of each team's
 report, generates and validates the corresponding code, and compares the
-result against that team's published estimate. Of the six teams whose
-reported estimates we do not recover, three trace to reports that do not
-describe the analysis precisely enough to regenerate it, including one
-whose text names a different covariate from its own results table. We
-further demonstrate how the schema supports specification and
-exploration of three alternative random effect structures for Team 5.
+result against that team's published estimate.
 
 The paper is organized as follows: In Section~\ref{sec-method}, we
 present our methodology, including the schema representation for
@@ -694,13 +689,13 @@ data}\label{sec-gaitd}
 In this section we demonstrate the workflow in the case where an author
 provides a faithful schema alongside a published manuscript, which a
 reader can then use to question and explore the analysis, following the
-second path in Figure~\ref{fig-workflow}. We use Yee et al. (2025)'s
+lower path in Figure~\ref{fig-workflow}. We use Yee et al. (2025)'s
 GAITD regression analysis of heaped smoking data, published in the
-Annals of Applied Statistics, as the example. Yee et al. (2025) report
-four separate smoking-related responses, and for demonstration purposes,
-we build the schema for only the first response, smoking initiation age
-(P1, Section 5.1 of their paper). The same workflow extends to the other
-three cases.
+\emph{Annals of Applied Statistics}, as the example. Yee et al. (2025)
+report four separate smoking-related responses, and for demonstration
+purposes, we build the schema for only the first response, smoking
+initiation age (P1, Section 5.1 of their paper). The same workflow
+extends to the other three cases.
 
 The schema in Listing~\ref{lst-heaping} comprises fourteen entries, each
 recording an \emph{objective}, a \emph{decision}, and a \emph{rationale}
@@ -1259,7 +1254,7 @@ were excluded on these grounds. Executing such scripts asynchronously
 through a background job queue would lift the restriction without
 changing the rest of the workflow.
 
-In our pipeline the model sees the column names but never the values
+In our pipeline the LLM sees the column names but never the values
 themselves, for privacy reasons. Formats that the schema does not record
 must therefore be learned through the validation loop. The birth dates
 in the football data, used to derive player age, are a case in point:
