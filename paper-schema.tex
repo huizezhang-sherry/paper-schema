@@ -715,6 +715,30 @@ purposes, we build the schema for only the first response, smoking
 initiation age (P1, Section 5.1 of their paper). The same workflow
 extends to the other three cases.
 
+The data come from the smoking questionnaire of the 2017--2020 cycle of
+the National Health and Nutrition Examination Survey (NHANES), available
+as \texttt{smqP} in the \texttt{VGAMdata} package (Yee \& Gray, 2025).
+Each row is a survey respondent, recording their smoking history
+(initiation age \texttt{SIA}, cessation age \texttt{SCA}, and daily
+cigarette consumption, \texttt{TC30} for current smokers and
+\texttt{TCquit} for former smokers), their age, and the standard
+demographic covariates in smoking studies: gender, race, marital status,
+and education. Several of these variables are missing by design:
+\texttt{SCA} and \texttt{TCquit} exist only for former smokers, and
+education and marital status were not collected for respondents under
+20; age is also top-coded at 80. The response, \texttt{SIA}, is a count
+whose distribution is heaped: certain ages are reported far more often
+than a classic count distribution would predict. GAITD (generally
+altered, inflated, truncated, and deflated) regression accommodates such
+heaping by modifying a parent count distribution, such as the Poisson or
+negative binomial, at specified values, which may receive additional
+probability (inflation), reduced probability (deflation), probabilities
+modeled separately from the parent (alteration), or no probability at
+all (truncation). Which ages to treat as special, and which operation to
+apply (inflation, deflation, alteration, or truncation) to each, are
+modeling decisions typically guided by an exploratory spikeplot of the
+empirical distribution of \texttt{SIA}.
+
 The schema in Listing~\ref{lst-heaping} comprises fourteen entries, each
 recording an \emph{objective}, a \emph{decision}, and a \emph{rationale}
 in the structure introduced in Section~\ref{sec-schema}. Consider
