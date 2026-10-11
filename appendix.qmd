@@ -25,11 +25,11 @@ bibliography: bibliography.bib
 
 ## Schema extraction for Team 5 {#app-team5 .unnumbered}
 
-The many-analysts football study of @silberzahn2018, analysed in the main
-paper, uses a pre-extracted methodology text for each team, rather than the
-original report, as the input to schema extraction. The text used for Team 5 is quoted below, and
-@lst-team5-schema gives the schema extracted from it, as an illustration of
-both the input and the output of the extraction stage.
+For the many-analysts football study of @silberzahn2018, the workflow takes
+as input a pre-extracted methodology text for each team rather than the
+original report. The text used for Team 5 is quoted below, and
+@lst-team5-schema gives the schema extracted from it, illustrating both the
+input and the output of the extraction stage.
 
 ```{r}
 #| echo: false
@@ -52,8 +52,10 @@ cat("````\n")
 
 @lst-team5-code gives the script generated and validated from that schema,
 completing the pipeline from methodology text to executable code for this
-team. As in the main paper, the generated script is annotated with the
-schema step each block implements.
+team. As in the main paper, the script is annotated with the schema step each
+block implements. Although the schema specifies `glmer()` from `lme4`, the
+script fits the model with `glmmTMB()`, reflecting the substitution of faster
+model-fitting functions described in the main paper.
 
 :::{#lst-team5-code lst-cap="The R script generated and validated from the schema in @lst-team5-schema."}
 ```{r}
@@ -65,33 +67,17 @@ cat("````\n")
 ```
 :::
 
-<!-- Ablation commented out; see ISSUES.md. The corresponding paragraph in the
-main paper is commented out too, and the figure is figures/res-compare.png.
-
-## Ablation study: schema-based vs direct-generation pipelines {#app-abl .unnumbered}
-
-@fig-res-compare shows the ratio of the reproduced to the reported odds ratio for each team, with (blue) and without (yellow) the schema step. A ratio of 1 (dashed line) indicates an exact match. Teams are ordered by the larger of the two pipelines' deviation from an exact match. The largest deviations occur for Team 21, 31, 9, 32, 28, and 8.
-
-```{r}
-#| echo: false
-#| label: fig-res-compare
-#| out.width: 90%
-#| out.height: 80%
-#| fig.cap: "Comparison of the schema-based (with schema) and direct-generation (without schema) pipelines, each expressed as the ratio of the reproduced to the reported odd ratio in @silberzahn2018; a ratio of 1 (dashed line) indicates an exact match. Teams are ordered by the larger of the two pipelines' deviation from an exact match, so a team appears near the top if either pipeline diverges substantially from the reported value. The largest deviations occur for Team 21, 31, 9, 32, 28, and 8."
-knitr::include_graphics(here::here("figures/res-compare.png"))
-```
-
--->
-
-
 ## Built-in prompts {#app-prompt .unnumbered}
+
+The prompts that `tines` uses at each stage of the workflow are reproduced
+below, with placeholders in square brackets.
 
 :::{.callout-note}
 
-# Prompt: Extracting the schema from the text
+# Prompt: extracting the schema from the text
 
 ```{r echo = FALSE}
-tines::prompt_extract_schema(text = "[inset text here]", data_dict = NA)  
+tines::prompt_extract_schema(text = "[insert text here]", data_dict = NA)
 ```
 
 :::
@@ -108,7 +94,7 @@ tines::prompt_gen_code()
 
 :::{.callout-note}
 
-# Prompt: validating the code generated 
+# Prompt: validating the generated code
 
 ```{r echo = FALSE}
 cat(strwrap(tines:::build_sys_prompt(data = "[insert the path to the data]"), width = 70), sep = "\n")
@@ -120,7 +106,7 @@ cat(strwrap(tines:::build_sys_prompt(data = "[insert the path to the data]"), wi
 # Prompt: generating alternatives for a specific step
 
 ```{r echo = FALSE}
-tines::prompt_alternatives(step = "[inset step number here]")
+tines::prompt_alternatives(step = "[insert step number here]")
 ```
 
 :::

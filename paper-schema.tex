@@ -405,11 +405,12 @@ A_{i} = \langle f_{i}, \pi_{i}, \rho_{i}, \mathcal{I}_{i}, \mathcal{O}_{i}, \ome
 \(f_{i} \in \mathcal{F}\) is the \emph{objective} of a step, identifying
 the problem the \emph{decision}, \(\pi_{i} \in \Pi\), is trying to
 solve. \(\rho_{i}\) is the \emph{rationale} provided for choosing the
-decision \(\pi_{i}\). All three fields are written in short natural
-language sentences, and together they form a self-contained account of
-each decision in the analysis. As an example, Listing~\ref{lst-schema}
-presents the schema that describes the steps for calculating the Human
-Development Index (HDI) (United Nations Development Programme, 2025):
+decision \(\pi_{i}\). All three fields are written in short
+natural-language sentences, and together they form a self-contained
+account of each decision in the analysis. As an example,
+Listing~\ref{lst-schema} presents the schema that describes the steps
+for calculating the Human Development Index (HDI) (United Nations
+Development Programme, 2025):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
@@ -428,8 +429,8 @@ Development Index (HDI) (United Nations Development Programme, 2025):
 
 \begin{codelisting}
 
-\caption{\label{lst-schema}An example schema for calculating Human
-Development Index (HDI)}
+\caption{\label{lst-schema}An example schema for calculating the Human
+Development Index (HDI).}
 
 \centering{
 
@@ -554,13 +555,13 @@ original schema, form one new analysis. This is useful when an analyst
 already has a specific alternative analysis in mind and wants to
 evaluate it as a whole. Listing~\ref{lst-alternatives-single} fills in
 the skeleton to construct an alternative HDI computation, using a
-harmonic mean to combine the two education variables in Step 2 and an
-arithmetic mean to combine the three dimensions in Step 3.
+harmonic mean to combine the two education variables in step 2 and an
+arithmetic mean to combine the three dimensions in step 3.
 
 \begin{codelisting}
 
 \caption{\label{lst-alternatives-single}A sample alternative file that
-changes the decisions for Step 2 and Step 3 in calculating Human
+changes the decisions for steps 2 and 3 in calculating the Human
 Development Index (HDI).}
 
 \centering{
@@ -602,10 +603,10 @@ all candidates yields \(\prod_{i \in C} k_i\) analyses.
 \begin{codelisting}
 
 \caption{\label{lst-alternatives-multi}A sample alternative file that
-explores one alternative decision for Step 2 and two for Step 3 in
-calculating Human Development Index (HDI). Combining these alternatives
-with the original schema produces a total of (1+1) × (2+1) = 6
-analyses.}
+explores one alternative decision for step 2 and two for step 3 in
+calculating the Human Development Index (HDI). Combining these
+alternatives with the original schema produces a total of (1+1) × (2+1)
+= 6 analyses.}
 
 \centering{
 
@@ -692,19 +693,23 @@ readers can explore the reported result under different decisions.
 
 }
 
-\caption{\label{fig-workflow}Overview of the schema-driven analysis
-workflow. Schemas can be authored manually or generated from natural
-language manuscripts by an LLM. Schemas are used to generate code, which
-is validated through iterative execution in a sandboxed environment and
-repaired when errors occur. Alternative specifications can expand a
-schema into a multiverse of parallel analyses.}
+\caption{\label{fig-workflow}Overview of the schema-driven workflow. A
+schema is either authored manually or extracted from a manuscript by an
+LLM (left). To reproduce the analysis (top), an LLM generates code from
+the schema and validates it through iterative execution and repair in a
+sandboxed environment, and the analyst runs the validated script and
+compares its estimates with those reported. To explore alternatives
+(bottom), an alternative file is merged with the schema to give one
+schema per alternative, each passed through the same generation and
+validation. Badges mark whether a step is performed by a human or an
+LLM.}
 
 \end{figure}%
 
 \section{Application: GAITD regression of heaped smoking
 data}\label{sec-gaitd}
 
-In this section we demonstrate the workflow in the case where an author
+In this section, we demonstrate the workflow in the case where an author
 provides a faithful schema alongside a published manuscript, which a
 reader can then use to question and explore the analysis, following the
 lower path in Figure~\ref{fig-workflow}. We use Yee et al. (2025)'s
@@ -742,10 +747,10 @@ empirical distribution of \texttt{SIA}.
 The schema in Listing~\ref{lst-heaping} comprises fourteen entries, each
 recording an \emph{objective}, a \emph{decision}, and a \emph{rationale}
 in the structure introduced in Section~\ref{sec-schema}. Consider
-\texttt{special\_value\_mid\_risk}: the decision is to treat ages 12-14
-and 19-21 as one inflated group with extra probability mass, since these
-ages show a moderate, secondary peak in the spikeplots with the
-high-risk group (ages 15-18) showing the most prominent peak. Recording
+\texttt{special\_value\_mid\_risk}: the decision is to treat ages 12--14
+and 19--21 as one inflated group with extra probability mass, since
+these ages show a moderate, secondary peak in the spikeplots, with the
+high-risk group (ages 15--18) showing the most prominent peak. Recording
 the rationale along with the decision allows a reader to agree or
 disagree with the authors' choice, and to question and explore the
 analysis, as we do later in this section.
@@ -974,29 +979,29 @@ of the schema step each block implements.}
 
 \end{codelisting}%
 
-Yee et al. (2025)'s supplementary material reports an investigation from
-a reviewer, who suggested splitting the mid-risk group into two, keeping
-ages 12-14 as inflated but treating ages 19-21 as altered instead, since
-that older subgroup shows a qualitatively different, declining pattern
-of uptake. Listing~\ref{lst-ap1921} encodes the reviewer's suggestion as
-an alternative file, overriding three steps at once:
-\texttt{special\_value\_mid\_risk} narrows the inflated group to ages
-12-14, \texttt{alteration\_operator\_decision} turns on an alteration
-group for ages 19-21, and \texttt{covariate\_selection} drops to an
-intercept-only model, matching how the authors themselves computed AIC
-for this comparison; \texttt{branch:\ single} ties the three overrides
-into one refit, rather than crossing them into separate branches.
-Generating and validating code from this alternative file reproduces the
-AIC of 19,340.4 that Yee et al. (2025) reports. Here the question was
-answered because the authors chose to report the refit in their
-supplement; with the schema available, any reader who raises such a
-question can answer it directly.
+Yee et al. (2025)'s supplementary material reports an investigation
+prompted by a reviewer, who suggested splitting the mid-risk group into
+two, keeping ages 12--14 as inflated but treating ages 19--21 as altered
+instead, since that older subgroup shows a qualitatively different,
+declining pattern of uptake. Listing~\ref{lst-ap1921} encodes the
+reviewer's suggestion as an alternative file, overriding three steps at
+once: \texttt{special\_value\_mid\_risk} narrows the inflated group to
+ages 12--14, \texttt{alteration\_operator\_decision} turns on an
+alteration group for ages 19--21, and \texttt{covariate\_selection}
+drops to an intercept-only model, matching how the authors themselves
+computed AIC for this comparison; \texttt{branch:\ single} ties the
+three overrides into one refit, rather than crossing them into separate
+branches. Generating and validating code from this alternative file
+reproduces the AIC of 19,340.4 that Yee et al. (2025) reports. Here the
+question was answered because the authors chose to report the refit in
+their supplement; with the schema available, any reader who raises such
+a question can answer it directly.
 
 \begin{codelisting}
 
 \caption{\label{lst-ap1921}An alternative YAML file specifying a joint
 change to the mid-risk inflation, alteration, and covariate steps in the
-GAITD schema, treating ages 19-21 as an alteration group rather than
+GAITD schema, treating ages 19--21 as an alteration group rather than
 pooling them into the mid-risk inflated group.}
 
 \centering{
@@ -1049,30 +1054,31 @@ data analysis, answering whether referees are more likely to give red
 cards to dark-skin-toned players than to light-skin-toned players. The
 provided dataset contains two raters' skin color ratings of players'
 pictures, the aggregated number of red cards received by a player from a
-referee across all matches in that player-referee pair, and other
+referee across all matches in that player--referee pair, and other
 relevant player, referee, and game characteristics: player birthday,
 height, weight, player position, league country, number of victories,
 ties, and defeats.
 
-Each team was free to choose their own analysis approach; we take Team 5
-as an illustration. They disaggregated the player-referee records into
+Each team was free to choose its own analysis approach; we take Team 5
+as an illustration. They disaggregated the player--referee records into
 player--game observations, giving a binary response for whether a player
-received a red card, and removed incomplete cases by list-wise deletion.
+received a red card, and removed incomplete cases by listwise deletion.
 They then fitted a binomial generalized linear mixed model with a logit
 link, taking the average of the two raters' skin color ratings as the
 covariate of interest, with random intercepts for players and referees
 and a random intercept and slope for the referee's country of origin.
 
 Team 5's analysis is only one of the approaches taken: other teams made
-different preprocessing decisions, assumed different distributions
-(linear, logistic, or Poisson), specified different fixed and random
-effects, or worked in a Bayesian framework. Each team was required to
-document its analysis in a report with a publishable methodology
-section. All of these are available on the Open Science Framework.
+different preprocessing decisions, fitted different model families
+(linear, logistic, or Poisson regression), specified different fixed and
+random effects, or worked in a Bayesian framework. Each team was
+required to document its analysis in a report with a publishable
+methodology section. All of these are available on the Open Science
+Framework.
 
-These reports are not directly usable as input since the many-analysts
-study also takes in a second research question and the construction of
-confidence intervals. Some teams write their final analysis as a set of
+These reports are not directly usable as input, since the many-analysts
+study also covers a second research question and the construction of
+confidence intervals. Some teams wrote their final analysis as a set of
 edits to the initial one rather than as a self-contained methodology
 section. We therefore pre-extract a simplified methodology text for each
 team and use it in place of the report.
@@ -1085,7 +1091,7 @@ and the generated script.
 
 To accelerate the evaluation of each script, we manually replace the
 standard modeling functions with faster counterparts after the scripts
-are generated but before validation: \texttt{lm()}and \texttt{glm()}
+are generated but before validation: \texttt{lm()} and \texttt{glm()}
 with \texttt{fixest::feols()} and \texttt{fixest::feglm()} (Bergé et
 al., 2026), and \texttt{lme4::glmer()} (Bates et al., 2015) with
 \texttt{glmmTMB::glmmTMB()} (Brooks et al., 2017). These fit the same
@@ -1120,44 +1126,44 @@ schema-based reproduction (reproduced) vs.~the effect size reported in
 Silberzahn et al. (2018) (reported). Teams are ordered by the absolute
 difference between the reproduced and reported odds ratio. The
 reproduction recovers the reported odds ratio closely for most teams;
-the largest deviations occur for Team 1, 9, 15, 21, 23, and 27.}
+the largest deviations occur for Teams 1, 9, 15, 21, 23, and 27.}
 
 \end{figure}%
 
 Figure~\ref{fig-res-schema} shows the comparison of the estimated effect
-sizes, in odds ratio, from our schema workflow (reproduced) and those
+sizes, as odds ratios, from our schema workflow (reproduced) and those
 reported in Silberzahn et al. (2018) (reported). The odds ratio is well
 recovered for most teams, though six show a noticeably larger gap: Teams
 1, 9, 15, 21, 23, and 27.
 
-For Teams 1 and 23 the discrepancy originates in our code generation.
-When reshaping the data from the player-referee level to the game level,
-the schema correctly specifies this step, but the generated code fails
-to execute it as intended, and the resulting error passes through
+For Teams 1 and 23, the discrepancy originates in our code generation.
+When reshaping the data from the player--referee level to the game
+level, the schema correctly specifies this step, but the generated code
+fails to execute it as intended, and the resulting error passes through
 validation silently rather than triggering a repair.
 
-For the remaining four the reported result could not be regenerated from
-the report, though one of them resists diagnosis: for Team 21, examining
-both the extracted schema and the generated code turned up nothing that
-accounts for the gap. The other three reveal reproducibility issues in
-the reports themselves. Team 9's text names ``referee country'' as the
-covariate while the full report shows ``player country'' is used
-instead. For Team 27, the authors write that ``a variable for player
-position was included, as well as a variable for the league of the
-player'', which read literally adds only main effects but might equally
-be shorthand for interactions, consistent with how the other covariates
-entered their initial model. Team 15 is subtler: their log-linear model
-includes a skin-tone by league interaction, so the coefficient of
-interest is defined relative to a parameterization the report does not
-state, with SPSS's effect coding averaging it across leagues and R's
-default dummy coding fixing it at a reference league. Setting the
-\texttt{contrasts} argument in R recovers the reported value exactly, so
-the discrepancy is numerical rather than statistical, although
-identifying it required manual investigation.
+For the remaining four, the reported result could not be regenerated
+from the report, though one of them resists diagnosis: for Team 21,
+examining both the extracted schema and the generated code turned up
+nothing that accounts for the gap. The other three reveal
+reproducibility issues in the reports themselves. Team 9's text names
+``referee country'' as the covariate while the full report shows
+``player country'' is used instead. For Team 27, the authors write that
+``a variable for player position was included, as well as a variable for
+the league of the player'', which read literally adds only main effects
+but might equally be shorthand for interactions, consistent with how the
+other covariates entered their initial model. Team 15 is subtler: their
+log-linear model includes a skin-tone-by-league interaction, so the
+coefficient of interest is defined relative to a parameterization the
+report does not state, with SPSS's effect coding averaging it across
+leagues and R's default dummy coding fixing it at a reference league.
+Setting the \texttt{contrasts} argument in R recovers the reported value
+exactly, so the discrepancy is numerical rather than statistical,
+although identifying it required manual investigation.
 
 \subsection{Exploring alternatives}\label{sec-explore}
 
-Team 5 arrives at its final model by comparing three random effect
+Team 5 arrives at its final model by comparing three random-effects
 structures, a set of alternative decisions within a single modeling step
 of the kind described in Section~\ref{sec-alternative}. Write
 \(y_{ijm}\) for whether player \(i\) received a red card from referee
@@ -1182,20 +1188,20 @@ in GM2, and
 \((w_{0c}, w_{1c})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}})\)
 in GM3. Model GM1 lets the baseline log-odds vary across players and
 referees, GM2 additionally lets the effect of skin color vary across
-referees, and GM3, the model Team 5 report, instead lets both the
+referees, and GM3, the model Team 5 reports, instead lets both the
 baseline and that effect vary across referees' countries of origin.
 
 All three alternatives are specified in a single YAML file, following
 the format described in Section~\ref{sec-alternative} and shown in
 Listing~\ref{lst-yaml-alternative}. Merging it with Team 5's schema
-produces one schema per alternative and yield three validated scripts.
-Both estimated random and fixed effects in each model matches with Team
-5's reported values.
+produces one schema per alternative and yields three validated scripts.
+The estimated random and fixed effects in each model match Team 5's
+reported values.
 
 \begin{codelisting}
 
 \caption{\label{lst-yaml-alternative}Example of a YAML file specifying
-alternatives for the random effects structure in the many-analysts
+alternatives for the random-effects structure in the many-analysts
 analysis of Team 5.}
 
 \centering{
@@ -1226,10 +1232,10 @@ analysis of Team 5.}
 
 \section{Discussion}\label{sec-discussion}
 
-Existing reproducible practices focus on whether published results can
-be reproduced from the code and data, not on the chain of decisions that
-produced them. We propose a schema that records those decisions along
-with the rationale for choosing them in natural language as an
+Existing reproducibility practices focus on whether published results
+can be reproduced from the code and data, not on the chain of decisions
+that produced them. We propose a schema that records those decisions,
+along with the rationale for choosing them, in natural language as an
 intermediate representation between the manuscript and the code. A
 schema can be written by an author or extracted from the manuscript by
 an LLM. It can then be turned into an executable script, or expanded
@@ -1245,20 +1251,20 @@ own code would not reveal.
 
 A data analysis question admits more than one defensible answer, and the
 schema records which one was taken. Arriving at those decisions is a
-matter of human judgement, whether the analyst writes the schema
-directly or it is extracted from a manuscript in which the decisions
-were already made. Once they are determined, generating the code is a
-comparatively mechanical translation, which current LLMs perform with
-reasonable reliability inside a generation-and-validation loop. Our
-approach therefore contrasts with fully automated systems that use
-multiple LLM agents to plan, generate, and execute analyses (Hu et al.,
-2024; Jansen et al., 2025; Sun et al., 2026), which aim to automate the
-decisions themselves. Donoho (2026) describes the risk in such systems
-as one of premature autonomy, where the model projects an intent onto
-the user rather than responding to what was asked. We do not attempt to
-automate the human judgement that goes into making those decisions, but
-instead provide a structured way to record them and a workflow to turn
-them into code.
+matter of human judgment, whether the analyst writes the schema directly
+or it is extracted from a manuscript in which the decisions were already
+made. Once they are determined, generating the code is a comparatively
+mechanical translation, which current LLMs perform with reasonable
+reliability inside a generation-and-validation loop. Our approach
+therefore contrasts with fully automated systems that use multiple LLM
+agents to plan, generate, and execute analyses (Hu et al., 2024; Jansen
+et al., 2025; Sun et al., 2026), which aim to automate the decisions
+themselves. Donoho (2026) describes the risk in such systems as one of
+premature autonomy, where the model projects an intent onto the user
+rather than responding to what was asked. We do not attempt to automate
+the human judgment that goes into making those decisions, but instead
+provide a structured way to record them and a workflow to turn them into
+code.
 
 Three sources of uncertainty enter this pipeline, and they behave
 differently as models improve. The first is implementation, where the
@@ -1267,13 +1273,13 @@ carry it out: the scripts for Teams 1 and 23 ran and returned estimates
 after reshaping the data incorrectly. The second is extraction, where
 the text states a decision clearly to a trained reader and the model
 fails to recover it. In Team 5's report, the phrase ``a random effect of
-skin tone across referees' countries'' is read by most statisticians as
-implying both a random intercept and a slope, while read literally it
-specifies only a slope, and the extraction took the literal reading
-rather than the conventional one. Both are epistemic (reducible)
-(Hüllermeier \& Waegeman, 2021; Kendall \& Gal, 2017) and we would
-expect them to diminish as models continue to improve, rather than
-persist as structural limitations of the workflow. The third is
+skin-tone across referees' countries of origin'' is read by most
+statisticians as implying both a random intercept and a slope, while
+read literally it specifies only a slope, and the extraction took the
+literal reading rather than the conventional one. Both are epistemic
+(reducible) (Hüllermeier \& Waegeman, 2021; Kendall \& Gal, 2017), and
+we would expect them to diminish as models continue to improve, rather
+than persist as structural limitations of the workflow. The third is
 aleatoric (irreducible) and belongs to the source text rather than the
 pipeline: where a report is ambiguous or self-contradictory, as in Teams
 9, 27, and 15, no model can recover an intent the text does not express.
@@ -1281,7 +1287,7 @@ Team 15 differs in kind: its model is fully specified, and the
 discrepancy is numerical, arising because a reparameterization changes
 which quantity a coefficient denotes. It remains a reproducibility
 issue, since the reported number could be regenerated only by manually
-investigating the encoding. As extraction and generation improve, what
+investigating the coding. As extraction and generation improve, what
 remains is increasingly uncertainty of this third kind, which the schema
 is designed to make visible.
 
@@ -1295,10 +1301,11 @@ schema does not specify must be inferred through validation. The birth
 dates in the football data, from which player age is derived, illustrate
 this: the script for Team 21 initially parsed them as
 \texttt{\%Y-\%m-\%d} and adopted the correct \texttt{\%d.\%m.\%Y} only
-after a parsing failure, whereas it takes Team 1 four attempts to find
-the correct formats. In both cases the format was recovered by trial and
-error and had these attempts failed, the pipeline would either have
-terminated or propagated the error silently into the analysis.
+after a parsing failure, whereas the script for Team 1 took four
+attempts to find the correct format. In both cases the format was
+recovered by trial and error; had these attempts failed, the pipeline
+would either have terminated or propagated the error silently into the
+analysis.
 
 We conclude with several directions for future work. Executing scripts
 through a background job queue would accommodate analyses too expensive
@@ -1327,7 +1334,7 @@ All analyses were carried out in R (R Core Team, 2026), using the
 (Yee, 2025), \texttt{VGAMdata} (Yee \& Gray, 2025), \texttt{lme4} (Bates
 et al., 2015), \texttt{glmmTMB} (Brooks et al., 2017; McGillycuddy et
 al., 2025), and \texttt{fixest} (Bergé et al., 2026) packages. The
-article is created using Quarto (Allaire et al., 2026).
+article was created using Quarto (Allaire et al., 2026).
 
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
