@@ -313,10 +313,10 @@ different choices. Standard practice in reproducible research (Peng,
 2011; Wrobel et al., 2024) asks for the code and the data to be made
 available, but does not extend to the decisions behind them.
 
-The distinction arises because code and the decisions it implements
-operate at different levels: code specifies precisely what a computer
-should do, while a decision has a contextual interpretation that the
-code itself does not capture. Consider a line such as
+This gap arises because code and the decisions it implements operate at
+different levels: code specifies precisely what a computer should do,
+while a decision has a contextual interpretation that the code itself
+does not capture. Consider a line such as
 \texttt{dplyr::filter(df,\ x\ \textgreater{}\ 0)}, which has a precise
 meaning as code: keep rows where \texttt{x} is positive. Which decision
 this line encodes is not something the code can answer: it could
@@ -326,43 +326,61 @@ as invalid by an encoding convention where \(x \le 0\) denotes
 missingness, and nothing in the \texttt{filter()} syntax indicates which
 is intended. Nor does code generally carry the rationale behind a
 decision, unless the author has left detailed comments. A better place
-to state the decisions is in the manuscript, where decisions are
-described along with their rationale. But this information is scattered
-across the manuscript rather than collected in one place, with
-preprocessing and modeling decisions appearing in different sections of
-the manuscript. Authors may also simply leave out decisions they
-consider minor, on the assumption that the code provides all the detail
-a reader would need. Reconstructing the full sequence, therefore, means
-searching across the paper and the code for decisions and their
-rationale before a reader can begin to comprehend the analysis. Ideally,
-this sequence of decisions and their rationale would live in a single
-file, so a reader can follow the analysis directly rather than piecing
-it together from multiple sources. This file should also be extensible,
-so a reader can specify an alternative decision and easily evaluate it
-to see how the result would change.
+to state the decisions is the manuscript, where they are described along
+with their rationale. But this information is scattered across the
+manuscript rather than collected in one place, with preprocessing and
+modeling decisions appearing in different sections. Authors may also
+simply leave out decisions they consider minor, on the assumption that
+the code provides all the detail a reader would need. Reconstructing the
+full sequence, therefore, means searching across the paper and the code
+for decisions and their rationale before a reader can begin to
+comprehend the analysis.
+
+Literate programming tools such as Sweave (Leisch, 2002), R Markdown
+(Xie et al., 2018), Jupyter notebooks (Kluyver et al., 2016), and Quarto
+(Allaire et al., 2026) integrate narrative and code within a single
+document, yet a published notebook does not resolve this problem.
+Substantive decisions, such as the exclusion of observations or the
+choice of covariates, remain interleaved with routine data manipulation,
+such as the renaming of columns, and a reader needs to examine the code
+to distinguish one from the other. Moreover, the narrative exists to
+explain the code, and the format places no requirement on what it must
+cover. An author narrates the steps they consider worth explaining, not
+the complete set of decisions needed to obtain the result. Ideally, a
+reader would understand an analysis by following its decisions step by
+step to reach the result, and would consult the code only when the
+implementation of a particular decision is of interest. What this
+requires is a self-contained record of the decisions and their
+rationale. With such a record, a reader can assess each decision that
+leads to the result and raise alternatives to investigate how the result
+changes. Once the chain of decisions has been specified, its
+implementation in code reduces largely to a translation task, which
+large language models (LLMs) now perform with reasonable reliability
+(Chen et al., 2021; Huang et al., 2022; Jiang et al., 2026; Lai et al.,
+2023; Shah et al., 2026).
 
 In this paper, we present a schema that records a data analysis as a
 sequence of decisions, each stated with the objective it addresses and
 the rationale for choosing it, together with the variables it consumes
-and produces. We also demonstrate how this schema, coupled with large
-language models (LLMs), can be used to generate code scripts from
-natural-language descriptions in manuscripts, and explore alternative
-decision choices. We present two applications. The first takes the
-perspective of an author supplying a schema alongside a published
-manuscript, using the GAITD regression analysis of heaped smoking data
-in Yee et al. (2025). A reader can then specify an alternative file,
-coupled with the original schema, to compare model performance under a
-different inflation-alteration specification. The second, the
-many-analysts football study, considers the opposite situation, where no
-schema is supplied and the workflow serves instead as a reproducibility
-test. It extracts a schema from a simplified version of each team's
-report, generates and validates the corresponding code, and compares the
-result against that team's published estimate.
+and produces. We also demonstrate how this schema, coupled with LLMs,
+can be used to generate code scripts from natural-language descriptions
+in manuscripts and to explore alternative decisions. We present two
+applications. The first takes the perspective of an author supplying a
+schema alongside a published manuscript, using the GAITD regression
+analysis of heaped smoking data in Yee et al. (2025). A reader can then
+specify an alternative file, coupled with the original schema, to
+compare model performance under a different inflation-alteration
+specification. The second, the many-analysts football study, considers
+the opposite situation, where no schema is supplied and the workflow
+serves instead as a reproducibility test. It extracts a schema from a
+simplified version of each team's report, generates and validates the
+corresponding code, and compares the result against that team's
+published estimate.
 
 The paper is organized as follows: In Section~\ref{sec-method}, we
 present our methodology, including the schema representation for
-describing data analysis, the specification of the alternative file, and
-the workflow for generating and validating code from the schema with
+describing a data analysis, the specification of the alternative file,
+and the workflow for generating and validating code from the schema with
 LLMs. In Section~\ref{sec-gaitd}, we construct a schema for a published
 GAITD regression analysis and show how it allows a reader to evaluate an
 alternative specification directly. In Section~\ref{sec-application}, we
@@ -1319,6 +1337,11 @@ C. W., Nielsen, A., Skaug, H. J., Maechler, M., \& Bolker, B. M. (2017).
 zero-inflated generalized linear mixed modeling. \emph{The R Journal},
 \emph{9}(2), 378--400. \url{https://doi.org/10.32614/RJ-2017-066}
 
+\bibitem[\citeproctext]{ref-chen2021codex}
+Chen, M., Tworek, J., Jun, H., et al. (2021). Evaluating large language
+models trained on code. \emph{arXiv Preprint arXiv:2107.03374}.
+\url{https://arxiv.org/abs/2107.03374}
+
 \bibitem[\citeproctext]{ref-donoho2026}
 Donoho, D. (2026). Discussion of {``}LAMBDA: A large model based data
 agent{''}. \emph{Journal of the American Statistical Association},
@@ -1329,6 +1352,15 @@ agent{''}. \emph{Journal of the American Statistical Association},
 Hu, S., Lu, C., \& Clune, J. (2024, October). \emph{Automated {Design}
 of {Agentic} {Systems}}.
 \url{https://openreview.net/forum?id=t9U3LW7JVX}
+
+\bibitem[\citeproctext]{ref-huang_executionbased_2022}
+Huang, J., Wang, C., Zhang, J., Yan, C., Cui, H., Inala, J. P., Clement,
+C., \& Duan, N. (2022). Execution-based {Evaluation} for {Data}
+{Science} {Code} {Generation} {Models}. In E. Dragut, Y. Li, L. Popa, S.
+Vucetic, \& S. Srivastava (Eds.), \emph{Proceedings of the {Fourth}
+{Workshop} on {Data} {Science} with {Human}-in-the-{Loop} ({Language}
+{Advances})} (pp. 28--36). Association for Computational Linguistics.
+\url{https://doi.org/10.18653/v1/2022.dash-1.5}
 
 \bibitem[\citeproctext]{ref-hullermeier2021}
 Hüllermeier, E., \& Waegeman, W. (2021). Aleatoric and epistemic
@@ -1341,10 +1373,39 @@ Leveraging large language models for data analysis automation.
 \emph{PLOS ONE}, \emph{20}(2), e0317084.
 \url{https://doi.org/10.1371/journal.pone.0317084}
 
+\bibitem[\citeproctext]{ref-jiang2026survey}
+Jiang, J., Wang, F., Shen, J., Kim, S., \& Kim, S. (2026). A survey on
+large language models for code generation. \emph{ACM Transactions on
+Software Engineering and Methodology}, \emph{35}(2), 1--72.
+
 \bibitem[\citeproctext]{ref-kendall2017}
 Kendall, A., \& Gal, Y. (2017). What uncertainties do we need in
 bayesian deep learning for computer vision? \emph{Advances in Neural
 Information Processing Systems 30 (NeurIPS 2017)}, 5574--5584.
+
+\bibitem[\citeproctext]{ref-jupyter}
+Kluyver, T., Ragan-Kelley, B., Pérez, F., Granger, B., Bussonnier, M.,
+Frederic, J., Kelley, K., Hamrick, J., Grout, J., Corlay, S., Ivanov,
+P., Avila, D., Abdalla, S., Willing, C., \& team, J. development.
+(2016). Jupyter notebooks - a publishing format for reproducible
+computational workflows. In F. Loizides \& B. Scmidt (Eds.),
+\emph{Positioning and power in academic publishing: Players, agents and
+agendas} (pp. 87--90). IOS Press.
+\url{https://eprints.soton.ac.uk/403913/}
+
+\bibitem[\citeproctext]{ref-lai_ds1000_2023}
+Lai, Y., Li, C., Wang, Y., Zhang, T., Zhong, R., Zettlemoyer, L., Yih,
+W.-T., Fried, D., Wang, S., \& Yu, T. (2023). {DS}-1000: {A} {Natural}
+and {Reliable} {Benchmark} for {Data} {Science} {Code} {Generation}.
+\emph{Proceedings of the 40th {International} {Conference} on {Machine}
+{Learning}}, 18319--18345.
+\url{https://proceedings.mlr.press/v202/lai23b.html}
+
+\bibitem[\citeproctext]{ref-Leisch2002}
+Leisch, F. (2002). Sweave: Dynamic generation of statistical reports
+using literate data analysis. In W. Härdle \& B. Rönz (Eds.),
+\emph{Compstat 2002 --- proceedings in computational statistics} (pp.
+575--580). Physica-Verlag GmbH.
 
 \bibitem[\citeproctext]{ref-glmmTMB-2}
 McGillycuddy, M., Warton, D. I., Popovic, G., \& Bolker, B. M. (2025).
@@ -1368,6 +1429,12 @@ J., \& Kay, M. (2023). Multiverse: Multiplexing alternative data
 analyses in r notebooks. \emph{Proceedings of the 2023 CHI Conference on
 Human Factors in Computing Systems}.
 \url{https://doi.org/10.1145/3544548.3580726}
+
+\bibitem[\citeproctext]{ref-shah_automating_2026}
+Shah, S. M. H., Hopfgartner, F., \& Bleier, A. (2026). \emph{Automating
+{Computational} {Reproducibility} in {Social} {Science}: {Comparing}
+{Prompt}-{Based} and {Agent}-{Based} {Approaches}}.
+\url{https://doi.org/10.1145/3774905.3795485}
 
 \bibitem[\citeproctext]{ref-silberzahn2018}
 Silberzahn, R., Uhlmann, E. L., Martin, D. P., Anselmi, P., Aust, F.,
@@ -1416,6 +1483,11 @@ J., Usher, T., \& Wolfson, J. (2024). Partnering {With} {Authors} to
 {Enhance} {Reproducibility} at {JASA}. \emph{Journal of the American
 Statistical Association}, \emph{119}(546), 795--797.
 \url{https://doi.org/10.1080/01621459.2024.2340557}
+
+\bibitem[\citeproctext]{ref-xie2018rmarkdown}
+Xie, Y., Allaire, J. J., \& Grolemund, G. (2018). \emph{R markdown: The
+definitive guide}. Chapman; Hall/CRC.
+\url{https://bookdown.org/yihui/rmarkdown}
 
 \bibitem[\citeproctext]{ref-VGAM}
 Yee, T. W. (2025). \emph{{VGAM}: Vector generalized linear and additive
