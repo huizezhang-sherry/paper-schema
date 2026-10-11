@@ -1039,7 +1039,10 @@ the manuscript itself by an LLM for readers to understand and explore
 the analysis. In this section, we demonstrate the workflow in the
 opposite situation, where no schema is supplied and the workflow serves
 as a reproducibility test using the many-analysts football study
-(Silberzahn et al., 2018).
+(Silberzahn et al., 2018). We choose this study because its
+many-analysts design provides replicates of the same analysis:
+independent teams analyzed the same data to answer the same question,
+each reporting its methodology and estimate.
 
 Silberzahn et al. (2018) invited 29 research groups to conduct the same
 data analysis, answering whether referees are more likely to give red
@@ -1082,9 +1085,9 @@ and the generated script.
 
 To accelerate the evaluation of each script, we manually replace the
 standard modeling functions with faster counterparts after the scripts
-are generated but before validation: \texttt{lm()}/\texttt{glm()} with
-\texttt{fixest::feols()}/\texttt{fixest::feglm()} (Bergé et al., 2026),
-and \texttt{lme4::glmer()} (Bates et al., 2015) with
+are generated but before validation: \texttt{lm()}and \texttt{glm()}
+with \texttt{fixest::feols()} and \texttt{fixest::feglm()} (Bergé et
+al., 2026), and \texttt{lme4::glmer()} (Bates et al., 2015) with
 \texttt{glmmTMB::glmmTMB()} (Brooks et al., 2017). These fit the same
 models by faster means, using multi-threaded C++ and Template Model
 Builder (TMB) respectively, so the substitution changes how the
@@ -1107,7 +1110,7 @@ correction involved resolving broken and overflowing syntax in comments.
 
 \centering{
 
-\includegraphics[width=0.9\linewidth,height=0.8\textheight]{figures/res-schema.png}
+\pandocbounded{\includegraphics[keepaspectratio]{paper-schema_files/figure-pdf/fig-res-schema-1.pdf}}
 
 }
 
@@ -1147,21 +1150,12 @@ entered their initial model. Team 15 is subtler: their log-linear model
 includes a skin-tone by league interaction, so the coefficient of
 interest is defined relative to a parameterization the report does not
 state, with SPSS's effect coding averaging it across leagues and R's
-default dummy coding fixing it at a reference league. Setting
-\texttt{contrasts} in R to match recovers the reported value exactly.
-Neither coding is wrong, but the reported number cannot be regenerated
-without knowing which one produced it. In all three cases the schema
-faithfully records what's in the text, and the discrepancy that follows
-points to a report whose description of the analysis is not precise
-enough to regenerate the result.
+default dummy coding fixing it at a reference league. Setting the
+\texttt{contrasts} argument in R recovers the reported value exactly, so
+the discrepancy is numerical rather than statistical, although
+identifying it required manual investigation.
 
 \subsection{Exploring alternatives}\label{sec-explore}
-
-{[}Im not convinced entirely that this section is necessary - the main
-gist is to show an exmaple of a branch: multi alternative example. Also
-I feel leaving the many-analysts football study with the reproducibility
-issue we identified is a good ending point, and this section is a bit of
-a tangent. This section is not proofed.{]}
 
 Team 5 arrives at its final model by comparing three random effect
 structures, a set of alternative decisions within a single modeling step
@@ -1175,31 +1169,28 @@ in their random effects:
 
 \[
 \begin{aligned}
-\textbf{gm1:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j, \\
-\textbf{gm2:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_{0j} + v_{1j}\, x_i, \\
-\textbf{gm3:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j + w_{0,c(j)} + w_{1,c(j)}\, x_i,
+\textbf{GM1:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j, \\
+\textbf{GM2:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_{0j} + v_{1j}\, x_i, \\
+\textbf{GM3:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j + w_{0,c(j)} + w_{1,c(j)}\, x_i,
 \end{aligned}
 \]
 
 with \(u_i \sim N(0, \sigma^2_{\text{player}})\) throughout,
-\(v_j \sim N(0, \sigma^2_{\text{ref}})\) in gm1 and gm3,
+\(v_j \sim N(0, \sigma^2_{\text{ref}})\) in GM1 and GM3,
 \((v_{0j}, v_{1j})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{ref}})\)
-in gm2, and
+in GM2, and
 \((w_{0c}, w_{1c})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}})\)
-in gm3. Model gm1 lets the baseline log-odds vary across players and
-referees, gm2 additionally lets the effect of skin color vary across
-referees, and gm3, the model Team 5 report, instead lets both the
+in GM3. Model GM1 lets the baseline log-odds vary across players and
+referees, GM2 additionally lets the effect of skin color vary across
+referees, and GM3, the model Team 5 report, instead lets both the
 baseline and that effect vary across referees' countries of origin.
 
-All three are specified in a single YAML file, following the format
-described in Section~\ref{sec-alternative} and shown in
+All three alternatives are specified in a single YAML file, following
+the format described in Section~\ref{sec-alternative} and shown in
 Listing~\ref{lst-yaml-alternative}. Merging it with Team 5's schema
-produces one schema per alternative, and each is passed through the same
-code generation and validation used for the original, yielding three
-validated scripts from one file and no hand-editing of the team's code.
-The estimated effect of skin tone is unchanged across this expansion,
-matching the value Team 5 report and shown for this team in
-Figure~\ref{fig-res-schema}.
+produces one schema per alternative and yield three validated scripts.
+Both estimated random and fixed effects in each model matches with Team
+5's reported values.
 
 \begin{codelisting}
 
@@ -1279,35 +1270,40 @@ fails to recover it. In Team 5's report, the phrase ``a random effect of
 skin tone across referees' countries'' is read by most statisticians as
 implying both a random intercept and a slope, while read literally it
 specifies only a slope, and the extraction took the literal reading
-rather than the conventional one. Both are epistemic (Hüllermeier \&
-Waegeman, 2021; Kendall \& Gal, 2017) and we would expect them to
-diminish as models continue to improve, rather than persist as
-structural limitations of the workflow. The third is aleatoric and
-belongs to the source text rather than the pipeline: where a report is
-ambiguous or self-contradictory, as in Teams 9, 27, and 15, no model can
-recover an intent the text does not express. As extraction and
-generation improve, what remains is increasingly uncertainty of this
-third kind, which the schema is designed to make visible.
+rather than the conventional one. Both are epistemic (reducible)
+(Hüllermeier \& Waegeman, 2021; Kendall \& Gal, 2017) and we would
+expect them to diminish as models continue to improve, rather than
+persist as structural limitations of the workflow. The third is
+aleatoric (irreducible) and belongs to the source text rather than the
+pipeline: where a report is ambiguous or self-contradictory, as in Teams
+9, 27, and 15, no model can recover an intent the text does not express.
+Team 15 differs in kind: its model is fully specified, and the
+discrepancy is numerical, arising because a reparameterization changes
+which quantity a coefficient denotes. It remains a reproducibility
+issue, since the reported number could be regenerated only by manually
+investigating the encoding. As extraction and generation improve, what
+remains is increasingly uncertainty of this third kind, which the schema
+is designed to make visible.
 
-The validate-and-repair loop assumes that each candidate script can be
-executed and diagnosed within an interactive timeframe, which rules out
-analyses too expensive to run repeatedly, and Teams 7, 12, 17, and 18
-were excluded on these grounds. Executing such scripts asynchronously
-through a background job queue would lift the restriction without
-changing the rest of the workflow.
+The validate-and-repair loop has two limitations. First, it requires
+each candidate script to be executed and diagnosed within an interactive
+timeframe, which precludes computationally intensive analyses. For this
+reason, the analyses of Teams 7, 12, 17, and 18 were excluded from the
+evaluation. Second, for privacy reasons the LLM is given the column
+names of the data but not their values, so any data format that the
+schema does not specify must be inferred through validation. The birth
+dates in the football data, from which player age is derived, illustrate
+this: the script for Team 21 initially parsed them as
+\texttt{\%Y-\%m-\%d} and adopted the correct \texttt{\%d.\%m.\%Y} only
+after a parsing failure, whereas it takes Team 1 four attempts to find
+the correct formats. In both cases the format was recovered by trial and
+error and had these attempts failed, the pipeline would either have
+terminated or propagated the error silently into the analysis.
 
-In our pipeline the LLM sees the column names but never the values
-themselves, for privacy reasons. Formats that the schema does not record
-must therefore be learned through the validation loop. The birth dates
-in the football data, used to derive player age, are a case in point:
-the script for Team 21 parsed them as \texttt{\%Y-\%m-\%d} and was
-corrected to \texttt{\%d.\%m.\%Y} only after one parse failure, while
-the repair for Team 1 supplied four candidate formats for R to try in
-turn. In both cases the date format was recovered by trial and error.
-When the trials fail, the pipeline can fail outright or carry the
-failure silently into the analysis.
-
-The implementation reported here is an R package, but nothing about the
+We conclude with several directions for future work. Executing scripts
+through a background job queue would accommodate analyses too expensive
+for an interactive loop without changing the rest of the workflow. The
+implementation reported here is an R package, but nothing about the
 problem is specific to R, and a general-purpose tool such as a
 command-line utility would support analyses written in any language. Our
 implementation records the schema as a single YAML file, which gives the

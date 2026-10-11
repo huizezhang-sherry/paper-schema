@@ -65,8 +65,6 @@ bibliography: bibliography.bib
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
 
 library(tidyverse)
-library(glmmTMB)
-library(broom.mixed)
 ```
 
 
@@ -332,7 +330,7 @@ cat("````\n")
 
 # Application: many-analysts football study {#sec-application}
 
-@sec-gaitd assumed the authors supply a schema alongside the manuscript, but a schema need not come from the authors. Since it records decisions in natural language, the schema can be extracted from the manuscript itself by an LLM for readers to understand and explore the analysis. In this section, we demonstrate the workflow in the opposite situation, where no schema is supplied and the workflow serves as a reproducibility test using the many-analysts football study [@silberzahn2018].
+@sec-gaitd assumed the authors supply a schema alongside the manuscript, but a schema need not come from the authors. Since it records decisions in natural language, the schema can be extracted from the manuscript itself by an LLM for readers to understand and explore the analysis. In this section, we demonstrate the workflow in the opposite situation, where no schema is supplied and the workflow serves as a reproducibility test using the many-analysts football study [@silberzahn2018]. We choose this study because its many-analysts design provides replicates of the same analysis: independent teams analyzed the same data to answer the same question, each reporting its methodology and estimate.
 
 @silberzahn2018 invited 29 research groups to conduct the same data analysis, answering whether referees are more likely to give red cards to dark-skin-toned players than to light-skin-toned players. The provided dataset contains two raters' skin color ratings of players' pictures, the aggregated number of red cards received by a player from a referee across all matches in that player-referee pair, and other relevant player, referee, and game characteristics: player birthday, height, weight, player position, league country, number of victories, ties, and defeats. 
 
@@ -344,7 +342,7 @@ These reports are not directly usable as input since the many-analysts study als
 
 Each team's text is then passed through the workflow of @sec-method to extract the schema and then generate and validate the corresponding code with Claude Opus 4.5. The Appendix follows Team 5 through the pipeline to show the input text, the schema, and the generated script.
 
-To accelerate the evaluation of each script, we manually replace the standard modeling functions with faster counterparts after the scripts are generated but before validation: `lm()`/`glm()` with `fixest::feols()`/`fixest::feglm()` [@fixest], and `lme4::glmer()` [@lme4] with `glmmTMB::glmmTMB()` [@glmmTMB-1]. These fit the same models by faster means, using multi-threaded C++ and Template Model Builder (TMB) respectively, so the substitution changes how the coefficients are computed, not the coefficients themselves. 
+To accelerate the evaluation of each script, we manually replace the standard modeling functions with faster counterparts after the scripts are generated but before validation: `lm()`and `glm()` with `fixest::feols()` and `fixest::feglm()` [@fixest], and `lme4::glmer()` [@lme4] with `glmmTMB::glmmTMB()` [@glmmTMB-1]. These fit the same models by faster means, using multi-threaded C++ and Template Model Builder (TMB) respectively, so the substitution changes how the coefficients are computed, not the coefficients themselves. 
 
 ```{r}
 #| echo: false
@@ -357,10 +355,26 @@ Of the 29 teams, the analyses of four teams (Teams 7, 12, 17, and 18) are too co
 ```{r}
 #| echo: false
 #| label: fig-res-schema
-#| out.width: 90%
-#| out.height: 80%
+#| fig-width: 6
+#| fig-height: 8.5
 #| fig.cap: "Comparison of the odds ratio of the effect of skin color on receiving red cards in football games from our schema-based reproduction (reproduced) vs. the effect size reported in @silberzahn2018 (reported). Teams are ordered by the absolute difference between the reproduced and reported odds ratio. The reproduction recovers the reported odds ratio closely for most teams; the largest deviations occur for Team 1, 9, 15, 21, 23, and 27."
-knitr::include_graphics(here::here("figures/res-schema.png"))
+res <- read_csv(here::here("sim-football/res.csv"), show_col_types = FALSE) |>
+  mutate(team = fct_reorder(factor(team), diff))
+res_long <- res |>
+  select(team, reproduced = or, reported = OR) |>
+  pivot_longer(c(reproduced, reported), names_to = "type", values_to = "value") |>
+  mutate(type = fct_relevel(type, "reproduced", "reported")) |>
+  arrange(desc(type))
+
+ggplot(res) +
+  geom_segment(aes(x = or, xend = OR, y = team, yend = team), alpha = 0.6) +
+  geom_point(data = res_long, aes(x = value, y = team, color = type), size = 2.5) +
+  scale_x_continuous(breaks = 1:5) +
+  coord_transform(x = "log") +
+  scale_color_manual(values = c(reproduced = "#0072B2", reported = "#D55E00")) +
+  labs(x = "Odds ratio", y = "Team", color = NULL) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
 ```
 
 @fig-res-schema shows the comparison of the estimated effect sizes, in odds ratio, from our schema workflow (reproduced) and those reported in @silberzahn2018 (reported). The odds ratio is well recovered for most teams, though six show a noticeably larger gap: Teams 1, 9, 15, 21, 23, and 27.
@@ -368,27 +382,25 @@ knitr::include_graphics(here::here("figures/res-schema.png"))
 For Teams 1 and 23 the discrepancy originates in our code generation. When reshaping the data from the player-referee level to the game level, the schema correctly specifies this step, but the generated code fails to execute it as intended, and the resulting error passes through validation silently rather than triggering a repair.
 <!-- The confidence score $\omega_i$ separates these two cases in a way worth noting. For Team 27, extraction returned `create_interaction_terms` with medium confidence, flagging the step whose reading is in doubt before any code was written. For Team 9, every step came back with high confidence, which is the correct response rather than an oversight: the report's text is unambiguous on its own terms, and the inconsistency appears only when that text is set against the estimation table. Since $\omega_i$ records the model's confidence that the schema reflects the source text, it can surface a description that is ambiguous, but not one that is internally clear and contradicted elsewhere. Catching the latter requires comparing the schema against the reported results, which is what the test as a whole does. -->
 
-For the remaining four the reported result could not be regenerated from the report, though one of them resists diagnosis: for Team 21, examining both the extracted schema and the generated code turned up nothing that accounts for the gap. The other three reveal reproducibility issues in the reports themselves. Team 9's text names "referee country" as the covariate while the full report shows "player country" is used instead. For Team 27, the authors write that "a variable for player position was included, as well as a variable for the league of the player", which read literally adds only main effects but might equally be shorthand for interactions, consistent with how the other covariates entered their initial model. Team 15 is subtler: their log-linear model includes a skin-tone by league interaction, so the coefficient of interest is defined relative to a parameterization the report does not state, with SPSS's effect coding averaging it across leagues and R's default dummy coding fixing it at a reference league. Setting `contrasts` in R to match recovers the reported value exactly. Neither coding is wrong, but the reported number cannot be regenerated without knowing which one produced it. In all three cases the schema faithfully records what's in the text, and the discrepancy that follows points to a report whose description of the analysis is not precise enough to regenerate the result.
+For the remaining four the reported result could not be regenerated from the report, though one of them resists diagnosis: for Team 21, examining both the extracted schema and the generated code turned up nothing that accounts for the gap. The other three reveal reproducibility issues in the reports themselves. Team 9's text names "referee country" as the covariate while the full report shows "player country" is used instead. For Team 27, the authors write that "a variable for player position was included, as well as a variable for the league of the player", which read literally adds only main effects but might equally be shorthand for interactions, consistent with how the other covariates entered their initial model. Team 15 is subtler: their log-linear model includes a skin-tone by league interaction, so the coefficient of interest is defined relative to a parameterization the report does not state, with SPSS's effect coding averaging it across leagues and R's default dummy coding fixing it at a reference league. Setting the `contrasts` argument in R recovers the reported value exactly, so the discrepancy is numerical rather than statistical, although identifying it required manual investigation.
 
 <!-- options(contrasts = c("contr.sum", "contr.poly")) -->
 
 ## Exploring alternatives {#sec-explore}
 
-[Im not convinced entirely that this section is necessary - the main gist is to show an exmaple of a branch: multi alternative example. Also I feel leaving the many-analysts football study with the reproducibility issue we identified is a good ending point, and this section is a bit of a tangent. This section is not proofed.]
-
 Team 5 arrives at its final model by comparing three random effect structures, a set of alternative decisions within a single modeling step of the kind described in @sec-alternative. Write $y_{ijm}$ for whether player $i$ received a red card from referee $j$ in game $m$, $x_i$ for player $i$'s skin color rating averaged over the two raters and rescaled to $[0, 1]$, and $c(j)$ for the country of origin of referee $j$. In each model $y_{ijm} \sim \mathrm{Bernoulli}(p_{ijm})$, and the three differ only in their random effects:
 
 $$
 \begin{aligned}
-\textbf{gm1:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j, \\
-\textbf{gm2:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_{0j} + v_{1j}\, x_i, \\
-\textbf{gm3:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j + w_{0,c(j)} + w_{1,c(j)}\, x_i,
+\textbf{GM1:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j, \\
+\textbf{GM2:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_{0j} + v_{1j}\, x_i, \\
+\textbf{GM3:} \quad \mathrm{logit}(p_{ijm}) &= \beta_0 + \beta_1 x_i + u_i + v_j + w_{0,c(j)} + w_{1,c(j)}\, x_i,
 \end{aligned}
 $$
 
-with $u_i \sim N(0, \sigma^2_{\text{player}})$ throughout, $v_j \sim N(0, \sigma^2_{\text{ref}})$ in gm1 and gm3, $(v_{0j}, v_{1j})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{ref}})$ in gm2, and $(w_{0c}, w_{1c})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}})$ in gm3. Model gm1 lets the baseline log-odds vary across players and referees, gm2 additionally lets the effect of skin color vary across referees, and gm3, the model Team 5 report, instead lets both the baseline and that effect vary across referees' countries of origin.
+with $u_i \sim N(0, \sigma^2_{\text{player}})$ throughout, $v_j \sim N(0, \sigma^2_{\text{ref}})$ in GM1 and GM3, $(v_{0j}, v_{1j})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{ref}})$ in GM2, and $(w_{0c}, w_{1c})^{\top} \sim N(\mathbf{0}, \boldsymbol{\Sigma}_{\text{country}})$ in GM3. Model GM1 lets the baseline log-odds vary across players and referees, GM2 additionally lets the effect of skin color vary across referees, and GM3, the model Team 5 report, instead lets both the baseline and that effect vary across referees' countries of origin.
 
-All three are specified in a single YAML file, following the format described in @sec-alternative and shown in @lst-yaml-alternative. Merging it with Team 5's schema produces one schema per alternative, and each is passed through the same code generation and validation used for the original, yielding three validated scripts from one file and no hand-editing of the team's code. The estimated effect of skin tone is unchanged across this expansion, matching the value Team 5 report and shown for this team in @fig-res-schema.
+All three alternatives are specified in a single YAML file, following the format described in @sec-alternative and shown in @lst-yaml-alternative. Merging it with Team 5's schema produces one schema per alternative and yield three validated scripts. Both estimated random and fixed effects in each model matches with Team 5's reported values.
 
 
 :::{#lst-yaml-alternative lst-cap="Example of a YAML file specifying alternatives for the random effects structure in the many-analysts analysis of Team 5."}
@@ -447,13 +459,11 @@ Existing reproducible practices focus on whether published results can be reprod
 
 A data analysis question admits more than one defensible answer, and the schema records which one was taken. Arriving at those decisions is a matter of human judgement, whether the analyst writes the schema directly or it is extracted from a manuscript in which the decisions were already made. Once they are determined, generating the code is a comparatively mechanical translation, which current LLMs perform with reasonable reliability inside a generation-and-validation loop. Our approach therefore contrasts with fully automated systems that use multiple LLM agents to plan, generate, and execute analyses [@jansen2025; @hu_automated_2024; @sun_lambda_2026], which aim to automate the decisions themselves. @donoho2026 describes the risk in such systems as one of premature autonomy, where the model projects an intent onto the user rather than responding to what was asked. We do not attempt to automate the human judgement that goes into making those decisions, but instead provide a structured way to record them and a workflow to turn them into code.
 
-Three sources of uncertainty enter this pipeline, and they behave differently as models improve. The first is implementation, where the schema states a decision unambiguously and the generated code fails to carry it out: the scripts for Teams 1 and 23 ran and returned estimates after reshaping the data incorrectly. The second is extraction, where the text states a decision clearly to a trained reader and the model fails to recover it. In Team 5's report, the phrase "a random effect of skin tone across referees' countries" is read by most statisticians as implying both a random intercept and a slope, while read literally it specifies only a slope, and the extraction took the literal reading rather than the conventional one. Both are epistemic [@kendall2017; @hullermeier2021] and we would expect them to diminish as models continue to improve, rather than persist as structural limitations of the workflow. The third is aleatoric and belongs to the source text rather than the pipeline: where a report is ambiguous or self-contradictory, as in Teams 9, 27, and 15, no model can recover an intent the text does not express. As extraction and generation improve, what remains is increasingly uncertainty of this third kind, which the schema is designed to make visible.
+Three sources of uncertainty enter this pipeline, and they behave differently as models improve. The first is implementation, where the schema states a decision unambiguously and the generated code fails to carry it out: the scripts for Teams 1 and 23 ran and returned estimates after reshaping the data incorrectly. The second is extraction, where the text states a decision clearly to a trained reader and the model fails to recover it. In Team 5's report, the phrase "a random effect of skin tone across referees' countries" is read by most statisticians as implying both a random intercept and a slope, while read literally it specifies only a slope, and the extraction took the literal reading rather than the conventional one. Both are epistemic (reducible) [@kendall2017; @hullermeier2021] and we would expect them to diminish as models continue to improve, rather than persist as structural limitations of the workflow. The third is aleatoric (irreducible) and belongs to the source text rather than the pipeline: where a report is ambiguous or self-contradictory, as in Teams 9, 27, and 15, no model can recover an intent the text does not express. Team 15 differs in kind: its model is fully specified, and the discrepancy is numerical, arising because a reparameterization changes which quantity a coefficient denotes. It remains a reproducibility issue, since the reported number could be regenerated only by manually investigating the encoding. As extraction and generation improve, what remains is increasingly uncertainty of this third kind, which the schema is designed to make visible.
 
-The validate-and-repair loop assumes that each candidate script can be executed and diagnosed within an interactive timeframe, which rules out analyses too expensive to run repeatedly, and Teams 7, 12, 17, and 18 were excluded on these grounds. Executing such scripts asynchronously through a background job queue would lift the restriction without changing the rest of the workflow.
+The validate-and-repair loop has two limitations. First, it requires each candidate script to be executed and diagnosed within an interactive timeframe, which precludes computationally intensive analyses. For this reason, the analyses of Teams 7, 12, 17, and 18 were excluded from the evaluation. Second, for privacy reasons the LLM is given the column names of the data but not their values, so any data format that the schema does not specify must be inferred through validation. The birth dates in the football data, from which player age is derived, illustrate this: the script for Team 21 initially parsed them as `%Y-%m-%d` and adopted the correct `%d.%m.%Y` only after a parsing failure, whereas it takes Team 1 four attempts to find the correct formats. In both cases the format was recovered by trial and error and had these attempts failed, the pipeline would either have terminated or propagated the error silently into the analysis.
 
-In our pipeline the LLM sees the column names but never the values themselves, for privacy reasons. Formats that the schema does not record must therefore be learned through the validation loop. The birth dates in the football data, used to derive player age, are a case in point: the script for Team 21 parsed them as `%Y-%m-%d` and was corrected to `%d.%m.%Y` only after one parse failure, while the repair for Team 1 supplied four candidate formats for R to try in turn. In both cases the date format was recovered by trial and error. When the trials fail, the pipeline can fail outright or carry the failure silently into the analysis.
-
-The implementation reported here is an R package, but nothing about the problem is specific to R, and a general-purpose tool such as a command-line utility would support analyses written in any language. Our implementation records the schema as a single YAML file, which gives the decisions an explicit structure that machines can read. An alternative is to record each decision in its own Markdown file to trade some of that structure for flexibility in how a decision is described. Separate files would further allow decisions to be linked over time, showing how an analysis developed rather than only where it arrived, and with attribution to individual researchers such a history could support a broader research-management system.
+We conclude with several directions for future work. Executing scripts through a background job queue would accommodate analyses too expensive for an interactive loop without changing the rest of the workflow. The implementation reported here is an R package, but nothing about the problem is specific to R, and a general-purpose tool such as a command-line utility would support analyses written in any language. Our implementation records the schema as a single YAML file, which gives the decisions an explicit structure that machines can read. An alternative is to record each decision in its own Markdown file to trade some of that structure for flexibility in how a decision is described. Separate files would further allow decisions to be linked over time, showing how an analysis developed rather than only where it arrived, and with attribution to individual researchers such a history could support a broader research-management system.
 
 # Acknowledgments
 
