@@ -1,0 +1,15 @@
+$-- Quarto's graphics.tex, with \pandocbounded scaling images to the line width
+$-- only: the AOAS checklist does not allow \textheight in the source.
+$if(graphics)$
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image down to fit the line width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\p@\scalebox{\@tempb}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+\makeatother
+$endif$

@@ -1,17 +1,35 @@
 ---
 title: "Code availability is not enough: schemas for documenting and extending data analysis"
+runtitle: "Schemas for documenting and extending data analysis"
 format:
-  tandf-pdf:
-    keep-tex: true
+  pdf:
+    # AOAS template: IMS class, bibliography style and partials in latex/
+    documentclass: imsart
+    classoption: [aoas]
     number-sections: true
+    cite-method: natbib
+    natbiboptions: authoryear
+    biblio-style: spr-ims-nameyear
+    indent: true                 # no parskip: AOAS forbids \parskip
+    fig-pos: tbp                 # top or bottom of a page, or a float page; never mid-page
+    template-partials:
+      - latex/partials/doc-class.tex
+      - latex/partials/title.tex
+      - latex/partials/before-body.tex
+      - latex/partials/fonts.latex
+      - latex/partials/tightlist.tex
+      - latex/partials/graphics.tex
+    format-resources:
+      - latex/imsart.cls
+      - latex/imsart.sty
+      - latex/spr-ims-nameyear.bst
+    keep-tex: true
     code-overflow: wrap
-    fontsize: 12pt
-    linestretch: 1.15
     include-in-header:
       - text: |
-          \usepackage{amsmath}
-          \usepackage{amssymb}
           \usepackage{fvextra}
+          % plain code blocks: the framed grey background overflows the bottom margin by 2.5pt
+          \renewenvironment{Shaded}{}{}
           \DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
           \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
           \makeatletter
@@ -26,30 +44,24 @@ format:
           }
           \makeatother
           \AtBeginDocument{\floatplacement{codelisting}{H}}
-    journal:
-      blinded: false
-csl: apa.csl
-date: last-modified
 author:
-  - name: H. Sherry Zhang
+  - id: e1
+    name:
+      given: H. Sherry
+      family: Zhang
     email: hsherryzhang@utexas.edu
-    attributes:
-      corresponding: true
-    affiliations: 
-        - id: 1
-          name: University of Texas at Austin
-          department: Department of Statistics and Data Science
-          city: Texas
-          country: United States
-          postal-code: 78705
-  - name: Roger D. Peng
-    affiliations: 
-        - id: 1
-          name: University of Texas at Austin
-          department: Department of Statistics and Data Science
-          city: Texas
-          country: United States
-          postal-code: 78705
+    affiliations:
+      - ref: A
+  - id: e2
+    name:
+      given: Roger D.
+      family: Peng
+    affiliations:
+      - ref: A
+affiliations:
+  - id: A
+    name: University of Texas at Austin
+    department: Department of Statistics and Data Science
 abstract: |
   A data analysis involves a sequence of decisions, from data cleaning to model specification, each of which can affect the reported result. Reproducing that result is not the same as understanding the sequence of decisions that produced it and the reasons for each: the code mixes those decisions with implementation details, while the manuscript states the major decisions and their rationale but scatters them across its sections and often leaves out the minor ones. A reader may then ask how the result would change under a different decision: the question itself is easy to pose, but implementing it is often non-trivial in practice. In this work, we propose a schema that represents a data analysis as a collection of decisions in natural language, from which large language models (LLMs) can generate and validate analysis scripts directly. This workflow can also expand a single analysis into a full multiverse of alternatives, specified in an alternative file, ready for comparison. We demonstrate the proposed workflow in two applications. In the first, we construct a schema for a published regression analysis of heaped smoking data and show that it reproduces the reported estimates, and that a reviewer-suggested alternative can be specified through the alternative file and turned into code automatically. In the second, where no schema is provided, we show how the workflow serves instead as a reproducibility check, applied to the many-analysts football study. As an intermediate representation between the manuscript and code scripts, our schema gives a self-contained account of an analysis and makes it extensible from a reader's perspective.
 keywords:
@@ -62,13 +74,11 @@ bibliography: bibliography.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 library(tidyverse)
 ```
 
-
-\newpage
 
 # Introduction {#sec-intro}
 
@@ -260,10 +270,9 @@ The same generation-validation procedure applies to multiple analyses. When a sc
 
 ```{r}
 #| label: fig-workflow
-#| out.width: 100%
 #| echo: false
 #| fig.cap: "Overview of the schema-driven workflow. A schema is either authored manually or extracted from a manuscript by an LLM (left). To reproduce the analysis (top), an LLM generates code from the schema and validates it through iterative execution and repair in a sandboxed environment, and the analyst runs the validated script and compares its estimates with those reported. To explore alternatives (bottom), an alternative file is merged with the schema to give one schema per alternative, each passed through the same generation and validation. Badges mark whether a step is performed by a human or an LLM."
-knitr::include_graphics(here::here("figures/workflow.png"))
+knitr::include_graphics(here::here("figures/workflow.png"), dpi = NA)   # no width: scaled to \linewidth by \pandocbounded
 ```
 
 <!-- Commented out pending simulation results; see ISSUES.md.
@@ -340,7 +349,7 @@ Team 5's analysis is only one of the approaches taken: other teams made differen
 
 These reports are not directly usable as input, since the many-analysts study also covers a second research question and the construction of confidence intervals. Some teams wrote their final analysis as a set of edits to the initial one rather than as a self-contained methodology section. We therefore pre-extract a simplified methodology text for each team and use it in place of the report. 
 
-Each team's text is then passed through the workflow of @sec-method to extract the schema and then generate and validate the corresponding code with Claude Opus 4.5. The Appendix follows Team 5 through the pipeline to show the input text, the schema, and the generated script.
+Each team's text is then passed through the workflow of @sec-method to extract the schema and then generate and validate the corresponding code with Claude Opus 4.5. The supplementary appendix follows Team 5 through the pipeline to show the input text, the schema, and the generated script.
 
 To accelerate the evaluation of each script, we manually replace the standard modeling functions with faster counterparts after the scripts are generated but before validation: `lm()` and `glm()` with `fixest::feols()` and `fixest::feglm()` [@fixest], and `lme4::glmer()` [@lme4] with `glmmTMB::glmmTMB()` [@glmmTMB-1]. These fit the same models by faster means, using multi-threaded C++ and Template Model Builder (TMB) respectively, so the substitution changes how the coefficients are computed, not the coefficients themselves. 
 
@@ -465,10 +474,23 @@ The validate-and-repair loop has two limitations. First, it requires each candid
 
 We conclude with several directions for future work. Executing scripts through a background job queue would accommodate analyses too expensive for an interactive loop without changing the rest of the workflow. The implementation reported here is an R package, but nothing about the problem is specific to R, and a general-purpose tool such as a command-line utility would support analyses written in any language. Our implementation records the schema as a single YAML file, which gives the decisions an explicit structure that machines can read. An alternative is to record each decision in its own Markdown file to trade some of that structure for flexibility in how a decision is described. Separate files would further allow decisions to be linked over time, showing how an analysis developed rather than only where it arrived, and with attribution to individual researchers such a history could support a broader research-management system.
 
-# Acknowledgments
-
-The implementation of the schema is available on CRAN as an R package, `tines`. The source code for reproducing the work reported in this paper is available in the Supplementary Materials and can be found at: <https://github.com/huizezhang-sherry/paper-schema>.
+```{=latex}
+\begin{acks}[Acknowledgments]
+The corresponding author is H. Sherry Zhang.
+```
 
 All analyses were carried out in R [@R], using the `tines`, `tidyverse` [@wickham2019tidyverse], `VGAM` [@VGAM], `VGAMdata` [@VGAMdata], `lme4` [@lme4], `glmmTMB` [@glmmTMB-1; @glmmTMB-2], and `fixest` [@fixest] packages. The article was created using Quarto [@Allaire_Quarto_2026].
 
-# References
+```{=latex}
+\end{acks}
+
+\begin{supplement}
+\stitle{Appendix}
+\sdescription{The pre-extracted methodology text, the extracted schema and the generated script for Team 5 of the many-analysts study, and the prompts that \texttt{tines} uses at each stage of the workflow.}
+\end{supplement}
+
+\begin{supplement}
+\stitle{Code and data}
+\sdescription{The implementation of the schema is available on CRAN as the R package \texttt{tines}. The source code and data for reproducing the work reported in this paper are available at \url{https://github.com/huizezhang-sherry/paper-schema}.}
+\end{supplement}
+```

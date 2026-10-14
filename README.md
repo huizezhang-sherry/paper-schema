@@ -19,8 +19,8 @@ paper-schema/
 ├── figures/                 Figure 1 (workflow diagram) and the script that draws it
 ├── data/                    saved model output used during development
 ├── sim-football/            submodule: many-analysts football study pipeline
-├── _extensions/             Quarto extension for the Taylor & Francis template
-└── interact.cls, agsm.bst,  LaTeX class, bibliography style and package
-    orcidlink.sty, apa.csl   required by the template
+├── latex/                   AOAS template: IMS class (imsart), bibliography style,
+│                            and the Quarto partials the manuscript renders with
+└── apa.csl                  citation style for the appendix
 ```
 

@@ -4,9 +4,7 @@
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
-\documentclass[
-  12pt,
-]{interact}
+\documentclass[aoas]{imsart}
 \usepackage{xcolor}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{5}
@@ -20,7 +18,7 @@
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 \fi
-\usepackage{lmodern}
+% default font package omitted per the AOAS checklist; imsart sets the fonts
 \ifPDFTeX\else
   % xetex/luatex font selection
 \fi
@@ -30,17 +28,6 @@
   \usepackage[]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
-\usepackage{setspace}
-\makeatletter
-\@ifundefined{KOMAClassName}{% if non-KOMA class
-  \IfFileExists{parskip.sty}{%
-    \usepackage{parskip}
-  }{% else
-    \setlength{\parindent}{0pt}
-    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
-}{% if KOMA class
-  \KOMAoptions{parskip=half}}
-\makeatother
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -119,69 +106,34 @@
 \usepackage{graphicx}
 \makeatletter
 \newsavebox\pandoc@box
-\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+\newcommand*\pandocbounded[1]{% scales image down to fit the line width
   \sbox\pandoc@box{#1}%
-  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
   \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
-  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
-  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \ifdim\@tempb\p@<\p@\scalebox{\@tempb}{\usebox\pandoc@box}%
   \else\usebox{\pandoc@box}%
   \fi%
 }
-% Set default figure placement to htbp
-\def\fps@figure{htbp}
 \makeatother
 
 
-% definitions for citeproc citations
-\NewDocumentCommand\citeproctext{}{}
-\NewDocumentCommand\citeproc{mm}{%
-  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
-\makeatletter
- % allow citations to break across lines
- \let\@cite@ofmt\@firstofone
- % avoid brackets around text for \cite:
- \def\@biblabel#1{}
- \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
-\makeatother
-\newlength{\cslhangindent}
-\setlength{\cslhangindent}{1.5em}
-\newlength{\csllabelwidth}
-\setlength{\csllabelwidth}{3em}
-\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
- {\begin{list}{}{%
-  \setlength{\itemindent}{0pt}
-  \setlength{\leftmargin}{0pt}
-  \setlength{\parsep}{0pt}
-  % turn on hanging indent if param 1 is 1
-  \ifodd #1
-   \setlength{\leftmargin}{\cslhangindent}
-   \setlength{\itemindent}{-1\cslhangindent}
-  \fi
-  % set entry spacing
-  \setlength{\itemsep}{#2\baselineskip}}}
- {\end{list}}
-\usepackage{calc}
-\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
-\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
-\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
-\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 
 
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 
 \providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+  \setlength{\itemsep}{0pt}}
 
 
 
  
+\usepackage[authoryear]{natbib}
+\bibliographystyle{spr-ims-nameyear}
 
 
-\usepackage{amsmath}
-\usepackage{amssymb}
 \usepackage{fvextra}
+% plain code blocks: the framed grey background overflows the bottom margin by 2.5pt
+\renewenvironment{Shaded}{}{}
 \DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, breaklines=true, breakanywhere=true, breakindent=1em, fontsize=\small}
 \makeatletter
@@ -196,7 +148,6 @@
 }
 \makeatother
 \AtBeginDocument{\floatplacement{codelisting}{H}}
-\usepackage{orcidlink}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -254,18 +205,21 @@ analysis decisions, Many-analysts study, Statistical workflow},
   pdfcreator={LaTeX via pandoc}}
 
 
+
+\begin{document}
+\begin{frontmatter}
 \title{Code availability is not enough: schemas for documenting and
 extending data analysis}
-\author{H. Sherry Zhang$\textsuperscript{1}$, Roger D.
-Peng$\textsuperscript{1}$}
+\runtitle{Schemas for documenting and extending data analysis}
 
-\thanks{CONTACT: H. Sherry
-Zhang. Email: \href{mailto:hsherryzhang@utexas.edu}{\nolinkurl{hsherryzhang@utexas.edu}}. }
-\begin{document}
-\captionsetup{labelsep=space}
-\maketitle
-\textsuperscript{1} Department of Statistics and Data
-Science, University of Texas at Austin, Texas, United States
+\begin{aug}
+\author[1]{\fnms{H.
+Sherry}~\snm{Zhang}\ead[label=e1]{hsherryzhang@utexas.edu}}
+\author[1]{\fnms{Roger D.}~\snm{Peng}}
+\address[1]{Department of Statistics and Data Science,\\ University of
+Texas at Austin\printead[presep={,\ }]{e1}}
+\end{aug}
+
 \begin{abstract}
 A data analysis involves a sequence of decisions, from data cleaning to
 model specification, each of which can affect the reported result.
@@ -292,16 +246,15 @@ an intermediate representation between the manuscript and code scripts,
 our schema gives a self-contained account of an analysis and makes it
 extensible from a reader's perspective.
 \end{abstract}
-\begin{keywords}
-\def\sep{;\ }
-Reproducibility\sep Large Language Models (LLMs)\sep Data analysis
-decisions\sep Many-analysts study\sep 
-Statistical workflow
-\end{keywords}
 
-
-\setstretch{1.15}
-\newpage
+\begin{keyword}
+\kwd{Reproducibility}
+\kwd{Large Language Models (LLMs)}
+\kwd{Data analysis decisions}
+\kwd{Many-analysts study}
+\kwd{Statistical workflow}
+\end{keyword}
+\end{frontmatter}
 
 \section{Introduction}\label{sec-intro}
 
@@ -309,9 +262,10 @@ A data analysis is the product of a chain of decisions, from how the
 data are cleaned to how the model is specified. Those decisions are what
 a reader needs in order to comprehend an analysis, judge whether it is
 reasonable, and extend it by asking how the result would change under
-different choices. Standard practice in reproducible research (Peng,
-2011; Wrobel et al., 2024) asks for the code and the data to be made
-available, but does not extend to the decisions behind them.
+different choices. Standard practice in reproducible research
+\citep{peng_reproducible_2011, wrobel_partnering_2024} asks for the code
+and the data to be made available, but does not extend to the decisions
+behind them.
 
 This gap arises because code and the decisions it implements operate at
 different levels: code specifies precisely what a computer should do,
@@ -336,9 +290,9 @@ full sequence, therefore, means searching across the paper and the code
 for decisions and their rationale before a reader can begin to
 comprehend the analysis.
 
-Literate programming tools such as Sweave (Leisch, 2002), R Markdown
-(Xie et al., 2018), Jupyter notebooks (Kluyver et al., 2016), and Quarto
-(Allaire et al., 2026) integrate narrative and code within a single
+Literate programming tools such as Sweave \citep{Leisch2002}, R Markdown
+\citep{xie2018rmarkdown}, Jupyter notebooks \citep{jupyter}, and Quarto
+\citep{Allaire_Quarto_2026} integrate narrative and code within a single
 document, yet a published notebook does not resolve this problem.
 Substantive decisions, such as the exclusion of observations or the
 choice of covariates, remain interleaved with routine data manipulation,
@@ -356,8 +310,7 @@ leads to the result and raise alternatives to investigate how the result
 changes. Once the chain of decisions has been specified, its
 implementation in code reduces largely to a translation task, which
 large language models (LLMs) now perform with reasonable reliability
-(Chen et al., 2021; Huang et al., 2022; Jiang et al., 2026; Lai et al.,
-2023; Shah et al., 2026).
+\citep{chen2021codex, huang_executionbased_2022, lai_ds1000_2023, jiang2026survey, shah_automating_2026}.
 
 In this paper, we present a schema that records a data analysis as a
 sequence of decisions, each stated with the objective it addresses and
@@ -367,8 +320,8 @@ can be used to generate code scripts from natural-language descriptions
 in manuscripts and to explore alternative decisions. We present two
 applications. The first takes the perspective of an author supplying a
 schema alongside a published manuscript, using the GAITD regression
-analysis of heaped smoking data in Yee et al. (2025). A reader can then
-specify an alternative file, coupled with the original schema, to
+analysis of heaped smoking data in \citet{yee2025heaping}. A reader can
+then specify an alternative file, coupled with the original schema, to
 compare model performance under a different inflation-alteration
 specification. The second, the many-analysts football study, considers
 the opposite situation, where no schema is supplied and the workflow
@@ -409,8 +362,7 @@ decision \(\pi_{i}\). All three fields are written in short
 natural-language sentences, and together they form a self-contained
 account of each decision in the analysis. As an example,
 Listing~\ref{lst-schema} presents the schema that describes the steps
-for calculating the Human Development Index (HDI) (United Nations
-Development Programme, 2025):
+for calculating the Human Development Index (HDI) \citep{hdi}:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
@@ -498,9 +450,9 @@ Recording a step's decision \(\pi_i\) does not mean it is the only one
 that could satisfy its objective \(f_i\): a reader may want to revisit
 the decision made for some of these steps and consider alternatives that
 address the same objective, the premise of multiverse analysis
-(Simonsohn et al., 2020; Steegen et al., 2016). Formally, a step in the
-schema can have a candidate set of alternatives: step \(i\) may admit
-\(k_i\) decisions that all satisfy its objective \(f_i\),
+\citep{steegen2016, simonsohn2020}. Formally, a step in the schema can
+have a candidate set of alternatives: step \(i\) may admit \(k_i\)
+decisions that all satisfy its objective \(f_i\),
 \(\{A_i^1, \dots, A_i^{k_i}\}\), of which the decision \(\pi_i\)
 recorded in the schema is just one member, \(A_i^1\). An alternative
 file specifies the remaining candidates, \(A_i^2, \dots, A_i^{k_i}\),
@@ -639,7 +591,7 @@ alternatives with the original schema produces a total of (1+1) × (2+1)
 \end{codelisting}%
 
 Existing multiverse tooling, such as the \texttt{multiverse} package in
-R (Sarma et al., 2023), expresses each branch in code, while our
+R \citep{sarma2023}, expresses each branch in code, while our
 alternatives are instead specified at the level of decisions, in natural
 language, from which modern LLMs can generate the corresponding code.
 Keeping them in a separate file also changes who can pose the
@@ -685,11 +637,11 @@ schema can also be augmented with an alternative file, expanding it into
 a multiverse of parallel analyses, so that the author and subsequent
 readers can explore the reported result under different decisions.
 
-\begin{figure}
+\begin{figure}[tbp]
 
 \centering{
 
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/workflow.png}
+\pandocbounded{\includegraphics[keepaspectratio]{figures/workflow.png}}
 
 }
 
@@ -712,37 +664,37 @@ data}\label{sec-gaitd}
 In this section, we demonstrate the workflow in the case where an author
 provides a faithful schema alongside a published manuscript, which a
 reader can then use to question and explore the analysis, following the
-lower path in Figure~\ref{fig-workflow}. We use Yee et al. (2025)'s
+lower path in Figure~\ref{fig-workflow}. We use \citet{yee2025heaping}'s
 GAITD regression analysis of heaped smoking data, published in the
-\emph{Annals of Applied Statistics}, as the example. Yee et al. (2025)
-report four separate smoking-related responses, and for demonstration
-purposes, we build the schema for only the first response, smoking
-initiation age (P1, Section 5.1 of their paper). The same workflow
-extends to the other three cases.
+\emph{Annals of Applied Statistics}, as the example.
+\citet{yee2025heaping} report four separate smoking-related responses,
+and for demonstration purposes, we build the schema for only the first
+response, smoking initiation age (P1, Section 5.1 of their paper). The
+same workflow extends to the other three cases.
 
 The data come from the smoking questionnaire of the 2017--2020 cycle of
 the National Health and Nutrition Examination Survey (NHANES), available
-as \texttt{smqP} in the \texttt{VGAMdata} package (Yee \& Gray, 2025).
-Each row is a survey respondent, recording their smoking history
-(initiation age \texttt{SIA}, cessation age \texttt{SCA}, and daily
-cigarette consumption, \texttt{TC30} for current smokers and
-\texttt{TCquit} for former smokers), their age, and the standard
-demographic covariates in smoking studies: gender, race, marital status,
-and education. Several of these variables are missing by design:
-\texttt{SCA} and \texttt{TCquit} exist only for former smokers, and
-education and marital status were not collected for respondents under
-20; age is also top-coded at 80. The response, \texttt{SIA}, is a count
-whose distribution is heaped: certain ages are reported far more often
-than a classic count distribution would predict. GAITD (generally
-altered, inflated, truncated, and deflated) regression accommodates such
-heaping by modifying a parent count distribution, such as the Poisson or
-negative binomial, at specified values, which may receive additional
-probability (inflation), reduced probability (deflation), probabilities
-modeled separately from the parent (alteration), or no probability at
-all (truncation). Which ages to treat as special, and which operation to
-apply (inflation, deflation, alteration, or truncation) to each, are
-modeling decisions typically guided by an exploratory spikeplot of the
-empirical distribution of \texttt{SIA}.
+as \texttt{smqP} in the \texttt{VGAMdata} package \citep{VGAMdata}. Each
+row is a survey respondent, recording their smoking history (initiation
+age \texttt{SIA}, cessation age \texttt{SCA}, and daily cigarette
+consumption, \texttt{TC30} for current smokers and \texttt{TCquit} for
+former smokers), their age, and the standard demographic covariates in
+smoking studies: gender, race, marital status, and education. Several of
+these variables are missing by design: \texttt{SCA} and \texttt{TCquit}
+exist only for former smokers, and education and marital status were not
+collected for respondents under 20; age is also top-coded at 80. The
+response, \texttt{SIA}, is a count whose distribution is heaped: certain
+ages are reported far more often than a classic count distribution would
+predict. GAITD (generally altered, inflated, truncated, and deflated)
+regression accommodates such heaping by modifying a parent count
+distribution, such as the Poisson or negative binomial, at specified
+values, which may receive additional probability (inflation), reduced
+probability (deflation), probabilities modeled separately from the
+parent (alteration), or no probability at all (truncation). Which ages
+to treat as special, and which operation to apply (inflation, deflation,
+alteration, or truncation) to each, are modeling decisions typically
+guided by an exploratory spikeplot of the empirical distribution of
+\texttt{SIA}.
 
 The schema in Listing~\ref{lst-heaping} comprises fourteen entries, each
 recording an \emph{objective}, a \emph{decision}, and a \emph{rationale}
@@ -758,9 +710,9 @@ analysis, as we do later in this section.
 \begin{codelisting}
 
 \caption{\label{lst-heaping}A schema for the GAITD regression analysis
-of smoking initiation age in Yee et al. (2025), constructed from the
-manuscript and intended to be provided alongside it as a self-contained
-account of the analysis.}
+of smoking initiation age in \citet{yee2025heaping}, constructed from
+the manuscript and intended to be provided alongside it as a
+self-contained account of the analysis.}
 
 \centering{
 
@@ -851,13 +803,13 @@ in the manuscript and supplementary material.
 
 As a check that this schema is accurate, generating and validating code
 from it produces the R script in Listing~\ref{lst-script-sia}, which
-reproduces the coefficients reported in Table 2 of Yee et al. (2025).
-Since the code was generated without access to the manuscript or the
-authors' script, the match shows that the schema records everything
-needed to reproduce the analysis. A schema of this kind could therefore
-accompany a manuscript as reproducibility material in its own right,
-alongside code and data, and a reader can rely on it as an accurate
-account of the analysis it documents.
+reproduces the coefficients reported in Table 2 of
+\citet{yee2025heaping}. Since the code was generated without access to
+the manuscript or the authors' script, the match shows that the schema
+records everything needed to reproduce the analysis. A schema of this
+kind could therefore accompany a manuscript as reproducibility material
+in its own right, alongside code and data, and a reader can rely on it
+as an accurate account of the analysis it documents.
 
 \begin{codelisting}
 
@@ -979,7 +931,7 @@ of the schema step each block implements.}
 
 \end{codelisting}%
 
-Yee et al. (2025)'s supplementary material reports an investigation
+\citet{yee2025heaping}'s supplementary material reports an investigation
 prompted by a reviewer, who suggested splitting the mid-risk group into
 two, keeping ages 12--14 as inflated but treating ages 19--21 as altered
 instead, since that older subgroup shows a qualitatively different,
@@ -992,10 +944,10 @@ drops to an intercept-only model, matching how the authors themselves
 computed AIC for this comparison; \texttt{branch:\ single} ties the
 three overrides into one refit, rather than crossing them into separate
 branches. Generating and validating code from this alternative file
-reproduces the AIC of 19,340.4 that Yee et al. (2025) reports. Here the
-question was answered because the authors chose to report the refit in
-their supplement; with the schema available, any reader who raises such
-a question can answer it directly.
+reproduces the AIC of 19,340.4 that \citet{yee2025heaping} reports. Here
+the question was answered because the authors chose to report the refit
+in their supplement; with the schema available, any reader who raises
+such a question can answer it directly.
 
 \begin{codelisting}
 
@@ -1044,12 +996,12 @@ the manuscript itself by an LLM for readers to understand and explore
 the analysis. In this section, we demonstrate the workflow in the
 opposite situation, where no schema is supplied and the workflow serves
 as a reproducibility test using the many-analysts football study
-(Silberzahn et al., 2018). We choose this study because its
-many-analysts design provides replicates of the same analysis:
-independent teams analyzed the same data to answer the same question,
-each reporting its methodology and estimate.
+\citep{silberzahn2018}. We choose this study because its many-analysts
+design provides replicates of the same analysis: independent teams
+analyzed the same data to answer the same question, each reporting its
+methodology and estimate.
 
-Silberzahn et al. (2018) invited 29 research groups to conduct the same
+\citet{silberzahn2018} invited 29 research groups to conduct the same
 data analysis, answering whether referees are more likely to give red
 cards to dark-skin-toned players than to light-skin-toned players. The
 provided dataset contains two raters' skin color ratings of players'
@@ -1085,19 +1037,19 @@ team and use it in place of the report.
 
 Each team's text is then passed through the workflow of
 Section~\ref{sec-method} to extract the schema and then generate and
-validate the corresponding code with Claude Opus 4.5. The Appendix
-follows Team 5 through the pipeline to show the input text, the schema,
-and the generated script.
+validate the corresponding code with Claude Opus 4.5. The supplementary
+appendix follows Team 5 through the pipeline to show the input text, the
+schema, and the generated script.
 
 To accelerate the evaluation of each script, we manually replace the
 standard modeling functions with faster counterparts after the scripts
 are generated but before validation: \texttt{lm()} and \texttt{glm()}
-with \texttt{fixest::feols()} and \texttt{fixest::feglm()} (Bergé et
-al., 2026), and \texttt{lme4::glmer()} (Bates et al., 2015) with
-\texttt{glmmTMB::glmmTMB()} (Brooks et al., 2017). These fit the same
-models by faster means, using multi-threaded C++ and Template Model
-Builder (TMB) respectively, so the substitution changes how the
-coefficients are computed, not the coefficients themselves.
+with \texttt{fixest::feols()} and \texttt{fixest::feglm()}
+\citep{fixest}, and \texttt{lme4::glmer()} \citep{lme4} with
+\texttt{glmmTMB::glmmTMB()} \citep{glmmTMB-1}. These fit the same models
+by faster means, using multi-threaded C++ and Template Model Builder
+(TMB) respectively, so the substitution changes how the coefficients are
+computed, not the coefficients themselves.
 
 Of the 29 teams, the analyses of four teams (Teams 7, 12, 17, and 18)
 are too computationally expensive to run inside an iterative
@@ -1112,7 +1064,7 @@ ran successfully without any validation, whereas the vast majority
 reached completion after two or three iterations. The most frequent
 correction involved resolving broken and overflowing syntax in comments.
 
-\begin{figure}
+\begin{figure}[tbp]
 
 \centering{
 
@@ -1123,7 +1075,7 @@ correction involved resolving broken and overflowing syntax in comments.
 \caption{\label{fig-res-schema}Comparison of the odds ratio of the
 effect of skin color on receiving red cards in football games from our
 schema-based reproduction (reproduced) vs.~the effect size reported in
-Silberzahn et al. (2018) (reported). Teams are ordered by the absolute
+\citet{silberzahn2018} (reported). Teams are ordered by the absolute
 difference between the reproduced and reported odds ratio. The
 reproduction recovers the reported odds ratio closely for most teams;
 the largest deviations occur for Teams 1, 9, 15, 21, 23, and 27.}
@@ -1132,7 +1084,7 @@ the largest deviations occur for Teams 1, 9, 15, 21, 23, and 27.}
 
 Figure~\ref{fig-res-schema} shows the comparison of the estimated effect
 sizes, as odds ratios, from our schema workflow (reproduced) and those
-reported in Silberzahn et al. (2018) (reported). The odds ratio is well
+reported in \citet{silberzahn2018} (reported). The odds ratio is well
 recovered for most teams, though six show a noticeably larger gap: Teams
 1, 9, 15, 21, 23, and 27.
 
@@ -1257,14 +1209,14 @@ made. Once they are determined, generating the code is a comparatively
 mechanical translation, which current LLMs perform with reasonable
 reliability inside a generation-and-validation loop. Our approach
 therefore contrasts with fully automated systems that use multiple LLM
-agents to plan, generate, and execute analyses (Hu et al., 2024; Jansen
-et al., 2025; Sun et al., 2026), which aim to automate the decisions
-themselves. Donoho (2026) describes the risk in such systems as one of
-premature autonomy, where the model projects an intent onto the user
-rather than responding to what was asked. We do not attempt to automate
-the human judgment that goes into making those decisions, but instead
-provide a structured way to record them and a workflow to turn them into
-code.
+agents to plan, generate, and execute analyses
+\citep{jansen2025, hu_automated_2024, sun_lambda_2026}, which aim to
+automate the decisions themselves. \citet{donoho2026} describes the risk
+in such systems as one of premature autonomy, where the model projects
+an intent onto the user rather than responding to what was asked. We do
+not attempt to automate the human judgment that goes into making those
+decisions, but instead provide a structured way to record them and a
+workflow to turn them into code.
 
 Three sources of uncertainty enter this pipeline, and they behave
 differently as models improve. The first is implementation, where the
@@ -1277,19 +1229,19 @@ skin-tone across referees' countries of origin'' is read by most
 statisticians as implying both a random intercept and a slope, while
 read literally it specifies only a slope, and the extraction took the
 literal reading rather than the conventional one. Both are epistemic
-(reducible) (Hüllermeier \& Waegeman, 2021; Kendall \& Gal, 2017), and
-we would expect them to diminish as models continue to improve, rather
-than persist as structural limitations of the workflow. The third is
-aleatoric (irreducible) and belongs to the source text rather than the
-pipeline: where a report is ambiguous or self-contradictory, as in Teams
-9, 27, and 15, no model can recover an intent the text does not express.
-Team 15 differs in kind: its model is fully specified, and the
-discrepancy is numerical, arising because a reparameterization changes
-which quantity a coefficient denotes. It remains a reproducibility
-issue, since the reported number could be regenerated only by manually
-investigating the coding. As extraction and generation improve, what
-remains is increasingly uncertainty of this third kind, which the schema
-is designed to make visible.
+(reducible) \citep{kendall2017, hullermeier2021}, and we would expect
+them to diminish as models continue to improve, rather than persist as
+structural limitations of the workflow. The third is aleatoric
+(irreducible) and belongs to the source text rather than the pipeline:
+where a report is ambiguous or self-contradictory, as in Teams 9, 27,
+and 15, no model can recover an intent the text does not express. Team
+15 differs in kind: its model is fully specified, and the discrepancy is
+numerical, arising because a reparameterization changes which quantity a
+coefficient denotes. It remains a reproducibility issue, since the
+reported number could be regenerated only by manually investigating the
+coding. As extraction and generation improve, what remains is
+increasingly uncertainty of this third kind, which the schema is
+designed to make visible.
 
 The validate-and-repair loop has two limitations. First, it requires
 each candidate script to be executed and diagnosed within an interactive
@@ -1322,216 +1274,30 @@ an analysis developed rather than only where it arrived, and with
 attribution to individual researchers such a history could support a
 broader research-management system.
 
-\section{Acknowledgments}\label{acknowledgments}
+\begin{acks}[Acknowledgments]
+The corresponding author is H. Sherry Zhang.
 
-The implementation of the schema is available on CRAN as an R package,
-\texttt{tines}. The source code for reproducing the work reported in
-this paper is available in the Supplementary Materials and can be found
-at: \url{https://github.com/huizezhang-sherry/paper-schema}.
+All analyses were carried out in R \citep{R}, using the \texttt{tines},
+\texttt{tidyverse} \citep{wickham2019tidyverse}, \texttt{VGAM}
+\citep{VGAM}, \texttt{VGAMdata} \citep{VGAMdata}, \texttt{lme4}
+\citep{lme4}, \texttt{glmmTMB} \citep{glmmTMB-1, glmmTMB-2}, and
+\texttt{fixest} \citep{fixest} packages. The article was created using
+Quarto \citep{Allaire_Quarto_2026}.
 
-All analyses were carried out in R (R Core Team, 2026), using the
-\texttt{tines}, \texttt{tidyverse} (Wickham et al., 2019), \texttt{VGAM}
-(Yee, 2025), \texttt{VGAMdata} (Yee \& Gray, 2025), \texttt{lme4} (Bates
-et al., 2015), \texttt{glmmTMB} (Brooks et al., 2017; McGillycuddy et
-al., 2025), and \texttt{fixest} (Bergé et al., 2026) packages. The
-article was created using Quarto (Allaire et al., 2026).
+\end{acks}
 
-\section*{References}\label{references}
-\addcontentsline{toc}{section}{References}
+\begin{supplement}
+\stitle{Appendix}
+\sdescription{The pre-extracted methodology text, the extracted schema and the generated script for Team 5 of the many-analysts study, and the prompts that \texttt{tines} uses at each stage of the workflow.}
+\end{supplement}
 
-\phantomsection\label{refs}
-\begin{CSLReferences}{1}{0}
-\bibitem[\citeproctext]{ref-Allaire_Quarto_2026}
-Allaire, J. J., Teague, C., Scheidegger, C., Xie, Y., Dervieux, C., \&
-Woodhull, G. (2026). \emph{{Quarto}} (Version 1.9) {[}Computer
-software{]}. \url{https://doi.org/10.5281/zenodo.5960048}
+\begin{supplement}
+\stitle{Code and data}
+\sdescription{The implementation of the schema is available on CRAN as the R package \texttt{tines}. The source code and data for reproducing the work reported in this paper are available at \url{https://github.com/huizezhang-sherry/paper-schema}.}
+\end{supplement}
 
-\bibitem[\citeproctext]{ref-lme4}
-Bates, D., Mächler, M., Bolker, B., \& Walker, S. (2015). Fitting linear
-mixed-effects models using {lme4}. \emph{Journal of Statistical
-Software}, \emph{67}(1), 1--48.
-\url{https://doi.org/10.18637/jss.v067.i01}
 
-\bibitem[\citeproctext]{ref-fixest}
-Bergé, L. R., Butts, K., \& McDermott, G. (2026). Fast and user-friendly
-econometrics estimations: {T}he {R} package fixest. \emph{arXiv Preprint
-arXiv:2601.21749}. \url{https://doi.org/10.48550/arXiv.2601.21749}
-
-\bibitem[\citeproctext]{ref-glmmTMB-1}
-Brooks, M. E., Kristensen, K., van Benthem, K. J., Magnusson, A., Berg,
-C. W., Nielsen, A., Skaug, H. J., Maechler, M., \& Bolker, B. M. (2017).
-{glmmTMB} balances speed and flexibility among packages for
-zero-inflated generalized linear mixed modeling. \emph{The R Journal},
-\emph{9}(2), 378--400. \url{https://doi.org/10.32614/RJ-2017-066}
-
-\bibitem[\citeproctext]{ref-chen2021codex}
-Chen, M., Tworek, J., Jun, H., et al. (2021). Evaluating large language
-models trained on code. \emph{arXiv Preprint arXiv:2107.03374}.
-\url{https://arxiv.org/abs/2107.03374}
-
-\bibitem[\citeproctext]{ref-donoho2026}
-Donoho, D. (2026). Discussion of {``}LAMBDA: A large model based data
-agent{''}. \emph{Journal of the American Statistical Association},
-\emph{121}(553), 14--16.
-\url{https://doi.org/10.1080/01621459.2025.2574396}
-
-\bibitem[\citeproctext]{ref-hu_automated_2024}
-Hu, S., Lu, C., \& Clune, J. (2024, October). \emph{Automated {Design}
-of {Agentic} {Systems}}.
-\url{https://openreview.net/forum?id=t9U3LW7JVX}
-
-\bibitem[\citeproctext]{ref-huang_executionbased_2022}
-Huang, J., Wang, C., Zhang, J., Yan, C., Cui, H., Inala, J. P., Clement,
-C., \& Duan, N. (2022). Execution-based {Evaluation} for {Data}
-{Science} {Code} {Generation} {Models}. In E. Dragut, Y. Li, L. Popa, S.
-Vucetic, \& S. Srivastava (Eds.), \emph{Proceedings of the {Fourth}
-{Workshop} on {Data} {Science} with {Human}-in-the-{Loop} ({Language}
-{Advances})} (pp. 28--36). Association for Computational Linguistics.
-\url{https://doi.org/10.18653/v1/2022.dash-1.5}
-
-\bibitem[\citeproctext]{ref-hullermeier2021}
-Hüllermeier, E., \& Waegeman, W. (2021). Aleatoric and epistemic
-uncertainty in machine learning: An introduction to concepts and
-methods. \emph{Machine Learning}, \emph{110}(3), 457--506.
-
-\bibitem[\citeproctext]{ref-jansen2025}
-Jansen, J. A., Manukyan, A., Khoury, N. A., \& Akalin, A. (2025).
-Leveraging large language models for data analysis automation.
-\emph{PLOS ONE}, \emph{20}(2), e0317084.
-\url{https://doi.org/10.1371/journal.pone.0317084}
-
-\bibitem[\citeproctext]{ref-jiang2026survey}
-Jiang, J., Wang, F., Shen, J., Kim, S., \& Kim, S. (2026). A survey on
-large language models for code generation. \emph{ACM Transactions on
-Software Engineering and Methodology}, \emph{35}(2), 1--72.
-
-\bibitem[\citeproctext]{ref-kendall2017}
-Kendall, A., \& Gal, Y. (2017). What uncertainties do we need in
-bayesian deep learning for computer vision? \emph{Advances in Neural
-Information Processing Systems 30 (NeurIPS 2017)}, 5574--5584.
-
-\bibitem[\citeproctext]{ref-jupyter}
-Kluyver, T., Ragan-Kelley, B., Pérez, F., Granger, B., Bussonnier, M.,
-Frederic, J., Kelley, K., Hamrick, J., Grout, J., Corlay, S., Ivanov,
-P., Avila, D., Abdalla, S., Willing, C., \& team, J. development.
-(2016). Jupyter notebooks - a publishing format for reproducible
-computational workflows. In F. Loizides \& B. Scmidt (Eds.),
-\emph{Positioning and power in academic publishing: Players, agents and
-agendas} (pp. 87--90). IOS Press.
-\url{https://eprints.soton.ac.uk/403913/}
-
-\bibitem[\citeproctext]{ref-lai_ds1000_2023}
-Lai, Y., Li, C., Wang, Y., Zhang, T., Zhong, R., Zettlemoyer, L., Yih,
-W.-T., Fried, D., Wang, S., \& Yu, T. (2023). {DS}-1000: {A} {Natural}
-and {Reliable} {Benchmark} for {Data} {Science} {Code} {Generation}.
-\emph{Proceedings of the 40th {International} {Conference} on {Machine}
-{Learning}}, 18319--18345.
-\url{https://proceedings.mlr.press/v202/lai23b.html}
-
-\bibitem[\citeproctext]{ref-Leisch2002}
-Leisch, F. (2002). Sweave: Dynamic generation of statistical reports
-using literate data analysis. In W. Härdle \& B. Rönz (Eds.),
-\emph{Compstat 2002 --- proceedings in computational statistics} (pp.
-575--580). Physica-Verlag GmbH.
-
-\bibitem[\citeproctext]{ref-glmmTMB-2}
-McGillycuddy, M., Warton, D. I., Popovic, G., \& Bolker, B. M. (2025).
-Parsimoniously fitting large multivariate random effects in {glmmTMB}.
-\emph{Journal of Statistical Software}, \emph{112}(1), 1--19.
-\url{https://doi.org/10.18637/jss.v112.i01}
-
-\bibitem[\citeproctext]{ref-peng_reproducible_2011}
-Peng, R. D. (2011). Reproducible {Research} in {Computational}
-{Science}. \emph{Science}, \emph{334}(6060), 1226--1227.
-\url{https://doi.org/10.1126/science.1213847}
-
-\bibitem[\citeproctext]{ref-R}
-R Core Team. (2026). \emph{R: A language and environment for statistical
-computing}. R Foundation for Statistical Computing.
-\url{https://doi.org/10.32614/R.manuals}
-
-\bibitem[\citeproctext]{ref-sarma2023}
-Sarma, A., Kale, A., Moon, M. J., Taback, N., Chevalier, F., Hullman,
-J., \& Kay, M. (2023). Multiverse: Multiplexing alternative data
-analyses in r notebooks. \emph{Proceedings of the 2023 CHI Conference on
-Human Factors in Computing Systems}.
-\url{https://doi.org/10.1145/3544548.3580726}
-
-\bibitem[\citeproctext]{ref-shah_automating_2026}
-Shah, S. M. H., Hopfgartner, F., \& Bleier, A. (2026). \emph{Automating
-{Computational} {Reproducibility} in {Social} {Science}: {Comparing}
-{Prompt}-{Based} and {Agent}-{Based} {Approaches}}.
-\url{https://doi.org/10.1145/3774905.3795485}
-
-\bibitem[\citeproctext]{ref-silberzahn2018}
-Silberzahn, R., Uhlmann, E. L., Martin, D. P., Anselmi, P., Aust, F.,
-Awtrey, E., Bahník, Š., Bai, F., Bannard, C., Bonnier, E., Carlsson, R.,
-Cheung, F., Christensen, G., Clay, R., Craig, M. A., Dalla Rosa, A.,
-Dam, L., Evans, M. H., Flores Cervantes, I., \ldots{} Nosek, B. A.
-(2018). Many Analysts, One Data Set: Making Transparent How Variations
-in Analytic Choices Affect Results. \emph{Advances in Methods and
-Practices in Psychological Science}, \emph{1}(3), 337--356.
-\url{https://doi.org/10.1177/2515245917747646}
-
-\bibitem[\citeproctext]{ref-simonsohn2020}
-Simonsohn, U., Simmons, J. P., \& Nelson, L. D. (2020). Specification
-curve analysis. \emph{Nature Human Behaviour}, \emph{4}(11), 1208--1214.
-\url{https://doi.org/10.1038/s41562-020-0912-z}
-
-\bibitem[\citeproctext]{ref-steegen2016}
-Steegen, S., Tuerlinckx, F., Gelman, A., \& Vanpaemel, W. (2016).
-Increasing transparency through a multiverse analysis.
-\emph{Perspectives on Psychological Science}, \emph{11}(5), 702--712.
-\url{https://doi.org/10.1177/1745691616658637}
-
-\bibitem[\citeproctext]{ref-sun_lambda_2026}
-Sun, M., Han, R., Jiang, B., Qi, H., Sun, D., Yuan, Y., \& Huang, J.
-(2026). {LAMBDA}: {A} {Large} {Model} {Based} {Data} {Agent}.
-\emph{Journal of the American Statistical Association}, \emph{121},
-1--13. \url{https://doi.org/10.1080/01621459.2025.2510000}
-
-\bibitem[\citeproctext]{ref-hdi}
-United Nations Development Programme. (2025). \emph{Human development
-report 2025}. United Nations Development Programme.
-\url{https://hdr.undp.org/}
-
-\bibitem[\citeproctext]{ref-wickham2019tidyverse}
-Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L. D.,
-François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M.,
-Pedersen, T. L., Miller, E., Bache, S. M., Müller, K., Ooms, J.,
-Robinson, D., Seidel, D. P., Spinu, V., \ldots{} Yutani, H. (2019).
-Welcome to the tidyverse. \emph{Journal of Open Source Software},
-\emph{4}(43), 1686. \url{https://doi.org/10.21105/joss.01686}
-
-\bibitem[\citeproctext]{ref-wrobel_partnering_2024}
-Wrobel, J., Hector, E. C., Crawford, L., McGowan, L. D., Silva, N. da,
-Goldsmith, J., Hicks, S., Kane, M., Lee, Y., Mayrink, V., Paciorek, C.
-J., Usher, T., \& Wolfson, J. (2024). Partnering {With} {Authors} to
-{Enhance} {Reproducibility} at {JASA}. \emph{Journal of the American
-Statistical Association}, \emph{119}(546), 795--797.
-\url{https://doi.org/10.1080/01621459.2024.2340557}
-
-\bibitem[\citeproctext]{ref-xie2018rmarkdown}
-Xie, Y., Allaire, J. J., \& Grolemund, G. (2018). \emph{R markdown: The
-definitive guide}. Chapman; Hall/CRC.
-\url{https://bookdown.org/yihui/rmarkdown}
-
-\bibitem[\citeproctext]{ref-VGAM}
-Yee, T. W. (2025). \emph{{VGAM}: Vector generalized linear and additive
-models}. \url{https://CRAN.R-project.org/package=VGAM}
-
-\bibitem[\citeproctext]{ref-yee2025heaping}
-Yee, T. W., Frigau, L., \& Ma, C. (2025). Heaping and seeping, GAITD
-regression and doubly constrained reduced-rank vector generalized linear
-models in smoking studies. \emph{The Annals of Applied Statistics},
-\emph{19}(4), 3045--3070.
-
-\bibitem[\citeproctext]{ref-VGAMdata}
-Yee, T. W., \& Gray, J. (2025). \emph{{VGAMdata}: Data supporting the
-{VGAM} package}. \url{https://CRAN.R-project.org/package=VGAMdata}
-
-\end{CSLReferences}
-
+\bibliography{bibliography.bib}
 
 
 

@@ -1,0 +1,32 @@
+$-- AOAS front matter (imsart.cls), filled from the qmd YAML header.
+$-- Each author needs an `id` (used as the e-mail label) and name given/family;
+$-- authors and addresses are linked through Quarto's affiliation `number`.
+\begin{frontmatter}
+\title{$title$}
+$if(runtitle)$
+\runtitle{$runtitle$}
+$endif$
+
+\begin{aug}
+$for(by-author)$
+\author[$for(it.affiliations)$$it.number$$sep$,$endfor$]{\fnms{$it.name.given$}~\snm{$it.name.family$}$if(it.email)$\ead[label=$it.id$]{$it.email$}$endif$$if(it.orcid)$\orcid{$it.orcid$}$endif$}
+$endfor$
+$for(by-affiliation)$
+\address[$it.number$]{$if(it.department)$$it.department$,\\ $endif$$it.name$$for(it.authors)$$if(it.email)$\printead[presep={,\ }]{$it.id$}$endif$$endfor$}
+$endfor$
+\end{aug}
+
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$if(keywords)$
+\begin{keyword}
+$for(keywords)$
+\kwd{$keywords$}
+$endfor$
+\end{keyword}
+$endif$
+\end{frontmatter}

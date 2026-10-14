@@ -7,3 +7,8 @@
 /.luarc.json
 /paper-schema_cache
 data/mod_comp_res.rds
+
+# copied next to the .tex from latex/ at render time
+/imsart.cls
+/imsart.sty
+/spr-ims-nameyear.bst
